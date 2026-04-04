@@ -573,6 +573,16 @@ document.getElementById('am-submit').onclick = async function(){
     song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};
   });
 };
+// ─── Event delegation for rate buttons (survives re-renders) ─
+document.getElementById('tab-now').addEventListener('click', e=>{
+  const btn = e.target.closest('.rb');
+  if(btn) openModal(btn.dataset.id);
+});
+document.getElementById('tab-hist').addEventListener('click', e=>{
+  const btn = e.target.closest('.rb');
+  if(btn) openModal(btn.dataset.id);
+});
+
 document.getElementById('btn-share').onclick = ()=>{
   const encoded = btoa(FB);
   const base = location.origin + location.pathname;
@@ -762,7 +772,6 @@ function renderApp(){
   const na = document.getElementById('now-area');
   if(cur){
     na.innerHTML = cardHTML(cur, users, true);
-    na.querySelector('.rb')?.addEventListener('click', ()=>openModal(cur.id));
   } else {
     na.innerHTML = `<div class="empty"><div style="font-size:40px;margin-bottom:8px">🎵</div><div style="font-size:16px;font-weight:600">Nothing playing yet</div><div style="font-size:12px;color:var(--mu);margin-top:3px">Tap above to add the current song</div></div>`;
   }
@@ -772,7 +781,6 @@ function renderApp(){
     ha.innerHTML = `<div class="empty"><div style="font-size:40px;margin-bottom:8px">📜</div><div style="font-size:16px;font-weight:600">No history yet</div></div>`;
   } else {
     ha.innerHTML = hist.map(s=>cardHTML(s,users,false)).join('');
-    ha.querySelectorAll('.rb').forEach(b=>b.addEventListener('click',()=>openModal(b.dataset.id)));
   }
 }
 
