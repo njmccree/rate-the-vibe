@@ -484,17 +484,9 @@ function launchApp(){
   document.getElementById('code-val').textContent = roomCode;
   showScreen('s-app');
   renderApp();
-  // If launched from iOS Shortcut, auto-add the song
   if(urlTitle){
     setTimeout(async ()=>{
-      let artworkUrl = null, appleMusicUrl = null;
-      if(urlStoreId){
-        const track = await lookupByStoreId(urlStoreId);
-        if(track){
-          artworkUrl = (track.artworkUrl100||'').replace('100x100','600x600');
-          appleMusicUrl = track.trackViewUrl || null;
-        }
-      }
+      const { artworkUrl, appleMusicUrl } = await resolveTrackMeta(urlStoreId, urlTitle, urlArtist);
       await autoAddSong(urlTitle, urlArtist||'', artworkUrl, appleMusicUrl);
     }, 500);
   }
@@ -617,11 +609,44 @@ async function searchItunes(query){
 
 async function lookupByStoreId(storeId){
   try{
-    const r = await fetch(`https://itunes.apple.com/lookup?id=${storeId}`);
+    const r = await fetch(`https://itunes.apple.com/lookup?id=${storeId}&entity=song`);
     if(!r.ok) return null;
     const d = await r.json();
-    return d.results?.[0] || null;
-  } catch(e){ return null; }
+    const result = d.results?.find(x => x.wrapperType === 'track') || d.results?.[0] || null;
+    console.log('iTunes lookup result:', result?.trackName, result?.artworkUrl100);
+    return result;
+  } catch(e){ console.warn('iTunes lookup failed:', e); return null; }
+}
+
+// Get best artwork + Apple Music URL for a song — tries store ID first, falls back to search
+async function resolveTrackMeta(storeId, title, artist){
+  // 1. Try store ID lookup (fast, exact)
+  if(storeId && storeId !== 'STOREID'){
+    const track = await lookupByStoreId(storeId);
+    if(track?.artworkUrl100){
+      return {
+        artworkUrl: track.artworkUrl100.replace(/\d+x\d+bb/, '600x600bb'),
+        appleMusicUrl: track.trackViewUrl || null
+      };
+    }
+  }
+  // 2. Fallback: search by title + artist
+  if(title){
+    const query = artist ? `${title} ${artist}` : title;
+    const results = await searchItunes(query);
+    // Find best match by comparing title similarity
+    const match = results.find(r =>
+      r.trackName?.toLowerCase() === title.toLowerCase()
+    ) || results[0];
+    if(match?.artworkUrl100){
+      console.log('iTunes search fallback found:', match.trackName);
+      return {
+        artworkUrl: match.artworkUrl100.replace(/\d+x\d+bb/, '600x600bb'),
+        appleMusicUrl: match.trackViewUrl || null
+      };
+    }
+  }
+  return { artworkUrl: null, appleMusicUrl: null };
 }
 
 function showSearchResults(results){
@@ -648,7 +673,7 @@ function pickResult(r){
   document.getElementById('title-in').value = r.trackName;
   document.getElementById('artist-in').value = r.artistName;
   document.getElementById('search-results').style.display='none';
-  selectedArtwork = (r.artworkUrl100||'').replace('100x100','600x600');
+  selectedArtwork = (r.artworkUrl100||'').replace(/\d+x\d+bb/, '600x600bb');
   selectedAppleMusicUrl = r.trackViewUrl || null;
   // Show artwork preview
   const prev = document.getElementById('artwork-preview');
