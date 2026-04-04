@@ -247,10 +247,30 @@ async function fbPut(code, data){
   return data;
 }
 
+// Firebase stores empty arrays as null and can return arrays as objects.
+// This normalises the data back to what we expect.
+function normalise(raw){
+  const d = raw || {};
+  // songs: null → [], object (Firebase array) → real array
+  let songs = d.songs;
+  if (!songs) songs = [];
+  else if (!Array.isArray(songs)) songs = Object.values(songs);
+  // each song's ratings might also be null or object
+  songs = songs.map(s => {
+    if (!s) return null;
+    let ratings = s.ratings;
+    if (!ratings) ratings = {};
+    else if (Array.isArray(ratings)) ratings = {};
+    return { ...s, ratings };
+  }).filter(Boolean);
+  return { songs, users: d.users || {} };
+}
+
 async function mergeAndSave(fn){
   setDot('sync');
   try{
-    const current = (await fbGet(roomCode)) || { songs:[], users:{} };
+    const raw = await fbGet(roomCode);
+    const current = normalise(raw);
     fn(current);
     current.users[myId] = { name:myName, emoji:myEmoji };
     await fbPut(roomCode, current);
@@ -269,8 +289,9 @@ function startPolling(){
   if(pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(async ()=>{
     try{
-      const d = await fbGet(roomCode);
-      if(!d) return;
+      const raw = await fbGet(roomCode);
+      if(!raw) return;
+      const d = normalise(raw);
       const s = JSON.stringify(d);
       if(s !== lastStr){ state=d; lastStr=s; renderApp(); }
       setDot('ok');
@@ -358,7 +379,7 @@ document.getElementById('btn-create').onclick = async function(){
     const code = uid();
     await fbPut(code, { songs:[], users:{ [myId]:{name:myName,emoji:myEmoji} } });
     roomCode = code;
-    state = await fbGet(code) || { songs:[], users:{} };
+    state = normalise(await fbGet(code));
     lastStr = JSON.stringify(state);
     launchApp();
     startPolling();
@@ -379,7 +400,7 @@ btnJoin.onclick = async function(){
   try{
     const d = await fbGet(code);
     if(!d) throw new Error('Room not found — check the code');
-    roomCode = code; state = d; lastStr = JSON.stringify(d);
+    roomCode = code; state = normalise(d); lastStr = JSON.stringify(state);
     await mergeAndSave(s=>{ s.users[myId]={name:myName,emoji:myEmoji}; });
     launchApp(); startPolling();
   } catch(e){
