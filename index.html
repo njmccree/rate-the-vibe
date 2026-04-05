@@ -1019,116 +1019,127 @@ function launchBracket(){
 // ════════════════════════════════════════════════
 // BRACKET — CREATE FLOW
 // ════════════════════════════════════════════════
+function bkSongRowHTML(s, i){
+  var art = s.artworkUrl
+    ? '<img class="bk-art" src="' + esc(s.artworkUrl) + '" loading="lazy">'
+    : '<div class="bk-art-ph">🎵</div>';
+  return '<div class="bk-song">'
+    + '<div style="font-size:11px;color:var(--mu);width:20px;flex-shrink:0;text-align:center;font-weight:600">' + (i+1) + '</div>'
+    + art
+    + '<div class="bk-info"><div class="bk-title">' + esc(s.title) + '</div><div class="bk-artist">' + esc(s.artist) + '</div></div>'
+    + '<button onclick="removeBkCreateSong(\'' + s.id + '\')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>'
+    + '</div>';
+}
+
 function renderBkCreate(){
   showScreen('s-bracket');
-  document.getElementById('bk-me-pill').textContent=myEmoji+' '+myName;
-  document.getElementById('bk-header-title').textContent='New Bracket';
-  const validSizes=[4,8,16,32,64];
-  const n=bkCreateSongs.length;
-  const nextValid=validSizes.find(v=>v>=n)||64;
-  const remaining=nextValid-n;
-  const isValid=isPowerOf2(n)&&n>=4&&n<=64;
-  const hasOriginal=bkCreateSongsOriginal.length>0;
-  const savedName=document.getElementById('bk-name-in')?.value||'';
-  document.getElementById('bk-body').innerHTML=`
-    <div style="margin-top:4px">
-      <div class="cl">Bracket Name</div>
-      <input type="text" id="bk-name-in" placeholder="e.g. Summer Bangers 2025..." value="${esc(savedName)}" autocomplete="off">
+  document.getElementById('bk-me-pill').textContent = myEmoji+' '+myName;
+  document.getElementById('bk-header-title').textContent = 'New Bracket';
 
-      <div style="height:18px"></div>
-      <div class="cl">Add Songs</div>
+  var validSizes = [4,8,16,32,64];
+  var n = bkCreateSongs.length;
+  var nextValid = validSizes.find(function(v){ return v>=n; }) || 64;
+  var remaining = nextValid - n;
+  var isValid = isPowerOf2(n) && n>=4 && n<=64;
+  var hasOriginal = bkCreateSongsOriginal.length > 0;
+  var savedName = (document.getElementById('bk-name-in') || {}).value || '';
 
-      <!-- Import tabs -->
-      <div style="display:flex;gap:6px;margin-bottom:12px">
-        <button id="bk-tab-shortcut" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--or-bdr);background:var(--or-dim);color:var(--or)">⚡ iOS Shortcut</button>
-        <button id="bk-tab-paste" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)">📋 Paste List</button>
-        <button id="bk-tab-search" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)">🔍 Search</button>
-      </div>
+  // Build sections as plain strings (no nested template literals)
+  var orderingHTML = '';
+  if(n > 0){
+    var shuffleBtn = !bkCreateIsShuffled
+      ? '<button id="bk-shuffle-btn" style="padding:5px 10px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:\'Outfit\',sans-serif">🔀 Shuffle</button>'
+      : '';
+    var restoreBtn = (bkCreateIsShuffled && hasOriginal)
+      ? '<button id="bk-restore-btn" style="padding:5px 10px;background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:\'Outfit\',sans-serif">↩️ Restore</button>'
+      : '';
+    orderingHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--tx)">' + n + ' songs '
+      + (isValid ? '✅' : n>64 ? '(max 64)' : '(need '+remaining+' more for '+nextValid+')') + '</div>'
+      + '<div style="display:flex;gap:6px">' + shuffleBtn + restoreBtn + '</div>'
+      + '</div>';
+  }
 
-      <!-- Shortcut panel -->
-      <div id="bk-import-tab-shortcut" style="background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Import an entire playlist in one tap</div>
-        <div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px">
-          <div><strong>1.</strong> Open <strong>Shortcuts</strong> app → tap <strong>+</strong> → <strong>Add Action</strong></div>
-          <div><strong>2.</strong> Search <strong>"Get Playlist"</strong> → add it → tap the playlist field → pick your playlist</div>
-          <div><strong>3.</strong> Add <strong>"Repeat with Each"</strong> → confirm it repeats items in your Playlist</div>
-          <div><strong>4.</strong> Inside the loop, add <strong>"Text"</strong> → tap inside the text box → tap the variable picker → choose <strong>Repeat Item → Name</strong> → type <code>__</code> → tap variable picker again → <strong>Repeat Item → Artist</strong></div>
-          <div><strong>5.</strong> Outside the loop, add <strong>"Combine Text"</strong> → tap separator → choose <strong>Custom</strong> → type <code>||</code></div>
-          <div><strong>6.</strong> Add <strong>"URL Encode"</strong> (connects automatically)</div>
-          <div><strong>7.</strong> Add <strong>"Open URLs"</strong> → paste the URL below → find <code>SONGS</code> in the URL → replace it with the <strong>URL Encoded Text</strong> variable</div>
-          <div><strong>8.</strong> Rename shortcut → tap <strong>Done</strong> → long-press → <strong>Add to Home Screen</strong></div>
-        </div>
-        <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:10px" id="bk-shortcut-url-display"></div>
-        <button class="bp" id="bk-copy-shortcut-url" style="margin-top:0;font-size:13px;padding:11px">Copy Shortcut URL 📋</button>
-      </div>
+  var statusHTML = '';
+  if(!isValid && n > 0){
+    statusHTML = '<div style="font-size:12px;color:#ff5f5f;margin-bottom:8px">Add ' + remaining + ' more song' + (remaining!==1?'s':'') + ' to reach ' + nextValid + '.</div>';
+  } else if(n === 0){
+    statusHTML = '<div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">No songs yet. Use one of the import methods above.</div>';
+  }
 
-      <!-- Paste panel (hidden by default) -->
-      <div id="bk-import-tab-paste" style="display:none;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:6px">Paste song titles</div>
-        <div style="font-size:12px;color:var(--mu);margin-bottom:8px">One song per line. Format: <code>Song Name</code> or <code>Song Name - Artist</code></div>
-        <textarea id="bk-paste-area" placeholder="Vampire - Olivia Rodrigo&#10;Blinding Lights - The Weeknd&#10;Bohemian Rhapsody..." style="min-height:120px;font-size:13px"></textarea>
-        <div id="bk-import-status" style="font-size:12px;color:var(--mu);margin-top:6px;min-height:18px"></div>
-        <button class="bp" id="bk-paste-btn" style="margin-top:8px;font-size:13px;padding:11px">Import Songs →</button>
-      </div>
+  var songListHTML = bkCreateSongs.map(bkSongRowHTML).join('');
 
-      <!-- Songs count + ordering -->
-      ${n>0?`
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-size:13px;font-weight:600;color:var(--tx)">${n} songs ${isValid?'✅':n>64?'(max 64)':'(need '+remaining+' more for '+nextValid+')'}</div>
-        <div style="display:flex;gap:6px">
-          ${!bkCreateIsShuffled?`<button id="bk-shuffle-btn" style="padding:5px 10px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">🔀 Shuffle</button>`:''}
-          ${bkCreateIsShuffled&&hasOriginal?`<button id="bk-restore-btn" style="padding:5px 10px;background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">↩️ Restore</button>`:''}
-        </div>
-      </div>`:''}
-      ${!isValid&&n>0?`<div style="font-size:12px;color:#ff5f5f;margin-bottom:8px">Add ${remaining} more song${remaining!==1?'s':''} to reach ${nextValid}.</div>`:''}
-      ${n===0?'<div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">No songs yet. Use one of the import methods above.</div>':''}
+  var shortcutBase = location.origin + location.pathname;
+  var shortcutUrl = shortcutBase + '?db=' + btoa(FB) + '&newbracket=1&who=' + encodeURIComponent(myName) + '__' + encodeURIComponent(myEmoji) + '&songs=SONGS';
 
-      <div id="bk-create-songs-list">${bkCreateSongs.map((s,i)=>`
-        <div class="bk-song">
-          <div style="font-size:11px;color:var(--mu);width:20px;flex-shrink:0;text-align:center;font-weight:600">${i+1}</div>
-          ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
-          <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
-          <button onclick="removeBkCreateSong('${s.id}')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
-        </div>`).join('')}</div>
-
-      <div style="height:4px"></div>
-      <button class="btn-gold" id="bk-create-btn" ${!isValid?'disabled':''}>Create Bracket 🏆</button>
-      <button class="bg" onclick="showScreen('s-home');setHomeMode('brackets')">Cancel</button>
-    </div>`;
+  document.getElementById('bk-body').innerHTML =
+    '<div style="margin-top:4px">'
+    + '<div class="cl">Bracket Name</div>'
+    + '<input type="text" id="bk-name-in" placeholder="e.g. Summer Bangers 2025..." value="' + esc(savedName) + '" autocomplete="off">'
+    + '<div style="height:18px"></div>'
+    + '<div class="cl">Add Songs</div>'
+    + '<div style="display:flex;gap:6px;margin-bottom:12px">'
+    +   '<button id="bk-tab-shortcut" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:\'Outfit\',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--or-bdr);background:var(--or-dim);color:var(--or)">⚡ iOS Shortcut</button>'
+    +   '<button id="bk-tab-paste" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:\'Outfit\',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)">📋 Paste List</button>'
+    +   '<button id="bk-tab-search" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:\'Outfit\',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)">🔍 Search</button>'
+    + '</div>'
+    // Shortcut panel
+    + '<div id="bk-import-tab-shortcut" style="background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">'
+    +   '<div style="font-size:13px;font-weight:600;margin-bottom:10px">Import an entire playlist in one tap</div>'
+    +   '<div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px">'
+    +     '<div><strong>1.</strong> Open <strong>Shortcuts</strong> app → tap <strong>+</strong> → <strong>Add Action</strong></div>'
+    +     '<div><strong>2.</strong> Search <strong>"Get Playlist"</strong> → add it → tap the playlist field → pick your playlist</div>'
+    +     '<div><strong>3.</strong> Add <strong>"Repeat with Each"</strong> → confirm it repeats items in your Playlist</div>'
+    +     '<div><strong>4.</strong> Inside the loop, add <strong>"Text"</strong> → tap inside the text box → tap the variable picker → choose <strong>Repeat Item → Name</strong> → type <code>__</code> → tap variable picker again → <strong>Repeat Item → Artist</strong></div>'
+    +     '<div><strong>5.</strong> Outside the loop, add <strong>"Combine Text"</strong> → tap separator → choose <strong>Custom</strong> → type <code>||</code></div>'
+    +     '<div><strong>6.</strong> Add <strong>"URL Encode"</strong> (connects automatically)</div>'
+    +     '<div><strong>7.</strong> Add <strong>"Open URLs"</strong> → paste the URL below → find <code>SONGS</code> in the URL → replace it with the <strong>URL Encoded Text</strong> variable</div>'
+    +     '<div><strong>8.</strong> Rename shortcut → tap <strong>Done</strong> → long-press → <strong>Add to Home Screen</strong></div>'
+    +   '</div>'
+    +   '<div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:10px" id="bk-shortcut-url-display">' + shortcutUrl + '</div>'
+    +   '<button class="bp" id="bk-copy-shortcut-url" style="margin-top:0;font-size:13px;padding:11px">Copy Shortcut URL 📋</button>'
+    + '</div>'
+    // Paste panel
+    + '<div id="bk-import-tab-paste" style="display:none;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">'
+    +   '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Paste song titles</div>'
+    +   '<div style="font-size:12px;color:var(--mu);margin-bottom:8px">One song per line. Format: <code>Song Name</code> or <code>Song Name - Artist</code></div>'
+    +   '<textarea id="bk-paste-area" placeholder="Vampire - Olivia Rodrigo&#10;Blinding Lights - The Weeknd&#10;Bohemian Rhapsody..." style="min-height:120px;font-size:13px"></textarea>'
+    +   '<div id="bk-import-status" style="font-size:12px;color:var(--mu);margin-top:6px;min-height:18px"></div>'
+    +   '<button class="bp" id="bk-paste-btn" style="margin-top:8px;font-size:13px;padding:11px">Import Songs →</button>'
+    + '</div>'
+    // Song count + ordering
+    + orderingHTML
+    + statusHTML
+    + '<div id="bk-create-songs-list">' + songListHTML + '</div>'
+    + '<div style="height:4px"></div>'
+    + '<button class="btn-gold" id="bk-create-btn"' + (!isValid?' disabled':'') + '>Create Bracket 🏆</button>'
+    + '<button class="bg" onclick="showScreen(\'s-home\');setHomeMode(\'brackets\')">Cancel</button>'
+    + '</div>';
 
   // Tab switching
-  const tabs = {shortcut:'bk-import-tab-shortcut', paste:'bk-import-tab-paste'};
   function setImportTab(active){
-    document.getElementById('bk-tab-shortcut').style.cssText=`flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid ${active==='shortcut'?'var(--or-bdr)':'var(--bdr)'};background:${active==='shortcut'?'var(--or-dim)':'var(--surf)'};color:${active==='shortcut'?'var(--or)':'var(--mu)'}`;
-    document.getElementById('bk-tab-paste').style.cssText=`flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid ${active==='paste'?'var(--or-bdr)':'var(--bdr)'};background:${active==='paste'?'var(--or-dim)':'var(--surf)'};color:${active==='paste'?'var(--or)':'var(--mu)'}`;
-    document.getElementById('bk-tab-search').style.cssText=`flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)`;
-    document.getElementById('bk-import-tab-shortcut').style.display=active==='shortcut'?'block':'none';
-    document.getElementById('bk-import-tab-paste').style.display=active==='paste'?'block':'none';
+    document.getElementById('bk-tab-shortcut').style.cssText = 'flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:\'Outfit\',sans-serif;font-weight:600;cursor:pointer;border:1px solid ' + (active==='shortcut'?'var(--or-bdr)':'var(--bdr)') + ';background:' + (active==='shortcut'?'var(--or-dim)':'var(--surf)') + ';color:' + (active==='shortcut'?'var(--or)':'var(--mu)');
+    document.getElementById('bk-tab-paste').style.cssText    = 'flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:\'Outfit\',sans-serif;font-weight:600;cursor:pointer;border:1px solid ' + (active==='paste'?'var(--or-bdr)':'var(--bdr)') + ';background:' + (active==='paste'?'var(--or-dim)':'var(--surf)') + ';color:' + (active==='paste'?'var(--or)':'var(--mu)');
+    document.getElementById('bk-tab-search').style.cssText   = 'flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:\'Outfit\',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)';
+    document.getElementById('bk-import-tab-shortcut').style.display = active==='shortcut'?'block':'none';
+    document.getElementById('bk-import-tab-paste').style.display    = active==='paste'?'block':'none';
   }
-  document.getElementById('bk-tab-shortcut').addEventListener('click',()=>setImportTab('shortcut'));
-  document.getElementById('bk-tab-paste').addEventListener('click',()=>setImportTab('paste'));
-  document.getElementById('bk-tab-search').addEventListener('click',()=>{setImportTab('none');openBkSearchModal();});
+  document.getElementById('bk-tab-shortcut').addEventListener('click', function(){ setImportTab('shortcut'); });
+  document.getElementById('bk-tab-paste').addEventListener('click',    function(){ setImportTab('paste'); });
+  document.getElementById('bk-tab-search').addEventListener('click',   function(){ setImportTab('none'); openBkSearchModal(); });
 
-  // Shortcut URL
-  const base=location.origin+location.pathname;
-  const shortcutUrl=`${base}?db=${btoa(FB)}&newbracket=1&who=${encodeURIComponent(myName)}__${encodeURIComponent(myEmoji)}&songs=SONGS`;
-  document.getElementById('bk-shortcut-url-display').textContent=shortcutUrl;
-  document.getElementById('bk-copy-shortcut-url').addEventListener('click',()=>{
-    navigator.clipboard?.writeText(shortcutUrl).then(()=>toast('📋 Shortcut URL copied!'));
+  document.getElementById('bk-copy-shortcut-url').addEventListener('click', function(){
+    navigator.clipboard && navigator.clipboard.writeText(shortcutUrl).then(function(){ toast('📋 Shortcut URL copied!'); });
   });
-
-  // Paste import
-  document.getElementById('bk-paste-btn')?.addEventListener('click', importPastedSongs);
-
-  // Ordering
-  document.getElementById('bk-create-btn')?.addEventListener('click', doCreateBracket);
-  document.getElementById('bk-shuffle-btn')?.addEventListener('click',()=>{
-    if(!bkCreateIsShuffled) bkCreateSongsOriginal=[...bkCreateSongs];
-    bkCreateSongs=[...bkCreateSongs].sort(()=>Math.random()-.5);
-    bkCreateIsShuffled=true; renderBkCreate();
+  document.getElementById('bk-paste-btn') && document.getElementById('bk-paste-btn').addEventListener('click', importPastedSongs);
+  document.getElementById('bk-create-btn') && document.getElementById('bk-create-btn').addEventListener('click', doCreateBracket);
+  document.getElementById('bk-shuffle-btn') && document.getElementById('bk-shuffle-btn').addEventListener('click', function(){
+    if(!bkCreateIsShuffled) bkCreateSongsOriginal = bkCreateSongs.slice();
+    bkCreateSongs = bkCreateSongs.slice().sort(function(){ return Math.random()-.5; });
+    bkCreateIsShuffled = true; renderBkCreate();
   });
-  document.getElementById('bk-restore-btn')?.addEventListener('click',()=>{
-    bkCreateSongs=[...bkCreateSongsOriginal]; bkCreateIsShuffled=false; renderBkCreate();
+  document.getElementById('bk-restore-btn') && document.getElementById('bk-restore-btn').addEventListener('click', function(){
+    bkCreateSongs = bkCreateSongsOriginal.slice(); bkCreateIsShuffled = false; renderBkCreate();
   });
 }
 
