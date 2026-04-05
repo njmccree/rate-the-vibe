@@ -26,9 +26,10 @@ h1{font-family:‘Playfair Display’,serif;font-size:34px;font-weight:900;margi
 .eg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px}
 .eb{background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:12px;padding:10px;font-size:24px;cursor:pointer;line-height:1}
 .eb.s{border-color:var(–or);background:var(–or-dim)}
-input,textarea{width:100%;background:rgba(255,255,255,.07);border:1px solid var(–bdr);border-radius:12px;padding:13px 15px;color:var(–tx);font-size:15px;font-family:‘Outfit’,sans-serif;outline:none;-webkit-appearance:none;resize:none}
+input,textarea{width:100%;background:rgba(255,255,255,.07);border:1px solid var(–bdr);border-radius:12px;padding:13px 15px;color:var(–tx);font-size:15px;font-family:‘Outfit’,sans-serif;outline:none;-webkit-appearance:none;resize:none;-webkit-text-fill-color:var(–tx)}
 input:focus,textarea:focus{border-color:var(–or-bdr)}
-input::placeholder,textarea::placeholder{color:var(–mu)}
+input::placeholder,textarea::placeholder{color:var(–mu);-webkit-text-fill-color:var(–mu)}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-text-fill-color:#f2ead8!important;-webkit-box-shadow:0 0 0 1000px #1a1825 inset!important;caret-color:#f2ead8}
 
 /* ── BUTTONS ── */
 .bp{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-family:‘Outfit’,sans-serif;font-weight:600;cursor:pointer;text-align:center;background:linear-gradient(135deg,#ff9340,#ff5f5f);color:#fff;margin-top:12px}
