@@ -208,7 +208,7 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 
 <!-- ══════════════ FIREBASE SETUP ══════════════ -->
 
-<div class="screen" id="s-firebase">
+<div class="screen on" id="s-firebase">
   <div class="hero"><div style="font-size:48px">🔥</div><h1>Connect Firebase</h1><p class="sub">One-time setup · ~3 minutes</p></div>
   <div class="card">
     <div class="info-box">ℹ️ Your friends won't need to do this — your share link includes everything automatically.</div>
@@ -589,7 +589,7 @@ btnTestFb.onclick=async()=>{
     setTimeout(()=>showScreen(myName?'s-home':'s-setup'),800);
   }catch(e){ st.style.color='#ff5f5f'; st.textContent='❌ '+e.message; btnTestFb.disabled=false; btnTestFb.textContent='Test & Save →'; }
 };
-if(FB) showScreen(myName?'s-home':'s-setup');
+if(FB){ showScreen(myName?'s-home':'s-setup'); } else { showScreen('s-firebase'); }
 
 // ════════════════════════════════════════════════
 // NAME SETUP SCREEN
