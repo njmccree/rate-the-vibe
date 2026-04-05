@@ -1200,6 +1200,17 @@ async function importPastedSongs(){
 }
 
 // Handle ?songs= URL param from iOS Shortcut
+async function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function searchItunesWithRetry(q, retries=2){
+  for(let attempt=0; attempt<=retries; attempt++){
+    if(attempt > 0) await sleep(500); // wait before retry
+    const results = await searchItunes(q);
+    if(results.length) return results;
+  }
+  return [];
+}
+
 async function handleShortcutSongs(encoded){
   try{
     const decoded = decodeURIComponent(encoded);
@@ -1209,30 +1220,48 @@ async function handleShortcutSongs(encoded){
       return { name: p, artist: '' };
     }).filter(p => p.name);
     if(!pairs.length) return;
-    // Go straight to bracket create with these songs
     bkCreateSongs = []; bkCreateSongsOriginal = []; bkCreateIsShuffled = false;
     showScreen('s-bracket');
     document.getElementById('bk-me-pill').textContent = myEmoji+' '+myName;
     document.getElementById('bk-header-title').textContent = 'New Bracket';
-    document.getElementById('bk-body').innerHTML = `<div style="padding:30px 0;text-align:center"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:15px;font-weight:600">Importing ${pairs.length} songs…</div><div id="bk-shortcut-status" style="font-size:13px;color:var(--mu);margin-top:6px"></div></div>`;
+    const total = Math.min(pairs.length, 64);
+    document.getElementById('bk-body').innerHTML = '<div style="padding:30px 0;text-align:center"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:15px;font-weight:600">Importing ' + total + ' songs…</div><div id="bk-shortcut-status" style="font-size:13px;color:var(--mu);margin-top:6px"></div><div id="bk-shortcut-bar" style="height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:12px 20px 0;overflow:hidden"><div id="bk-shortcut-fill" style="height:100%;background:var(--or);border-radius:2px;width:0;transition:width .3s"></div></div></div>';
     const songs = [];
-    for(let i=0; i<Math.min(pairs.length,64); i++){
+    for(let i=0; i<total; i++){
       const p = pairs[i];
-      document.getElementById('bk-shortcut-status').textContent = `Loading ${i+1}/${Math.min(pairs.length,64)}: ${p.name}`;
-      const q = p.artist ? `${p.name} ${p.artist}` : p.name;
-      const results = await searchItunes(q);
-      const match = results.find(r => r.trackName?.toLowerCase() === p.name.toLowerCase()) || results[0];
+      const statusEl = document.getElementById('bk-shortcut-status');
+      const fillEl   = document.getElementById('bk-shortcut-fill');
+      if(statusEl) statusEl.textContent = 'Loading ' + (i+1) + '/' + total + ': ' + p.name;
+      if(fillEl)   fillEl.style.width = Math.round((i/total)*100) + '%';
+
+      // Stagger requests to avoid iTunes rate limiting
+      if(i > 0) await sleep(120);
+
+      const q = p.artist ? p.name + ' ' + p.artist : p.name;
+      const results = await searchItunesWithRetry(q);
+      // Best match: exact title match first, then artist match, then first result
+      const match = results.find(r => r.trackName?.toLowerCase() === p.name.toLowerCase() && r.artistName?.toLowerCase() === (p.artist||'').toLowerCase())
+                 || results.find(r => r.trackName?.toLowerCase() === p.name.toLowerCase())
+                 || results[0];
       if(match){
-        songs.push({id:uid8(), title:match.trackName, artist:match.artistName,
-          artworkUrl:(match.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),
-          appleMusicUrl:match.trackViewUrl||null});
+        songs.push({
+          id: uid8(),
+          title: match.trackName,
+          artist: match.artistName,
+          artworkUrl: (match.artworkUrl100||'').replace(/\d+x\d+bb/, '600x600bb'),
+          appleMusicUrl: match.trackViewUrl || null
+        });
       } else {
         songs.push({id:uid8(), title:p.name, artist:p.artist||'Unknown Artist', artworkUrl:null, appleMusicUrl:null});
       }
     }
+    // Final progress fill
+    const fillEl = document.getElementById('bk-shortcut-fill');
+    if(fillEl) fillEl.style.width = '100%';
+    await sleep(300);
     bkCreateSongs = songs; bkCreateSongsOriginal = [...songs]; bkCreateIsShuffled = false;
     renderBkCreate();
-  } catch(e) { toast('⚠️ Could not load songs from Shortcut'); renderBkCreate(); }
+  } catch(e) { toast('⚠️ Could not load songs from Shortcut: ' + e.message); renderBkCreate(); }
 }
 
 async function doCreateBracket(){
