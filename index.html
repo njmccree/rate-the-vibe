@@ -148,7 +148,7 @@ input::placeholder,textarea::placeholder{color:var(--mu);-webkit-text-fill-color
 .ms-win-label{font-size:10px;color:var(--green);margin-top:4px;font-weight:700;letter-spacing:.5px}
 .matchup-vs{align-self:center;font-size:13px;color:var(--mu);font-weight:700;flex-shrink:0}
 .voter-pips{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
-.voter-pip{font-size:16px;opacity:.35}
+.voter-pip{font-size:16px;opacity:.35;text-align:center}
 .voter-pip.done{opacity:1}
 
 /* progress bars */
@@ -338,7 +338,7 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 <!-- ══════════════ BRACKET APP ══════════════ -->
 <div class="screen" id="s-bracket">
   <div class="abar">
-    <div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">🏆</span><span class="at-gold" id="bk-header-title">Brackets</span></div>
+    <div style="display:flex;align-items:center;gap:8px"><button id="btn-bk-back" style="background:none;border:none;color:var(--or);font-size:14px;font-family:'Outfit',sans-serif;cursor:pointer;padding:0;margin-right:2px">← Back</button><span style="font-size:20px">🏆</span><span class="at-gold" id="bk-header-title">Brackets</span></div>
     <div style="display:flex;align-items:center;gap:7px"><span class="dot" id="bk-dot"></span><div class="mpill" id="bk-me-pill"></div></div>
   </div>
   <div class="body" id="bk-body"></div>
@@ -678,6 +678,167 @@ btnNext.onclick=()=>{
 };
 
 
+
+// ════════════════════════════════════════════════
+// MY BRACKETS SCREEN
+// ════════════════════════════════════════════════
+function showMyBrackets(){
+  document.getElementById('bk-me-pill').textContent = myEmoji+' '+myName;
+  document.getElementById('bk-header-title').textContent = 'My Brackets';
+  document.getElementById('bk-dot').className = 'dot';
+
+  var sessions = loadSessions().filter(function(s){ return s.type==='bracket'; });
+  var html = '';
+
+  if(!sessions.length){
+    html = '<div class="empty" style="opacity:.4;padding:60px 20px">'
+         + '<div style="font-size:40px;margin-bottom:8px">🏆</div>'
+         + '<div style="font-size:16px;font-weight:600">No brackets yet</div>'
+         + '<div style="font-size:12px;color:var(--mu);margin-top:4px">Create or join a bracket to see it here</div>'
+         + '</div>';
+  } else {
+    for(var si=0; si<sessions.length; si++){
+      var s = sessions[si];
+      var isHost = s.role === 'host';
+      var code = s.code;
+      var name = esc(s.name || s.code);
+      var actionBtn;
+      if(isHost){
+        actionBtn = '<button class="bk-mgmt-del" data-code="'+code+'" data-name="'+name+'"'
+          + ' style="flex:1;padding:8px;background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.25);'
+          + 'border-radius:10px;color:#ff5f5f;font-size:12px;font-weight:600;cursor:pointer">🗑 Delete</button>';
+      } else {
+        actionBtn = '<button class="bk-mgmt-leave" data-code="'+code+'" data-name="'+name+'"'
+          + ' style="flex:1;padding:8px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);'
+          + 'border-radius:10px;color:var(--mu);font-size:12px;font-weight:600;cursor:pointer">🚪 Leave</button>';
+      }
+      var openBtn = '<button class="bk-mgmt-open" data-code="'+code+'"'
+        + ' style="flex:2;padding:8px;background:var(--or-dim);border:1px solid var(--or-bdr);'
+        + 'border-radius:10px;color:var(--or);font-size:12px;font-weight:600;cursor:pointer">Open →</button>';
+
+      html += '<div class="sesh-card" style="flex-direction:column;align-items:stretch;gap:10px">'
+            + '<div style="display:flex;align-items:center;gap:12px">'
+            +   '<div class="sesh-icon">🏆</div>'
+            +   '<div class="sesh-info">'
+            +     '<div class="sesh-name">'+name+'</div>'
+            +     '<div class="sesh-meta">'+(isHost?'You created':'You joined')+' · '+timeAgoShort(s.ts)+'</div>'
+            +     '<div class="sesh-code">'+code+'</div>'
+            +   '</div>'
+            + '</div>'
+            + '<div style="display:flex;gap:8px;padding-top:6px;border-top:1px solid var(--bdr)">'
+            +   actionBtn + openBtn
+            + '</div>'
+            + '</div>';
+    }
+  }
+
+  html += '<button class="bg" id="bk-mgmt-new" style="margin-top:12px">+ Create or Join a Bracket</button>';
+  document.getElementById('bk-body').innerHTML = html;
+
+  document.getElementById('bk-body').addEventListener('click', function handler(e){
+    var openBtn  = e.target.closest('.bk-mgmt-open');
+    var delBtn   = e.target.closest('.bk-mgmt-del');
+    var leaveBtn = e.target.closest('.bk-mgmt-leave');
+    var newBtn   = document.getElementById('bk-mgmt-new');
+    if(openBtn)  rejoinBracket(openBtn.dataset.code);
+    if(delBtn)   confirmDeleteBracket(delBtn.dataset.code, delBtn.dataset.name);
+    if(leaveBtn) confirmLeaveBracket(leaveBtn.dataset.code, leaveBtn.dataset.name);
+    if(e.target===newBtn){ showScreen('s-home'); setHomeMode('brackets'); }
+  }, {once:true});
+
+  showScreen('s-bracket');
+  showBottomNav();
+  document.getElementById('nav-brackets').classList.add('active');
+  document.getElementById('nav-live').classList.remove('active');
+}
+
+async function rejoinBracket(code){
+  try{
+    var raw = await fbBkGet(code);
+    var b = normaliseBracket(raw);
+    if(!b) throw new Error('Bracket not found');
+    bkCode = code; bkState = b; bkLastStr = JSON.stringify(b);
+    await mergeAndSaveBracket(function(s){ s.members[myId]={name:myName,emoji:myEmoji}; });
+    launchBracket(); startBkPolling();
+  }catch(e){ toast('⚠️ '+e.message); }
+}
+
+// ── Confirm modal helpers ─────────────────────────────────────────────────────
+var _confirmCallback = null;
+function showConfirm(title, msg, callback){
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent   = msg;
+  _confirmCallback = callback;
+  document.getElementById('confirm-modal').classList.add('on');
+}
+document.getElementById('confirm-ok').onclick = function(){
+  document.getElementById('confirm-modal').classList.remove('on');
+  if(_confirmCallback){ _confirmCallback(); _confirmCallback=null; }
+};
+document.getElementById('confirm-cancel').onclick = function(){
+  document.getElementById('confirm-modal').classList.remove('on');
+  _confirmCallback = null;
+};
+document.getElementById('confirm-modal').onclick = function(e){
+  if(e.target===e.currentTarget){ document.getElementById('confirm-modal').classList.remove('on'); _confirmCallback=null; }
+};
+
+// ── Delete bracket (owner only) ────────────────────────────────────────────────
+function confirmDeleteBracket(code, name){
+  showConfirm(
+    '🗑 Delete Bracket?',
+    '"' + name + '" will be permanently deleted for everyone in the group. This cannot be undone.',
+    function(){ doDeleteBracket(code); }
+  );
+}
+
+async function doDeleteBracket(code){
+  try{
+    // Delete from Firebase by setting to null
+    var r = await fetch(fbBkEp(code), {method:'DELETE'});
+    if(!r.ok && r.status !== 404) throw new Error('HTTP '+r.status);
+    // Remove from local sessions
+    var sessions = loadSessions().filter(function(s){ return !(s.type==='bracket' && s.code===code); });
+    localStorage.setItem(SESH_KEY, JSON.stringify(sessions));
+    if(bkCode === code){ bkCode=null; bkState=null; if(bkPollTimer)clearInterval(bkPollTimer); }
+    toast('🗑 Bracket deleted');
+    showMyBrackets();
+  }catch(e){ toast('⚠️ Could not delete: '+e.message); }
+}
+
+// ── Leave bracket (member only) ────────────────────────────────────────────────
+function confirmLeaveBracket(code, name){
+  showConfirm(
+    '🚪 Leave Bracket?',
+    'You will be removed from "' + name + '". You can rejoin with the bracket code if you change your mind.',
+    function(){ doLeaveBracket(code); }
+  );
+}
+
+async function doLeaveBracket(code){
+  try{
+    // Remove self from members and ratings in Firebase
+    var raw = await fbBkGet(code);
+    var b = normaliseBracket(raw);
+    if(b){
+      if(b.members) delete b.members[myId];
+      if(b.ratings) delete b.ratings[myId];
+      if(b.readyMembers) delete b.readyMembers[myId];
+      // Remove votes from all matchups
+      Object.keys(b.matchups||{}).forEach(function(mid){
+        if(b.matchups[mid].votes) delete b.matchups[mid].votes[myId];
+      });
+      await fbBkPut(code, b);
+    }
+    // Remove from local sessions
+    var sessions = loadSessions().filter(function(s){ return !(s.type==='bracket' && s.code===code); });
+    localStorage.setItem(SESH_KEY, JSON.stringify(sessions));
+    if(bkCode === code){ bkCode=null; bkState=null; if(bkPollTimer)clearInterval(bkPollTimer); }
+    toast('🚪 Left bracket');
+    showMyBrackets();
+  }catch(e){ toast('⚠️ Could not leave: '+e.message); }
+}
+
 // ════════════════════════════════════════════════
 // SESSION HISTORY
 // ════════════════════════════════════════════════
@@ -823,8 +984,10 @@ document.getElementById('nav-live').onclick=()=>{
 };
 document.getElementById('nav-brackets').onclick=()=>{
   document.getElementById('nav-brackets').classList.add('active'); document.getElementById('nav-live').classList.remove('active');
-  if(bkCode){ showScreen('s-bracket'); renderBracket(); } else { setHomeMode('brackets'); showScreen('s-home'); }
+  var bkSessions = loadSessions().filter(function(s){ return s.type==='bracket'; });
+  if(bkSessions.length){ showMyBrackets(); } else if(bkCode){ showScreen('s-bracket'); renderBracket(); } else { setHomeMode('brackets'); showScreen('s-home'); }
 };
+document.getElementById('btn-bk-back').onclick = function(){ showMyBrackets(); };
 
 // ════════════════════════════════════════════════
 // LIVE LISTEN APP
@@ -1389,7 +1552,7 @@ function renderBkRating(b){
       return`<div class="bk-song ${hasRating?'rated':''}" style="cursor:pointer" onclick="openBkRateModal('${s.id}')">
         ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
         <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
-        ${hasRating?`<div class="bk-rating-badge" style="color:${scoreColor(r)}">${r}</div>`:`<div class="bk-unrated">Tap to rate</div>`}
+        ${hasRating?`<div class="bk-rating-badge" style="color:${scoreColor(r)}">${r}<span style="font-size:10px;opacity:.6">/10</span></div>`:`<div class="bk-unrated">Tap to rate</div>`}
       </div>`;
     }).join('')}
     ${allRated?`
@@ -1442,18 +1605,18 @@ function renderBkVoting(b){
             <div class="ms-side ${m.winner===s1.id?'winner':'loser'}">
               ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
               <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div>
-              ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}</div>`:''}
+              ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}<span style="font-size:12px;opacity:.6">/10</span></div>`:''}
               ${m.winner===s1.id?`<div class="ms-win-label">🏆 WINNER</div>`:''}
             </div>
             <div class="matchup-vs">vs</div>
             <div class="ms-side ${m.winner===s2.id?'winner':'loser'}">
               ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
               <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div>
-              ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}</div>`:''}
+              ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}<span style="font-size:12px;opacity:.6">/10</span></div>`:''}
               ${m.winner===s2.id?`<div class="ms-win-label">🏆 WINNER</div>`:''}
             </div>
           </div>
-          <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`${u.emoji} ${r1!==undefined?r1:'?'} / ${r2!==undefined?r2:'?'}`;}).join(' · ')}</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`<span style="display:inline-flex;align-items:center;gap:3px">${u.emoji} <b>${esc(u.name||'?')}</b>: <span style="color:var(--or)">${r1!==undefined?r1+'/10':'?'}</span> · <span style="color:var(--or)">${r2!==undefined?r2+'/10':'?'}</span></span>`;}).join(' · ')}</div>
         </div>`;
       } else {
         // Voting open
@@ -1473,7 +1636,7 @@ function renderBkVoting(b){
               ${myVote===s2.id?`<div class="ms-vote-label">✓ Your vote</div>`:''}
             </div>
           </div>
-          <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" title="${b.members[uid]?.name||''}">${b.members[uid]?.emoji||'🎵'}</span>`).join('')}</div>
+          <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" style="display:flex;flex-direction:column;align-items:center;gap:2px"><span>${b.members[uid]?.emoji||'🎵'}</span><span style="font-size:9px;color:var(--mu);max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.members[uid]?.name||'')} </span></span>`).join('')}</div>
           <div style="font-size:11px;color:var(--mu);margin-top:6px">${votedCount}/${memberIds.length} voted · waiting for all votes to reveal</div>
         </div>`;
       }
@@ -1532,7 +1695,7 @@ function renderBkComplete(b){
       <div class="rank-num ${i===0?'gold':''}">${i===0?'🥇':i+1}</div>
       ${s.artworkUrl?`<img class="rank-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="rank-art-ph">🎵</div>`}
       <div class="rank-info"><div class="rank-title">${esc(s.title)}</div><div class="rank-artist">${esc(s.artist)}</div><div style="font-size:10px;color:var(--mu);margin-top:2px">${positions[s.id]||''}</div></div>
-      ${avg!==null?`<div class="rank-score" style="color:${scoreColor(avg)}">${avg.toFixed(1)}</div>`:''}
+      ${avg!==null?`<div class="rank-score" style="color:${scoreColor(avg)}">${avg.toFixed(1)}<span style="font-size:11px;opacity:.6">/10</span></div>`:''}
     </div>`;
   });
   html+=`</div>
@@ -1549,14 +1712,14 @@ function renderBkComplete(b){
           <div class="ms-side ${m.winner===s1.id?'winner':'loser'}">
             ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`}
             <div class="ms-title">${esc(s1.title)}</div>
-            ${avg1!==null?`<div class="ms-score" style="font-size:16px">${avg1.toFixed(1)}</div>`:''}
+            ${avg1!==null?`<div class="ms-score" style="font-size:16px">${avg1.toFixed(1)}<span style="font-size:10px;opacity:.6">/10</span></div>`:''}
             ${m.winner===s1.id?`<div class="ms-win-label">🏆</div>`:''}
           </div>
           <div class="matchup-vs">vs</div>
           <div class="ms-side ${m.winner===s2.id?'winner':'loser'}">
             ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`}
             <div class="ms-title">${esc(s2.title)}</div>
-            ${avg2!==null?`<div class="ms-score" style="font-size:16px">${avg2.toFixed(1)}</div>`:''}
+            ${avg2!==null?`<div class="ms-score" style="font-size:16px">${avg2.toFixed(1)}<span style="font-size:10px;opacity:.6">/10</span></div>`:''}
             ${m.winner===s2.id?`<div class="ms-win-label">🏆</div>`:''}
           </div>
         </div>
@@ -1710,5 +1873,15 @@ function handleUrlParams(){
 
 </script>
 
+
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="mt" id="confirm-title" style="margin-bottom:8px"></div>
+    <div class="ma" id="confirm-msg"></div>
+    <button class="bp" id="confirm-ok" style="background:linear-gradient(135deg,#ff5f5f,#ff2d55)">Confirm</button>
+    <button class="bg" id="confirm-cancel">Cancel</button>
+  </div>
+</div>
 </body>
 </html>
