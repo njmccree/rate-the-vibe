@@ -491,8 +491,11 @@ const urlDb     = params.get('db');
 const urlRoom   = params.get('room');
 const urlTitle  = params.get('title');
 const urlArtist = params.get('artist');
-const urlStoreId = params.get('storeid');
-const urlWho     = params.get('who');
+const urlStoreId    = params.get('storeid');
+const urlWho        = params.get('who');
+const urlBracket    = params.get('bracket');
+const urlNewBracket = params.get('newbracket');
+const urlSongs      = params.get('songs');
 // Restore identity from shortcut URL so user doesn't have to re-enter name
 if(urlWho){
   const whoParts = urlWho.split('__');
@@ -1610,9 +1613,6 @@ function handleUrlParams(){
   }
 }
 
-const urlBracket    = params.get('bracket');
-const urlNewBracket = params.get('newbracket');
-const urlSongs      = params.get('songs');
 </script>
 
 </body>
