@@ -168,7 +168,7 @@ input::placeholder,textarea::placeholder{color:var(--mu);-webkit-text-fill-color
 .bracket-rank{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr)}
 .bracket-rank:last-child{border-bottom:none}
 .rank-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--mu);width:32px;flex-shrink:0;text-align:center}
-.rank-num.gold{color:var(--gold)}
+.rank-num.gold{color:var(--gold)}.rank-num.silver{color:#C0C0C0}.rank-num.bronze{color:#CD7F32}
 .rank-art{width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0}
 .rank-art-ph{width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,.08);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
 .rank-info{flex:1;min-width:0}
@@ -197,6 +197,19 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 .step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
 .stn{background:var(--or);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
 .stt{font-size:14px;line-height:1.5}
+
+  .comment{background:rgba(255,255,255,.04);border-radius:12px;padding:10px 12px}
+  .comment-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .comment-emoji{font-size:16px}
+  .comment-name{font-size:12px;font-weight:600}
+  .comment-time{font-size:10px;color:var(--mu);margin-left:auto}
+  .comment-text{font-size:13px;line-height:1.4;margin-bottom:6px}
+  .comment-actions{display:flex;gap:10px}
+  .cmt-btn{background:none;border:none;color:var(--mu);font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;display:flex;align-items:center;gap:3px;touch-action:manipulation}
+  .cmt-btn.liked{color:var(--or)}
+  .replies{margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;gap:8px}
+  .reply{background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px}
+  .reply-input-row{display:flex;gap:6px;margin-top:6px}
 
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -454,6 +467,22 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
     </div>
     <div id="bks-added" style="margin-top:12px"></div>
     <button class="bg" id="bks-done" style="margin-top:8px">Done Adding Songs</button>
+  </div>
+</div>
+
+<!-- BRACKET: Comments Modal -->
+<div class="overlay" id="bk-comments-modal">
+  <div class="modal" style="padding-bottom:30px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div id="bkc-art" style="width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,.08);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden"></div>
+      <div><div class="mt" id="bkc-title" style="font-size:16px;margin-bottom:0"></div><div class="ma" id="bkc-artist" style="font-size:12px;margin-bottom:0"></div></div>
+    </div>
+    <div id="bkc-list" style="max-height:340px;overflow-y:auto;margin:12px 0;display:flex;flex-direction:column;gap:10px"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <input id="bkc-input" type="text" placeholder="Add a comment…" autocomplete="off" style="flex:1;font-size:13px;padding:10px 13px">
+      <button id="bkc-send" style="flex-shrink:0;padding:0 16px;background:var(--or);border:none;border-radius:12px;color:#fff;font-size:20px;cursor:pointer;font-family:Outfit,sans-serif">↑</button>
+    </div>
+    <button class="bg" id="bkc-close" style="margin-top:8px">Close</button>
   </div>
 </div>
 
@@ -850,6 +879,181 @@ async function doLeaveBracket(code){
   }catch(e){ toast('⚠️ Could not leave: '+e.message); }
 }
 
+
+// ════════════════════════════════════════════════
+// BRACKET COMMENTS
+// ════════════════════════════════════════════════
+var _bkcSongId = null;
+
+function fbCmtEp(bkCode, songId){
+  return FB.replace(/\/+$/,'') + '/bracketComments/' + bkCode + '/' + songId + '.json';
+}
+async function fbCmtGet(songId){
+  try{
+    var r = await fetch(fbCmtEp(bkCode, songId));
+    if(!r.ok) return {};
+    var d = await r.json();
+    return d || {};
+  }catch(e){ return {}; }
+}
+async function fbCmtPut(songId, data){
+  await fetch(fbCmtEp(bkCode, songId), {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+  });
+}
+
+async function openBkComments(songId){
+  _bkcSongId = songId;
+  var b = bkState; if(!b) return;
+  var song = bkSong(b, songId);
+  if(!song) return;
+
+  // Set header
+  var artEl = document.getElementById('bkc-art');
+  if(song.artworkUrl){
+    artEl.innerHTML = '<img src="'+esc(song.artworkUrl)+'" style="width:40px;height:40px;object-fit:cover">';
+  } else {
+    artEl.textContent = '🎵';
+  }
+  document.getElementById('bkc-title').textContent = song.title;
+  document.getElementById('bkc-artist').textContent = song.artist;
+  document.getElementById('bkc-input').value = '';
+  document.getElementById('bkc-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px">Loading…</div>';
+  document.getElementById('bk-comments-modal').classList.add('on');
+
+  await refreshComments(songId);
+}
+
+async function refreshComments(songId){
+  var comments = await fbCmtGet(songId);
+  renderCommentsList(comments, songId);
+}
+
+function renderCommentsList(comments, songId){
+  var list = document.getElementById('bkc-list');
+  if(!list) return;
+  var b = bkState;
+  var entries = Object.entries(comments).sort(function(a,b){ return (a[1].ts||0)-(b[1].ts||0); });
+  if(!entries.length){
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px">No comments yet. Be the first!</div>';
+    return;
+  }
+  list.innerHTML = entries.map(function(entry){
+    var cid = entry[0], c = entry[1];
+    var likesObj = c.likes||{};
+    var likeCount = Object.keys(likesObj).length;
+    var iLiked = !!likesObj[myId];
+    var repliesObj = c.replies||{};
+    var replyEntries = Object.entries(repliesObj).sort(function(a,b){ return (a[1].ts||0)-(b[1].ts||0); });
+    var repliesHtml = replyEntries.map(function(re){
+      var rid=re[0], rep=re[1];
+      var rLikes = rep.likes||{};
+      var rLiked = !!rLikes[myId];
+      var rLikeCount = Object.keys(rLikes).length;
+      return '<div class="reply">'
+        +'<div class="comment-header"><span class="comment-emoji">'+(rep.emoji||'🎵')+'</span>'
+        +'<span class="comment-name">'+esc(rep.name||'?')+'</span>'
+        +'<span class="comment-time">'+timeAgoShort(rep.ts||0)+'</span></div>'
+        +'<div class="comment-text">'+esc(rep.text||'')+'</div>'
+        +'<div class="comment-actions">'
+        +'<button class="cmt-btn bkc-like-reply '+(rLiked?'liked':'')+'" data-cid="'+cid+'" data-rid="'+rid+'">♥ '+(rLikeCount||'')+'</button>'
+        +'</div></div>';
+    }).join('');
+    return '<div class="comment" data-cid="'+cid+'">'
+      +'<div class="comment-header"><span class="comment-emoji">'+(c.emoji||'🎵')+'</span>'
+      +'<span class="comment-name">'+esc(c.name||'?')+'</span>'
+      +'<span class="comment-time">'+timeAgoShort(c.ts||0)+'</span></div>'
+      +'<div class="comment-text">'+esc(c.text||'')+'</div>'
+      +'<div class="comment-actions">'
+      +'<button class="cmt-btn bkc-like '+(iLiked?'liked':'')+'" data-cid="'+cid+'">♥ '+(likeCount||'')+'</button>'
+      +'<button class="cmt-btn bkc-reply-open" data-cid="'+cid+'">↩ Reply</button>'
+      +'</div>'
+      +(replyEntries.length?'<div class="replies">'+repliesHtml+'</div>':'')
+      +'<div class="reply-input-row" id="bkc-reply-row-'+cid+'" style="display:none">'
+      +'<input class="bkc-reply-input" data-cid="'+cid+'" type="text" placeholder="Write a reply…" style="flex:1;font-size:12px;padding:8px 10px" autocomplete="off">'
+      +'<button class="bkc-reply-send" data-cid="'+cid+'" style="flex-shrink:0;padding:0 12px;background:var(--or);border:none;border-radius:10px;color:#fff;font-size:16px;cursor:pointer">↑</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+
+  // Scroll to bottom
+  list.scrollTop = list.scrollHeight;
+}
+
+// Event delegation on comment list
+document.getElementById('bkc-list').addEventListener('click', async function(e){
+  var likeBtn   = e.target.closest('.bkc-like');
+  var replyOpen = e.target.closest('.bkc-reply-open');
+  var replySend = e.target.closest('.bkc-reply-send');
+  var likeReply = e.target.closest('.bkc-like-reply');
+
+  if(likeBtn){
+    var cid = likeBtn.dataset.cid;
+    var comments = await fbCmtGet(_bkcSongId);
+    if(!comments[cid]) return;
+    if(!comments[cid].likes) comments[cid].likes = {};
+    if(comments[cid].likes[myId]) delete comments[cid].likes[myId];
+    else comments[cid].likes[myId] = true;
+    await fbCmtPut(_bkcSongId, comments);
+    renderCommentsList(comments, _bkcSongId);
+  }
+  if(replyOpen){
+    var cid = replyOpen.dataset.cid;
+    var row = document.getElementById('bkc-reply-row-'+cid);
+    if(row){ row.style.display = row.style.display==='none'?'flex':'none'; row.querySelector('input')&&row.querySelector('input').focus(); }
+  }
+  if(likeReply){
+    var cid = likeReply.dataset.cid, rid = likeReply.dataset.rid;
+    var comments = await fbCmtGet(_bkcSongId);
+    if(!comments[cid]||!comments[cid].replies||!comments[cid].replies[rid]) return;
+    if(!comments[cid].replies[rid].likes) comments[cid].replies[rid].likes = {};
+    if(comments[cid].replies[rid].likes[myId]) delete comments[cid].replies[rid].likes[myId];
+    else comments[cid].replies[rid].likes[myId] = true;
+    await fbCmtPut(_bkcSongId, comments);
+    renderCommentsList(comments, _bkcSongId);
+  }
+  if(replySend){
+    var cid = replySend.dataset.cid;
+    var row = document.getElementById('bkc-reply-row-'+cid);
+    var input = row && row.querySelector('input');
+    var txt = input && input.value.trim();
+    if(!txt) return;
+    var comments = await fbCmtGet(_bkcSongId);
+    if(!comments[cid]) return;
+    if(!comments[cid].replies) comments[cid].replies = {};
+    var rid = uid8();
+    comments[cid].replies[rid] = {userId:myId, name:myName, emoji:myEmoji, text:txt, ts:Date.now(), likes:{}};
+    await fbCmtPut(_bkcSongId, comments);
+    if(input) input.value='';
+    renderCommentsList(comments, _bkcSongId);
+  }
+});
+
+document.getElementById('bkc-send').addEventListener('click', async function(){
+  var input = document.getElementById('bkc-input');
+  var txt = (input.value||'').trim();
+  if(!txt||!_bkcSongId) return;
+  input.value=''; this.disabled=true;
+  var comments = await fbCmtGet(_bkcSongId);
+  var cid = uid8();
+  comments[cid] = {userId:myId, name:myName, emoji:myEmoji, text:txt, ts:Date.now(), likes:{}, replies:{}};
+  await fbCmtPut(_bkcSongId, comments);
+  this.disabled=false;
+  renderCommentsList(comments, _bkcSongId);
+});
+
+document.getElementById('bkc-input').addEventListener('keydown', function(e){
+  if(e.key==='Enter') document.getElementById('bkc-send').click();
+});
+
+document.getElementById('bkc-close').addEventListener('click', function(){
+  document.getElementById('bk-comments-modal').classList.remove('on');
+  _bkcSongId=null;
+});
+document.getElementById('bk-comments-modal').addEventListener('click', function(e){
+  if(e.target===e.currentTarget){ document.getElementById('bk-comments-modal').classList.remove('on'); _bkcSongId=null; }
+});
+
 // ════════════════════════════════════════════════
 // SESSION HISTORY
 // ════════════════════════════════════════════════
@@ -1225,7 +1429,16 @@ function totalRatingsForMember(b,uid){ return Object.keys(b.ratings?.[uid]||{}).
 function allMembersRatedAll(b){ const ids=Object.keys(b.members); return ids.length>0&&ids.every(id=>totalRatingsForMember(b,id)>=b.songs.length); }
 function allMembersReady(b){ const ids=Object.keys(b.members); return ids.length>0&&ids.every(id=>b.readyMembers?.[id]); }
 function isPowerOf2(n){ return n>1&&(n&(n-1))===0; }
-function roundName(b,round){ const total=Math.log2(b.songs.length); if(total-round===0)return'🏆 Final'; if(total-round===1)return'🥊 Semifinal'; if(total-round===2)return'⚡ Quarterfinal'; return`Round ${round+1}`; }
+function roundName(b,round){
+  const total = Math.log2(b.songs.length);
+  const fromEnd = total - round - 1; // 0 = last round
+  if(fromEnd===0) return 'Championship';
+  if(fromEnd===1) return 'Final 4';
+  if(fromEnd===2) return 'Elite 8';
+  if(fromEnd===3) return 'Sweet 16';
+  if(fromEnd===4) return 'Round of 32';
+  return 'Round of 64';
+}
 
 function generateFirstRound(b){
   const shuffled=[...b.songs].sort(()=>Math.random()-.5);
@@ -1619,9 +1832,51 @@ function addBkCreateSong(r){
 // ════════════════════════════════════════════════
 
 function playlistLinkHTML(b){
-  if(!b||!b.playlistUrl)return '';
-  return '<a href="'+esc(b.playlistUrl)+'" target="_blank" class="aml" style="display:inline-flex;margin-bottom:12px">\u266b Open Playlist in Apple Music</a>';
+  var parts = [];
+  if(b&&b.playlistUrl)
+    parts.push('<a href="'+esc(b.playlistUrl)+'" target="_blank" class="aml" style="display:inline-flex;margin-bottom:4px">\u266b Open in Apple Music</a>');
+  if(b&&b.spotifyUrl)
+    parts.push('<a href="'+esc(b.spotifyUrl)+'" target="_blank" class="aml" style="display:inline-flex;margin-bottom:4px;background:rgba(30,215,96,.1);border-color:rgba(30,215,96,.3);color:#1ED760">\u25b6 Open in Spotify</a>');
+  if(b&&b.hostId===myId)
+    parts.push('<button id="bk-edit-playlists-btn" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:20px;color:var(--mu);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;margin-bottom:4px">\u270f\ufe0f Edit Playlist Links</button>');
+  if(!parts.length) return '';
+  return '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-bottom:10px">'+parts.join('')+'</div>';
 }
+
+function openEditPlaylistsModal(){
+  const b=bkState; if(!b)return;
+  showConfirm('Edit Playlist Links','',null); // repurpose confirm modal as form
+  // Actually build a custom modal
+  document.getElementById('confirm-title').textContent='✏️ Edit Playlist Links';
+  document.getElementById('confirm-msg').innerHTML=
+    '<div style="margin-bottom:10px">'
+    +'<div style="font-size:12px;color:var(--mu);margin-bottom:4px">Apple Music Playlist URL</div>'
+    +'<input id="ep-apple" type="text" placeholder="https://music.apple.com/..." autocomplete="off" autocapitalize="none" value="'+(b.playlistUrl?esc(b.playlistUrl):'')+'"/>'
+    +'</div>'
+    +'<div>'
+    +'<div style="font-size:12px;color:var(--mu);margin-bottom:4px">Spotify Playlist URL</div>'
+    +'<input id="ep-spotify" type="text" placeholder="https://open.spotify.com/playlist/..." autocomplete="off" autocapitalize="none" value="'+(b.spotifyUrl?esc(b.spotifyUrl):'')+'"/>'
+    +'</div>';
+  document.getElementById('confirm-ok').textContent='Save';
+  document.getElementById('confirm-ok').onclick=async function(){
+    document.getElementById('confirm-modal').classList.remove('on');
+    const apple=document.getElementById('ep-apple')?.value.trim()||null;
+    const spotify=document.getElementById('ep-spotify')?.value.trim()||null;
+    await mergeAndSaveBracket(function(b){
+      b.playlistUrl=apple||null;
+      b.spotifyUrl=spotify||null;
+    });
+    toast('✅ Playlist links updated');
+    document.getElementById('confirm-ok').textContent='Confirm';
+    document.getElementById('confirm-ok').onclick=function(){
+      document.getElementById('confirm-modal').classList.remove('on');
+      if(_confirmCallback){_confirmCallback();_confirmCallback=null;}
+    };
+  };
+  document.getElementById('confirm-modal').classList.add('on');
+  setTimeout(function(){ var el=document.getElementById('ep-apple'); if(el)el.focus(); },100);
+}
+
 
 function renderBracket(){
   if(!bkState||!bkCode)return;
@@ -1630,6 +1885,9 @@ function renderBracket(){
   if(b.status==='rating')renderBkRating(b);
   else if(b.status==='voting')renderBkVoting(b);
   else if(b.status==='complete')renderBkComplete(b);
+  // Wire up playlist edit button (host only)
+  const editBtn=document.getElementById('bk-edit-playlists-btn');
+  if(editBtn) editBtn.addEventListener('click',openEditPlaylistsModal);
 }
 
 function renderBkRating(b){
@@ -1655,7 +1913,8 @@ function renderBkRating(b){
     ${b.songs.map(s=>{
       const r=myRatings[s.id];
       const hasRating=r!==undefined;
-      return`<div class="bk-song ${hasRating?'rated':''}" style="cursor:pointer" onclick="openBkRateModal('${s.id}')">
+      return`<div class="bk-song ${hasRating?'rated':''}" style="cursor:pointer;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0" onclick="openBkRateModal('${s.id}')">
         ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
         <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
         ${hasRating?`<div class="bk-rating-badge" style="color:${scoreColor(r)}">${r}<span style="font-size:10px;opacity:.6">/10</span></div>`:`<div class="bk-unrated">Tap to rate</div>`}
@@ -1769,13 +2028,15 @@ function renderBkComplete(b){
   // Assign finish position based on which round they lost in
   const positions={}; // songId → position label
   b.songs.forEach(s=>positions[s.id]='First Round');
+  const totalRds = b.totalRounds||Math.log2(b.songs.length);
   allMatchups.forEach(m=>{
     if(!m.winner)return;
     const loser=m.song1===m.winner?m.song2:m.song1;
-    const label=roundName(b,m.round);
-    positions[loser]=`Out in ${label}`;
+    const fromEnd = totalRds - m.round - 1;
+    if(fromEnd===0) positions[loser]='Runner-Up';
+    else positions[loser]='Lost in '+roundName(b,m.round);
   });
-  if(b.bracketWinner)positions[b.bracketWinner]='🏆 Champion';
+  if(b.bracketWinner)positions[b.bracketWinner]='Champion';
   // Sort songs: winner first, then by round they lost (later = higher rank)
   const ranked=[...b.songs].sort((a,b_)=>{
     const ra=allMatchups.filter(m=>m.winner&&(m.song1===a.id||m.song2===a.id)&&m.winner!==a.id).map(m=>m.round)[0]??99;
@@ -1798,7 +2059,7 @@ function renderBkComplete(b){
   ranked.forEach((s,i)=>{
     const avg=avgRatingForSong(b,s.id);
     html+=`<div class="bracket-rank">
-      <div class="rank-num ${i===0?'gold':''}">${i===0?'🥇':i+1}</div>
+      <div class="rank-num ${i===0?'gold':i===1?'silver':i<=3?'bronze':''}">${i===0?'🥇':i===1?'🥈':i<=3?'🥉':i+1}</div>
       ${s.artworkUrl?`<img class="rank-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="rank-art-ph">🎵</div>`}
       <div class="rank-info"><div class="rank-title">${esc(s.title)}</div><div class="rank-artist">${esc(s.artist)}</div><div style="font-size:10px;color:var(--mu);margin-top:2px">${positions[s.id]||''}</div></div>
       ${avg!==null?`<div class="rank-score" style="color:${scoreColor(avg)}">${avg.toFixed(1)}<span style="font-size:11px;opacity:.6">/10</span></div>`:''}
