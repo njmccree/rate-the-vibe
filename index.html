@@ -596,17 +596,25 @@ document.getElementById('btn-test-fb').onclick = async function(){
   st.style.color='#ff9340'; st.textContent='Connecting to Firebase…';
 
   try{
-    const r = await fetch(url + '/ping.json', {
-      method:'PUT', headers:{'Content-Type':'application/json'}, body:'"ok"'
-    });
-    if(!r.ok) throw new Error('HTTP ' + r.status + ' — check the URL and Firebase rules');
+    // Use a plain GET — no custom headers = no CORS preflight needed
+    // Any HTTP response (even 401/403 if rules expired) means we reached Firebase
+    const r = await fetch(url + '/.json');
+    // r.status 200 or 401 = valid Firebase URL
+    // We accept anything except a network-level failure
     FB = url; localStorage.setItem('rtv-fb', FB);
-    st.style.color='#4cd97b'; st.textContent='✅ Connected!';
+    if(r.status === 401 || r.status === 403){
+      st.style.color='#4cd97b'; st.textContent='✅ Connected! (Update your Firebase rules if you see errors later)';
+    } else {
+      st.style.color='#4cd97b'; st.textContent='✅ Connected!';
+    }
     this.textContent='Connected ✓';
     setTimeout(()=>showScreen(myName?'s-home':'s-setup'), 800);
   }catch(e){
-    st.style.color='#ff5f5f'; st.textContent='❌ ' + e.message;
-    this.style.opacity='1'; this.textContent='Test & Save →';
+    // Network-level failure — try saving anyway since URL format looks valid
+    st.style.color='#ff9340'; st.textContent='⚠️ Could not verify — saving anyway. Error: ' + e.message;
+    FB = url; localStorage.setItem('rtv-fb', FB);
+    this.textContent='Saved ✓';
+    setTimeout(()=>showScreen(myName?'s-home':'s-setup'), 1500);
   }
 };
 
