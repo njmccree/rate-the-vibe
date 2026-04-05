@@ -651,7 +651,7 @@ document.getElementById('mtab-live').onclick=()=>setHomeMode('live');
 document.getElementById('mtab-brackets').onclick=()=>setHomeMode('brackets');
 document.getElementById('btn-home-back').onclick=()=>showScreen('s-setup');
 document.getElementById('btn-home-back-2').onclick=()=>showScreen('s-setup');
-document.getElementById('btn-change-fb').onclick=()=>{ localStorage.removeItem('rtv-fb'); FB=''; showScreen('s-firebase'); };
+// Firebase URL is hardcoded — no change-fb button needed
 
 // Join room from URL param
 if(urlRoom){ window.addEventListener('DOMContentLoaded',()=>{ document.getElementById('room-join-in').value=urlRoom; document.getElementById('btn-room-join').disabled=false; }); }
