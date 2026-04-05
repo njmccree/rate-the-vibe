@@ -1887,20 +1887,54 @@ document.getElementById('bkr-save').onclick=async function(){
 function openBkProgressModal(){
   const b=bkState; if(!b)return;
   const total=b.songs.length;
+  const isHost=b.hostId===myId;
   document.getElementById('bkp-list').innerHTML=Object.entries(b.members).map(([uid,u])=>{
     const rated=totalRatingsForMember(b,uid);
     const pct=total?rated/total*100:0;
     const isReady=!!b.readyMembers?.[uid];
-    return`<div class="prog-row">
+    const isMe=uid===myId;
+    const removeBtn=isHost&&!isMe
+      ? `<button class="bkp-remove-btn" data-uid="${uid}" data-name="${esc(u.name||'?')}" style="flex-shrink:0;background:none;border:1px solid rgba(255,95,95,.3);border-radius:8px;padding:4px 8px;color:#ff5f5f;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif">Remove</button>`
+      : '';
+    return`<div class="prog-row" style="align-items:center">
       <div style="font-size:24px">${u.emoji}</div>
       <div class="prog-info">
-        <div class="prog-name">${esc(u.name)} ${uid===myId?'(you)':''} ${isReady?'✅':''}</div>
+        <div class="prog-name">${esc(u.name)} ${isMe?'(you)':''} ${isReady?'✅':''}</div>
         <div class="prog-count">${rated}/${total} songs rated</div>
         <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
       </div>
+      ${removeBtn}
     </div>`;
   }).join('');
+
+  // Wire up remove buttons via delegation
+  document.getElementById('bkp-list').addEventListener('click', function(e){
+    const btn=e.target.closest('.bkp-remove-btn');
+    if(!btn)return;
+    const uid=btn.dataset.uid, name=btn.dataset.name;
+    document.getElementById('bk-progress-modal').classList.remove('on');
+    showConfirm(
+      'Remove Member?',
+      'Remove "'+name+'" from this bracket? Their ratings and votes will be deleted.',
+      function(){ doRemoveMember(uid); }
+    );
+  });
+
   document.getElementById('bk-progress-modal').classList.add('on');
+}
+
+async function doRemoveMember(uid){
+  try{
+    await mergeAndSaveBracket(function(b){
+      if(b.members)     delete b.members[uid];
+      if(b.ratings)     delete b.ratings[uid];
+      if(b.readyMembers)delete b.readyMembers[uid];
+      Object.keys(b.matchups||{}).forEach(function(mid){
+        if(b.matchups[mid].votes) delete b.matchups[mid].votes[uid];
+      });
+    });
+    toast('✅ Member removed');
+  }catch(e){ toast('⚠️ '+e.message); }
 }
 document.getElementById('bkp-close').onclick=()=>document.getElementById('bk-progress-modal').classList.remove('on');
 document.getElementById('bk-progress-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('bk-progress-modal').classList.remove('on');};
