@@ -210,7 +210,7 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 
 <!-- ══════════════ FIREBASE SETUP ══════════════ -->
 
-<div class="screen on" id="s-firebase">
+<div class="screen" id="s-firebase">
   <div class="hero"><div style="font-size:48px">🔥</div><h1>Connect Firebase</h1><p class="sub">One-time setup · ~3 minutes</p></div>
   <div class="card">
     <div class="info-box">ℹ️ Your friends won't need to do this — your share link includes everything automatically.</div>
@@ -259,7 +259,6 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
       <button class="bp" id="btn-room-join" disabled>Join →</button>
     </div>
     <button class="bg" id="btn-home-back">← Change Name</button>
-    <button class="bg" id="btn-change-fb" style="font-size:12px;opacity:.4;margin-top:4px">Change Firebase URL</button>
   </div>
 
   <!-- Bracket options -->
@@ -459,7 +458,7 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 const EMOJIS = ['🎵','🎸','🥁','🎹','🎺','🎻','🎤','🎧','🦄','🔥','💫','⚡'];
 const LL_LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
 
-let FB = localStorage.getItem('rtv-fb') || '';
+let FB = 'https://rate-the-song-default-rtdb.firebaseio.com';
 let myId = localStorage.getItem('rtv-id') || (()=>{const i=uid();localStorage.setItem('rtv-id',i);return i;})();
 let myName = localStorage.getItem('rtv-name') || '';
 let myEmoji = localStorage.getItem('rtv-emoji') || '🎵';
@@ -604,7 +603,7 @@ document.getElementById('btn-test-fb').onclick = function(){
   setTimeout(function(){ showScreen(myName ? 's-home' : 's-setup'); }, 600);
 };
 
-if(FB){ showScreen(myName?'s-home':'s-setup'); } else { showScreen('s-firebase'); }
+showScreen(myName?'s-home':'s-setup');
 
 // ════════════════════════════════════════════════
 // NAME SETUP SCREEN
