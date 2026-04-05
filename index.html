@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,116 +7,219 @@
 <title>Rate the Vibe 🎵</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0c0b0f;--surf:rgba(255,255,255,.05);--bdr:rgba(255,255,255,.09);--or:#ff9340;--or-dim:rgba(255,147,64,.15);--or-bdr:rgba(255,147,64,.3);--tx:#f2ead8;--mu:rgba(242,234,216,.45);--r:16px}
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
-  body{background-image:radial-gradient(ellipse at 10% 0%,rgba(80,20,120,.35) 0%,transparent 55%),radial-gradient(ellipse at 90% 90%,rgba(20,50,80,.3) 0%,transparent 55%)}
-  .screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:0 20px 40px}
-  .screen.on{display:flex}
-  .hero{margin-top:56px;text-align:center}
-  h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;margin-top:10px;background:linear-gradient(135deg,#ff9340 20%,#ff5f5f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .sub{color:var(--mu);font-size:14px;margin-top:6px}
-  .card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;width:100%;max-width:420px;margin-top:20px}
-  .cl{font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--mu);margin-bottom:13px}
-  .eg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px}
-  .eb{background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:12px;padding:10px;font-size:24px;cursor:pointer;line-height:1}
-  .eb.s{border-color:var(--or);background:var(--or-dim)}
-  input,textarea{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:12px;padding:13px 15px;color:var(--tx);font-size:15px;font-family:'Outfit',sans-serif;outline:none;-webkit-appearance:none;resize:none}
-  input:focus,textarea:focus{border-color:var(--or-bdr)}
-  input::placeholder,textarea::placeholder{color:var(--mu)}
-  .bp{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;text-align:center;background:linear-gradient(135deg,#ff9340,#ff5f5f);color:#fff;margin-top:12px}
-  .bp:disabled{opacity:.35;pointer-events:none}
-  .bg{display:block;width:100%;padding:14px;border:1px solid var(--bdr);border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;text-align:center;background:rgba(255,255,255,.06);color:var(--mu);margin-top:8px}
-  .ropts{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px;margin-top:24px}
-  .ropt{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;cursor:pointer;text-align:left;width:100%}
-  .ropt:active{border-color:var(--or-bdr);background:var(--or-dim)}
-  .oi{font-size:26px;margin-bottom:6px}
-  .ot{font-size:16px;font-weight:600;color:var(--tx)}
-  .od{font-size:13px;color:var(--mu);margin-top:2px}
-  /* app */
-  #s-app{padding:0}
-  .abar{width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:rgba(12,11,15,.9);backdrop-filter:blur(12px);z-index:10}
-  .at{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;background:linear-gradient(135deg,#ff9340,#ff5f5f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .dot{width:8px;height:8px;border-radius:50%;background:#4cd97b;flex-shrink:0;transition:background .3s}
-  .dot.sync{background:var(--or);animation:blink .8s infinite}
-  .dot.err{background:#ff5f5f}
-  .mpill{background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:20px;padding:4px 11px;font-size:12px;color:var(--or);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
-  .body{padding:14px 18px 90px;max-width:480px;margin:0 auto;width:100%}
-  .codebar{background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-  .codelbl{font-size:10px;letter-spacing:1px;color:var(--or);text-transform:uppercase;margin-bottom:2px}
-  .codeval{font-family:monospace;font-size:20px;font-weight:800;letter-spacing:4px}
-  .shbtn{background:var(--or);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:13px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap}
-  .tabs{display:flex;gap:8px;margin-bottom:14px}
-  .tab{flex:1;padding:9px;border:1px solid var(--bdr);background:var(--surf);border-radius:10px;color:var(--mu);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer}
-  .tab.a{border-color:var(--or-bdr);background:var(--or-dim);color:var(--or)}
-  .addb{width:100%;padding:13px;background:rgba(255,147,64,.07);border:1.5px dashed var(--or-bdr);border-radius:12px;color:var(--or);font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;margin-bottom:12px;display:block}
-  .addform{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
-  .row{display:flex;gap:8px}
-  .bsm{padding:10px 14px;font-size:13px}
-  .sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:10px}
-  .sc.now{background:rgba(255,147,64,.06);border-color:rgba(255,147,64,.22);box-shadow:0 0 24px rgba(255,147,64,.07)}
-  .sc-top{display:flex;gap:12px;align-items:flex-start}
-  .sc-art{width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.08)}
-  .sc-art-placeholder{width:56px;height:56px;border-radius:8px;flex-shrink:0;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:22px}
-  .sc-info{flex:1;min-width:0}
-  .aml{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 11px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.25);border-radius:20px;color:#ff2d55;font-size:12px;font-weight:600;text-decoration:none;font-family:'Outfit',sans-serif}
-  .aml:active{background:rgba(255,45,85,.22)}
-  .ntag{font-size:9px;letter-spacing:1.5px;color:var(--or);font-weight:700;margin-bottom:6px;font-family:monospace}
-  .stit{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.2}
-  .sart{color:var(--mu);font-size:13px;margin-top:2px}
-  .smet{font-size:10px;color:rgba(242,234,216,.28);margin-top:5px}
-  .avgr{display:flex;align-items:baseline;gap:7px;margin-top:10px}
-  .avgn{font-family:'Playfair Display',serif;font-size:38px;color:var(--or);line-height:1}
-  .avgs{font-size:11px;color:var(--mu)}
-  .rb{display:inline-block;padding:9px 14px;background:rgba(255,147,64,.12);border:1px solid var(--or-bdr);border-radius:10px;color:var(--or);font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:10px}
-  .rb:active{background:var(--or-dim)}
-  .chips{margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr);display:flex;flex-wrap:wrap;gap:5px}
-  .chip{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border-radius:20px;padding:4px 9px;font-size:11px}
-  .cst{color:var(--or);letter-spacing:-2px;font-size:10px}
-  .empty{text-align:center;padding:50px 20px;opacity:.4}
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
-  .overlay.on{display:flex}
-  .modal{background:#17151e;border:1px solid var(--bdr);border-radius:20px 20px 0 0;padding:26px 18px 50px;width:100%;max-width:480px;margin:0 auto;animation:sup .22s ease-out}
-  .mt{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:3px}
-  .ma{color:var(--mu);font-size:13px;margin-bottom:18px}
-  .mst{display:flex;gap:2px;margin-bottom:6px}
-  .ms{font-size:42px;cursor:pointer;color:rgba(255,255,255,.1);padding:4px;line-height:1;-webkit-user-select:none;user-select:none}
-  .ms.l{color:var(--or);text-shadow:0 0 14px rgba(255,147,64,.5)}
-  .ms:active{transform:scale(1.15)}
-  .ml{font-size:14px;color:var(--mu);font-style:italic;min-height:20px;margin-bottom:18px}
-  /* firebase setup */
-  .step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
-  .stn{background:var(--or);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
-  .stt{font-size:14px;line-height:1.5}
-  code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--or)}
-  .info{background:rgba(255,147,64,.1);border:1px solid var(--or-bdr);border-radius:10px;padding:12px;font-size:13px;color:var(--or);margin-bottom:14px;line-height:1.5}
-  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(28,26,36,.97);border:1px solid var(--bdr);border-radius:20px;padding:9px 18px;font-size:13px;z-index:200;backdrop-filter:blur(10px);white-space:nowrap;animation:fin .2s ease-out}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-  @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  @keyframes fin{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+:root{--bg:#0c0b0f;--surf:rgba(255,255,255,.05);--bdr:rgba(255,255,255,.09);--or:#ff9340;--or-dim:rgba(255,147,64,.15);--or-bdr:rgba(255,147,64,.3);--tx:#f2ead8;--mu:rgba(242,234,216,.45);--r:16px;--gold:#ffd700;--green:#4cd97b;--red:#ff5f5f}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--tx);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+body{background-image:radial-gradient(ellipse at 10% 0%,rgba(80,20,120,.35) 0%,transparent 55%),radial-gradient(ellipse at 90% 90%,rgba(20,50,80,.3) 0%,transparent 55%)}
+ 
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:0 20px 80px}
+.screen.on{display:flex}
+.hero{margin-top:56px;text-align:center}
+h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;margin-top:10px;background:linear-gradient(135deg,#ff9340 20%,#ff5f5f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{color:var(--mu);font-size:14px;margin-top:6px}
+ 
+/* ── CARDS / INPUTS ── */
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;width:100%;max-width:420px;margin-top:20px}
+.cl{font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--mu);margin-bottom:13px}
+.eg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px}
+.eb{background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:12px;padding:10px;font-size:24px;cursor:pointer;line-height:1}
+.eb.s{border-color:var(--or);background:var(--or-dim)}
+input,textarea{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--bdr);border-radius:12px;padding:13px 15px;color:var(--tx);font-size:15px;font-family:'Outfit',sans-serif;outline:none;-webkit-appearance:none;resize:none}
+input:focus,textarea:focus{border-color:var(--or-bdr)}
+input::placeholder,textarea::placeholder{color:var(--mu)}
+ 
+/* ── BUTTONS ── */
+.bp{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;text-align:center;background:linear-gradient(135deg,#ff9340,#ff5f5f);color:#fff;margin-top:12px}
+.bp:disabled{opacity:.35;pointer-events:none}
+.bg{display:block;width:100%;padding:14px;border:1px solid var(--bdr);border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;text-align:center;background:rgba(255,255,255,.06);color:var(--mu);margin-top:8px}
+.bg:disabled{opacity:.35;pointer-events:none}
+.btn-gold{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#111;margin-top:12px;display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;font-weight:700;cursor:pointer;text-align:center}
+.btn-gold:disabled{opacity:.35;pointer-events:none}
+ 
+/* ── ROOM OPTIONS ── */
+.ropts{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px;margin-top:24px}
+.ropt{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;cursor:pointer;text-align:left;width:100%}
+.ropt:active{border-color:var(--or-bdr);background:var(--or-dim)}
+.oi{font-size:26px;margin-bottom:6px}
+.ot{font-size:16px;font-weight:600;color:var(--tx)}
+.od{font-size:13px;color:var(--mu);margin-top:2px}
+ 
+/* ── APP BAR ── */
+.abar{width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:rgba(12,11,15,.9);backdrop-filter:blur(12px);z-index:10}
+.at{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;background:linear-gradient(135deg,#ff9340,#ff5f5f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.at-gold{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.dot.sync{background:var(--or);animation:blink .8s infinite}
+.dot.err{background:var(--red)}
+.mpill{background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:20px;padding:4px 11px;font-size:12px;color:var(--or);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+ 
+/* ── BOTTOM NAV ── */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;display:none;background:rgba(12,11,15,.95);border-top:1px solid var(--bdr);backdrop-filter:blur(12px);z-index:20;padding:0 0 env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;padding:10px 0 8px;border:none;background:none;color:var(--mu);font-size:11px;font-family:'Outfit',sans-serif;font-weight:500;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav-btn .nav-icon{font-size:20px;line-height:1}
+.nav-btn.active{color:var(--or)}
+.nav-inner{display:flex;max-width:480px;margin:0 auto;width:100%}
+ 
+/* ── BODY ── */
+.body{padding:14px 18px 90px;max-width:480px;margin:0 auto;width:100%}
+.codebar{background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.codelbl{font-size:10px;letter-spacing:1px;color:var(--or);text-transform:uppercase;margin-bottom:2px}
+.codeval{font-family:monospace;font-size:20px;font-weight:800;letter-spacing:4px}
+.shbtn{background:var(--or);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:13px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;padding:9px;border:1px solid var(--bdr);background:var(--surf);border-radius:10px;color:var(--mu);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer}
+.tab.a{border-color:var(--or-bdr);background:var(--or-dim);color:var(--or)}
+.addb{width:100%;padding:13px;background:rgba(255,147,64,.07);border:1.5px dashed var(--or-bdr);border-radius:12px;color:var(--or);font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;margin-bottom:12px;display:block}
+.addform{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.row{display:flex;gap:8px}
+.bsm{padding:10px 14px;font-size:13px}
+ 
+/* ── LIVE LISTEN SONG CARDS ── */
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.sc.now{background:rgba(255,147,64,.06);border-color:rgba(255,147,64,.22);box-shadow:0 0 24px rgba(255,147,64,.07)}
+.sc-top{display:flex;gap:12px;align-items:flex-start}
+.sc-art{width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.sc-art-ph{width:56px;height:56px;border-radius:8px;flex-shrink:0;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:22px}
+.sc-info{flex:1;min-width:0}
+.ntag{font-size:9px;letter-spacing:1.5px;color:var(--or);font-weight:700;margin-bottom:6px;font-family:monospace}
+.stit{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.2}
+.sart{color:var(--mu);font-size:13px;margin-top:2px}
+.smet{font-size:10px;color:rgba(242,234,216,.28);margin-top:5px}
+.avgr{display:flex;align-items:baseline;gap:7px;margin-top:10px}
+.avgn{font-family:'Playfair Display',serif;font-size:38px;color:var(--or);line-height:1}
+.avgs{font-size:11px;color:var(--mu)}
+.rb{display:inline-block;padding:9px 14px;background:rgba(255,147,64,.12);border:1px solid var(--or-bdr);border-radius:10px;color:var(--or);font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:10px}
+.rb:active{background:var(--or-dim)}
+.chips{margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr);display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border-radius:20px;padding:4px 9px;font-size:11px}
+.cst{color:var(--or);letter-spacing:-2px;font-size:10px}
+.aml{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 11px;background:rgba(255,45,85,.12);border:1px solid rgba(255,45,85,.25);border-radius:20px;color:#ff2d55;font-size:12px;font-weight:600;text-decoration:none;font-family:'Outfit',sans-serif}
+ 
+/* ── EMPTY STATES ── */
+.empty{text-align:center;padding:50px 20px;opacity:.4}
+ 
+/* ── HOME SCREEN TABS ── */
+.mode-tabs{display:flex;width:100%;max-width:420px;margin:20px 0 0;background:rgba(255,255,255,.04);border-radius:12px;padding:4px;gap:4px}
+.mode-tab{flex:1;padding:10px;border:none;border-radius:10px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;background:transparent;color:var(--mu);transition:all .2s}
+.mode-tab.active{background:var(--or);color:#fff}
+ 
+/* ── BRACKET SPECIFIC ── */
+.bk-section{display:none}
+.bk-section.on{display:block}
+ 
+/* bracket song cards */
+.bk-song{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.bk-song.rated{border-color:rgba(255,147,64,.3)}
+.bk-art{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.08)}
+.bk-art-ph{width:48px;height:48px;border-radius:8px;flex-shrink:0;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:18px}
+.bk-info{flex:1;min-width:0}
+.bk-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-artist{font-size:12px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-rating-badge{flex-shrink:0;font-size:13px;font-weight:700;color:var(--or)}
+.bk-unrated{flex-shrink:0;font-size:12px;color:var(--mu)}
+ 
+/* rating stepper */
+.score-stepper{display:flex;align-items:center;justify-content:center;gap:0;margin:20px 0 16px}
+.stepper-btn{width:64px;height:64px;border:none;border-radius:16px;font-size:28px;font-weight:300;cursor:pointer;background:rgba(255,255,255,.08);color:var(--tx);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stepper-btn:active{background:rgba(255,255,255,.15)}
+.score-display{width:100px;text-align:center;font-family:'Playfair Display',serif;font-size:52px;font-weight:900;line-height:1;padding:0 8px}
+.score-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);margin:0 0 16px;position:relative;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width .2s,background .2s}
+ 
+/* matchup cards */
+.matchup{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:16px;margin-bottom:14px}
+.matchup.active{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.04)}
+.matchup.done{border-color:rgba(76,217,123,.2);background:rgba(76,217,123,.03)}
+.matchup-header{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:12px;font-family:monospace}
+.matchup-songs{display:flex;gap:8px}
+.ms-side{flex:1;border:1px solid var(--bdr);border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s;background:rgba(255,255,255,.03)}
+.ms-side.voted{border-color:var(--gold);background:rgba(255,215,0,.1)}
+.ms-side.winner{border-color:var(--green);background:rgba(76,217,123,.1)}
+.ms-side.loser{opacity:.5}
+.ms-side img{width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px}
+.ms-side .ms-art-ph{width:52px;height:52px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 8px}
+.ms-title{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:2px}
+.ms-artist{font-size:10px;color:var(--mu)}
+.ms-score{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);margin-top:6px}
+.ms-vote-label{font-size:10px;color:var(--green);margin-top:4px;font-weight:600}
+.ms-win-label{font-size:10px;color:var(--green);margin-top:4px;font-weight:700;letter-spacing:.5px}
+.matchup-vs{align-self:center;font-size:13px;color:var(--mu);font-weight:700;flex-shrink:0}
+.voter-pips{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.voter-pip{font-size:16px;opacity:.35}
+.voter-pip.done{opacity:1}
+ 
+/* progress bars */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.prog-info{flex:1;min-width:0}
+.prog-name{font-size:13px;font-weight:600}
+.prog-count{font-size:11px;color:var(--mu);margin-top:2px}
+.prog-bar{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:4px;overflow:hidden}
+.prog-fill{height:100%;background:var(--or);border-radius:2px;transition:width .4s}
+ 
+/* round labels */
+.round-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-family:monospace;font-weight:700;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.round-label::after{content:'';flex:1;height:1px;background:rgba(255,215,0,.2)}
+ 
+/* bracket result song list */
+.bracket-rank{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.bracket-rank:last-child{border-bottom:none}
+.rank-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--mu);width:32px;flex-shrink:0;text-align:center}
+.rank-num.gold{color:var(--gold)}
+.rank-art{width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.rank-art-ph{width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,.08);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.rank-info{flex:1;min-width:0}
+.rank-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-artist{font-size:11px;color:var(--mu)}
+.rank-score{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--or);flex-shrink:0}
+ 
+/* info box */
+.info-box{background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:14px}
+.info-box.gold{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.25);color:var(--gold)}
+.info-box.green{background:rgba(76,217,123,.08);border-color:rgba(76,217,123,.25);color:var(--green)}
+ 
+/* ── OVERLAYS & MODALS ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+.overlay.on{display:flex}
+.modal{background:#17151e;border:1px solid var(--bdr);border-radius:20px 20px 0 0;padding:26px 18px 50px;width:100%;max-width:480px;margin:0 auto;animation:sup .22s ease-out;max-height:88vh;overflow-y:auto}
+.mt{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:3px}
+.ma{color:var(--mu);font-size:13px;margin-bottom:18px}
+.mst{display:flex;gap:2px;margin-bottom:6px}
+.ms{font-size:42px;cursor:pointer;color:rgba(255,255,255,.1);padding:4px;line-height:1;-webkit-user-select:none;user-select:none}
+.ms.l{color:var(--or);text-shadow:0 0 14px rgba(255,147,64,.5)}
+.ms:active{transform:scale(1.15)}
+.ml{font-size:14px;color:var(--mu);font-style:italic;min-height:20px;margin-bottom:18px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(28,26,36,.97);border:1px solid var(--bdr);border-radius:20px;padding:9px 18px;font-size:13px;z-index:300;backdrop-filter:blur(10px);white-space:nowrap;animation:fin .2s ease-out}
+code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--or)}
+.step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.stn{background:var(--or);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.stt{font-size:14px;line-height:1.5}
+ 
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fin{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .3s ease-out}
 </style>
 </head>
 <body>
-
-<!-- FIREBASE SETUP -->
-
+ 
+<!-- ══════════════ FIREBASE SETUP ══════════════ -->
 <div class="screen" id="s-firebase">
-  <div class="hero"><div style="font-size:48px">🔥</div><h1>Connect Firebase</h1><p class="sub">One-time setup · takes ~3 minutes</p></div>
+  <div class="hero"><div style="font-size:48px">🔥</div><h1>Connect Firebase</h1><p class="sub">One-time setup · ~3 minutes</p></div>
   <div class="card">
-    <div class="info">ℹ️ Your friends won't need to do this — your share link includes everything automatically.</div>
+    <div class="info-box">ℹ️ Your friends won't need to do this — your share link includes everything automatically.</div>
     <div class="step"><div class="stn">1</div><div class="stt">Go to <strong>console.firebase.google.com</strong> and sign in with Google</div></div>
     <div class="step"><div class="stn">2</div><div class="stt">Tap <strong>Add project</strong> → any name → skip Analytics → <strong>Create project</strong></div></div>
     <div class="step"><div class="stn">3</div><div class="stt">Left menu → <strong>Build → Realtime Database → Create database</strong> → any region → <strong>Start in test mode</strong></div></div>
-    <div class="step"><div class="stn">4</div><div class="stt">Copy the URL shown — looks like <code>https://myapp-default-rtdb.firebaseio.com</code></div></div>
-    <div class="step"><div class="stn">5</div><div class="stt">Paste it below and tap Test &amp; Save</div></div>
-    <input type="url" id="fb-in" placeholder="https://your-app-default-rtdb.firebaseio.com" autocomplete="off" autocapitalize="none" autocorrect="off">
+    <div class="step"><div class="stn">4</div><div class="stt">Copy the URL — looks like <code>https://myapp-default-rtdb.firebaseio.com</code></div></div>
+    <input type="url" id="fb-in" placeholder="https://your-app-default-rtdb.firebaseio.com" autocomplete="off" autocapitalize="none">
     <button class="bp" id="btn-test-fb" disabled>Test &amp; Save →</button>
     <div id="fb-status" style="font-size:13px;margin-top:10px;min-height:20px;text-align:center"></div>
   </div>
 </div>
-
-<!-- NAME SETUP -->
-
+ 
+<!-- ══════════════ NAME SETUP ══════════════ -->
 <div class="screen" id="s-setup">
   <div class="hero"><div style="font-size:52px">🎵</div><h1>Rate the Vibe</h1><p class="sub">Real-time song ratings with your crew</p></div>
   <div class="card">
@@ -127,41 +229,56 @@
     <button class="bp" id="btn-next" disabled>Continue →</button>
   </div>
 </div>
-
-<!-- ROOM -->
-
-<div class="screen" id="s-room">
-  <div class="hero"><div style="font-size:52px">🎧</div><h1>Your Session</h1><p class="sub">Create or join a room</p></div>
-  <div class="ropts">
-    <button class="ropt" id="btn-create">
+ 
+<!-- ══════════════ HOME (mode select) ══════════════ -->
+<div class="screen" id="s-home">
+  <div class="hero"><div style="font-size:52px" id="home-icon">🎧</div><h1 id="home-title">Live Listen</h1><p class="sub" id="home-sub">Rate songs in real-time with your crew</p></div>
+  <div class="mode-tabs" style="max-width:420px">
+    <button class="mode-tab active" id="mtab-live">🎧 Live Listen</button>
+    <button class="mode-tab" id="mtab-brackets">🏆 Brackets</button>
+  </div>
+ 
+  <!-- Live Listen options -->
+  <div class="ropts" id="live-opts">
+    <button class="ropt" id="btn-create-room">
       <div class="oi">✨</div><div class="ot">Create a Room</div>
-      <div class="od" id="create-desc">Start a session and get a shareable link</div>
+      <div class="od" id="create-room-desc">Start a session and get a shareable link</div>
     </button>
     <div style="color:var(--mu);font-size:13px;text-align:center">— or —</div>
     <div class="card" style="margin-top:0">
-      <div class="cl">Join with room code</div>
-      <input type="text" id="join-in" placeholder="ROOM CODE" autocomplete="off" autocapitalize="characters"
-        style="text-transform:uppercase;letter-spacing:4px;font-size:22px;font-weight:700;text-align:center">
-      <button class="bp" id="btn-join" disabled>Join →</button>
+      <div class="cl">Join a Room</div>
+      <input type="text" id="room-join-in" placeholder="ROOM CODE" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px;font-size:22px;font-weight:700;text-align:center">
+      <button class="bp" id="btn-room-join" disabled>Join →</button>
     </div>
-    <button class="bg" id="btn-back">← Back</button>
+    <button class="bg" id="btn-home-back">← Change Name</button>
     <button class="bg" id="btn-change-fb" style="font-size:12px;opacity:.4;margin-top:4px">Change Firebase URL</button>
   </div>
+ 
+  <!-- Bracket options -->
+  <div class="ropts" id="bracket-opts" style="display:none">
+    <button class="ropt" id="btn-new-bracket">
+      <div class="oi">🏆</div><div class="ot">Create a Bracket</div>
+      <div class="od">Build a tournament from Apple Music songs</div>
+    </button>
+    <div style="color:var(--mu);font-size:13px;text-align:center">— or —</div>
+    <div class="card" style="margin-top:0">
+      <div class="cl">Join a Bracket</div>
+      <input type="text" id="bracket-join-in" placeholder="BRACKET CODE" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:4px;font-size:22px;font-weight:700;text-align:center">
+      <button class="bp" id="btn-bracket-join" disabled>Join →</button>
+    </div>
+    <button class="bg" id="btn-home-back-2">← Change Name</button>
+  </div>
 </div>
-
-<!-- APP -->
-
+ 
+<!-- ══════════════ LIVE LISTEN APP ══════════════ -->
 <div class="screen" id="s-app">
   <div class="abar">
     <div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">🎵</span><span class="at">Rate the Vibe</span></div>
-    <div style="display:flex;align-items:center;gap:7px">
-      <span class="dot" id="dot"></span>
-      <div class="mpill" id="me-pill"></div>
-    </div>
+    <div style="display:flex;align-items:center;gap:7px"><span class="dot" id="dot"></span><div class="mpill" id="me-pill"></div></div>
   </div>
   <div class="body">
     <div class="codebar">
-      <div><div class="codelbl">Room — tap Share to invite friends</div><div class="codeval" id="code-val">——</div></div>
+      <div><div class="codelbl">Room Code — share with friends</div><div class="codeval" id="code-val">——</div></div>
       <button class="shbtn" id="btn-share">Share 📤</button>
     </div>
     <div class="tabs">
@@ -171,23 +288,18 @@
     <div id="tab-now">
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <button class="addb" id="btn-show-form" style="margin:0;flex:1">+ Add song</button>
-        <button id="btn-shortcut" title="iOS Shortcut" style="padding:13px 14px;background:rgba(255,147,64,.07);border:1.5px dashed var(--or-bdr);border-radius:12px;color:var(--or);font-size:18px;cursor:pointer;flex-shrink:0">⚡</button>
+        <button id="btn-shortcut" style="padding:13px 14px;background:rgba(255,147,64,.07);border:1.5px dashed var(--or-bdr);border-radius:12px;color:var(--or);font-size:18px;cursor:pointer;flex-shrink:0">⚡</button>
       </div>
       <div class="addform" id="add-form" style="display:none">
         <div style="font-weight:600;font-size:14px">What's playing? 🎵</div>
-        <!-- search input -->
         <div style="position:relative">
           <input type="text" id="title-in" placeholder="Search song or type title..." autocomplete="off" autocorrect="off" spellcheck="false">
           <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1e1c26;border:1px solid var(--bdr);border-radius:12px;margin-top:4px;overflow:hidden;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
         </div>
         <input type="text" id="artist-in" placeholder="Artist..." autocomplete="off">
-        <!-- artwork preview -->
         <div id="artwork-preview" style="display:none;align-items:center;gap:10px;background:rgba(255,255,255,.04);border-radius:10px;padding:10px">
           <img id="artwork-img" style="width:44px;height:44px;border-radius:6px;object-fit:cover" src="">
-          <div>
-            <div id="artwork-title" style="font-size:13px;font-weight:600"></div>
-            <div id="artwork-artist" style="font-size:12px;color:var(--mu)"></div>
-          </div>
+          <div><div id="artwork-title" style="font-size:13px;font-weight:600"></div><div id="artwork-artist" style="font-size:12px;color:var(--mu)"></div></div>
         </div>
         <div class="row">
           <button class="bg bsm" style="flex:1;margin:0" id="btn-cancel-form">Cancel</button>
@@ -196,657 +308,979 @@
       </div>
       <div id="now-area"></div>
     </div>
-
-```
-<!-- Shortcut modal -->
+    <div id="tab-hist" style="display:none"><div id="hist-area"></div></div>
+  </div>
+</div>
+ 
+<!-- ══════════════ BRACKET APP ══════════════ -->
+<div class="screen" id="s-bracket">
+  <div class="abar">
+    <div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">🏆</span><span class="at-gold" id="bk-header-title">Brackets</span></div>
+    <div style="display:flex;align-items:center;gap:7px"><span class="dot" id="bk-dot"></span><div class="mpill" id="bk-me-pill"></div></div>
+  </div>
+  <div class="body" id="bk-body"></div>
+</div>
+ 
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<div id="bottom-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" id="nav-live"><span class="nav-icon">🎧</span>Live Listen</button>
+    <button class="nav-btn" id="nav-brackets"><span class="nav-icon">🏆</span>Brackets</button>
+  </div>
+</div>
+ 
+<!-- ══════════════ MODALS ══════════════ -->
+ 
+<!-- Live Listen: already added -->
+<div class="overlay" id="already-modal">
+  <div class="modal">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+      <img id="am-art" style="width:56px;height:56px;border-radius:8px;object-fit:cover;display:none">
+      <div id="am-art-ph" style="width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🎵</div>
+      <div><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--or);margin-bottom:4px">Already in session</div>
+        <div class="mt" id="am-title" style="margin-bottom:2px;font-size:17px"></div><div class="ma" id="am-artist" style="margin-bottom:0;font-size:12px"></div></div>
+    </div>
+    <div id="am-avg" style="font-size:13px;color:var(--mu);margin-bottom:14px"></div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Your rating:</div>
+    <div class="mst" id="am-stars"></div><div class="ml" id="am-label">Tap a star to rate</div>
+    <button class="bp" id="am-submit" disabled>Submit Rating</button>
+    <button class="bg" id="am-dismiss">Dismiss</button>
+  </div>
+</div>
+ 
+<!-- Live Listen: rate song -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="mt" id="m-title">—</div><div class="ma" id="m-artist">—</div>
+    <div class="mst" id="m-stars"></div><div class="ml" id="m-label">Tap a star to rate</div>
+    <button class="bp" id="m-submit" disabled>Submit Rating</button>
+    <button class="bg" id="m-cancel">Cancel</button>
+  </div>
+</div>
+ 
+<!-- Live Listen: shortcut -->
 <div class="overlay" id="shortcut-modal">
   <div class="modal">
     <div style="font-size:28px;margin-bottom:6px">⚡</div>
-    <div class="mt" style="margin-bottom:6px">Add songs instantly</div>
-    <div class="ma" style="margin-bottom:16px">Set up a one-tap iOS Shortcut that grabs the song currently playing in Apple Music and adds it here automatically.</div>
+    <div class="mt" style="margin-bottom:6px">iOS Shortcut Setup</div>
+    <div class="ma">Add songs instantly from Apple Music or Shazam.</div>
     <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;font-size:13px;line-height:1.8;margin-bottom:16px">
       <div style="margin-bottom:8px;font-weight:600;color:var(--or)">How to set it up:</div>
-      <div>1. Open the <strong>Shortcuts</strong> app</div>
-      <div>2. Tap <strong>+</strong> → <strong>Add Action</strong></div>
-      <div>3. Search <strong>"Music"</strong> → add <strong>"Get Current Song"</strong></div>
-      <div>4. Add a <strong>"URL Encode"</strong> action → set it to the Magic Variable <strong>Name</strong> → rename result <code>EncodedTitle</code></div>
-      <div>5. Add another <strong>"URL Encode"</strong> action → set to Magic Variable <strong>Artist</strong> → rename <code>EncodedArtist</code></div>
-      <div>6. Add <strong>"Open URLs"</strong> action → paste the URL below</div>
-      <div>7. In the URL replace <code>TITLE</code> → Magic Variable <code>EncodedTitle</code></div>
-      <div>8. Replace <code>ARTIST</code> → Magic Variable <code>EncodedArtist</code></div>
-      <div>9. Replace <code>STOREID</code> → Magic Variable <strong>Store ID</strong> (from step 3's Get Current Song)</div>
-      <div>10. Name it <strong>"Rate the Vibe"</strong> and add to Home Screen</div>
+      <div>1. Open <strong>Shortcuts</strong> app → tap <strong>+</strong></div>
+      <div>2. Add action: <strong>"Shazam: Recognize Music"</strong> (or "Get Current Song" from Music)</div>
+      <div>3. Add <strong>"URL Encode"</strong> → set to Magic Variable <strong>Name</strong> → rename <code>EncodedTitle</code></div>
+      <div>4. Add <strong>"URL Encode"</strong> → set to Magic Variable <strong>Artist</strong> → rename <code>EncodedArtist</code></div>
+      <div>5. Add <strong>"Open URLs"</strong> → paste URL below → replace <code>TITLE</code>→<code>EncodedTitle</code>, <code>ARTIST</code>→<code>EncodedArtist</code>, <code>STOREID</code>→Magic Variable <strong>Store ID</strong></div>
     </div>
     <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:12px" id="shortcut-url-display"></div>
     <button class="bp" id="btn-copy-shortcut">Copy Shortcut URL 📋</button>
     <button class="bg" id="btn-close-shortcut">Done</button>
   </div>
 </div>
-<div id="tab-hist" style="display:none"><div id="hist-area"></div></div>
-```
-
-  </div>
-</div>
-
-<!-- ALREADY ADDED MODAL -->
-
-<div class="overlay" id="already-modal">
+ 
+<!-- Bracket: rate song (0-10 stepper) -->
+<div class="overlay" id="bk-rate-modal">
   <div class="modal">
-    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
-      <img id="am-art" style="width:56px;height:56px;border-radius:8px;object-fit:cover;display:none">
-      <div id="am-art-placeholder" style="width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🎵</div>
-      <div style="min-width:0">
-        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--or);margin-bottom:4px">Already in your session</div>
-        <div class="mt" id="am-title" style="margin-bottom:2px;font-size:17px"></div>
-        <div class="ma" id="am-artist" style="margin-bottom:0;font-size:12px"></div>
-      </div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px">
+      <img id="bkr-art" style="width:56px;height:56px;border-radius:8px;object-fit:cover;display:none">
+      <div id="bkr-art-ph" style="width:56px;height:56px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🎵</div>
+      <div><div class="mt" id="bkr-title" style="margin-bottom:2px;font-size:16px"></div><div class="ma" id="bkr-artist" style="margin-bottom:0;font-size:12px"></div></div>
     </div>
-    <div id="am-avg" style="font-size:13px;color:var(--mu);margin-bottom:14px"></div>
-    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--tx)">Your rating:</div>
-    <div class="mst" id="am-stars"></div>
-    <div class="ml" id="am-label">Tap a star to rate</div>
-    <button class="bp" id="am-submit" disabled>Submit Rating</button>
-    <button class="bg" id="am-dismiss">Dismiss</button>
+    <div style="font-size:12px;color:var(--mu);text-align:center;margin-bottom:4px">Rate this song (0 – 10)</div>
+    <div class="score-stepper">
+      <button class="stepper-btn" id="bkr-minus">−</button>
+      <div class="score-display" id="bkr-score">—</div>
+      <button class="stepper-btn" id="bkr-plus">+</button>
+    </div>
+    <div class="score-bar"><div class="score-fill" id="bkr-bar"></div></div>
+    <button class="bp" id="bkr-save" disabled>Save Rating</button>
+    <button class="bg" id="bkr-cancel">Cancel</button>
   </div>
 </div>
-<!-- RATING MODAL -->
-<div class="overlay" id="modal">
+ 
+<!-- Bracket: vote matchup -->
+<div class="overlay" id="bk-vote-modal">
   <div class="modal">
-    <div class="mt" id="m-title">—</div><div class="ma" id="m-artist">—</div>
-    <div class="mst" id="m-stars"></div>
-    <div class="ml" id="m-label">Tap a star to rate</div>
-    <button class="bp" id="m-submit" disabled>Submit Rating</button>
-    <button class="bg" id="m-cancel">Cancel</button>
+    <div id="bkv-header" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;font-family:monospace"></div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px">Which song moves on?</div>
+    <div id="bkv-songs" style="display:flex;gap:10px;margin-bottom:16px"></div>
+    <div id="bkv-voter-status" style="font-size:13px;color:var(--mu);margin-bottom:12px"></div>
+    <button class="bg" id="bkv-cancel">Cancel</button>
   </div>
 </div>
-
+ 
+<!-- Bracket: progress view -->
+<div class="overlay" id="bk-progress-modal">
+  <div class="modal">
+    <div class="mt" style="margin-bottom:4px">Rating Progress</div>
+    <div class="ma">Who's rated how many songs so far</div>
+    <div id="bkp-list"></div>
+    <button class="bg" id="bkp-close" style="margin-top:8px">Close</button>
+  </div>
+</div>
+ 
+<!-- Bracket: create song search -->
+<div class="overlay" id="bk-search-modal">
+  <div class="modal">
+    <div class="mt" style="margin-bottom:4px">Add Songs</div>
+    <div class="ma">Search Apple Music to add songs to your bracket</div>
+    <div style="position:relative">
+      <input type="text" id="bks-input" placeholder="Search song..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <div id="bks-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1e1c26;border:1px solid var(--bdr);border-radius:12px;margin-top:4px;overflow:hidden;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.5);max-height:300px;overflow-y:auto"></div>
+    </div>
+    <div id="bks-added" style="margin-top:12px"></div>
+    <button class="bg" id="bks-done" style="margin-top:8px">Done Adding Songs</button>
+  </div>
+</div>
+ 
 <script>
-// ─── Constants ────────────────────────────────────────────
+// ════════════════════════════════════════════════
+// CONSTANTS & STATE
+// ════════════════════════════════════════════════
 const EMOJIS = ['🎵','🎸','🥁','🎹','🎺','🎻','🎤','🎧','🦄','🔥','💫','⚡'];
-const LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
-
-// ─── State ────────────────────────────────────────────────
+const LL_LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
+ 
 let FB = localStorage.getItem('rtv-fb') || '';
 let myId = localStorage.getItem('rtv-id') || (()=>{const i=uid();localStorage.setItem('rtv-id',i);return i;})();
 let myName = localStorage.getItem('rtv-name') || '';
 let myEmoji = localStorage.getItem('rtv-emoji') || '🎵';
-let roomCode = null, state = null, lastStr = '', pollTimer = null;
-let curTab = 'now', mSongId = null, mStars = 0;
-
-// ─── URL Params: auto-join from share link ────────────────
+ 
+// Live Listen state
+let roomCode=null, llState=null, llLastStr='', llPollTimer=null, llCurTab='now';
+let mSongId=null, mStars=0, amSongId=null, amStars=0;
+let selectedArtwork=null, selectedAppleMusicUrl=null;
+let searchTimer=null, bkSearchTimer=null;
+ 
+// Bracket state
+let bkCode=null, bkState=null, bkLastStr='', bkPollTimer=null;
+let bkRateSongId=null, bkRateScore=null;
+let bkVoteMatchupId=null;
+let bkCreateSongs=[];
+let currentMode='live'; // 'live' | 'brackets'
+ 
+// URL params
 const params = new URLSearchParams(location.search);
 const urlDb     = params.get('db');
 const urlRoom   = params.get('room');
 const urlTitle  = params.get('title');
 const urlArtist = params.get('artist');
 const urlStoreId = params.get('storeid');
-if (urlDb) {
-  try { FB = atob(urlDb); localStorage.setItem('rtv-fb', FB); } catch(e){}
-}
-if (urlRoom) {
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('join-in').value = urlRoom;
-    document.getElementById('btn-join').disabled = false;
-  });
-}
-
-// ─── Helpers ─────────────────────────────────────────────
+if(urlDb){ try{ FB=atob(urlDb); localStorage.setItem('rtv-fb',FB); }catch(e){} }
+ 
+// ════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════
 function uid(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
+function uid8(){ return Math.random().toString(36).slice(2,10); }
 function timeAgo(ts){ const s=(Date.now()-ts)/1e3; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); document.getElementById(id).classList.add('on'); }
-function setDot(s){ const d=document.getElementById('dot'); if(!d)return; d.className='dot'+(s==='sync'?' sync':s==='err'?' err':''); }
 let _tt; function toast(msg){ let t=document.querySelector('.toast'); if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);} t.textContent=msg; clearTimeout(_tt); _tt=setTimeout(()=>t?.remove(),3000); }
-
-// ─── Firebase REST API ────────────────────────────────────
-function fbEndpoint(code){ return `${FB.replace(/\/+$/,'')}/rooms/${code}.json`; }
-
-async function fbGet(code){
-  const r = await fetch(fbEndpoint(code));
-  if (!r.ok) throw new Error(`Firebase error: HTTP ${r.status}`);
-  const data = await r.json();
-  return data; // null if not set, object if set
-}
-
-async function fbPut(code, data){
-  const r = await fetch(fbEndpoint(code), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  if (!r.ok) throw new Error(`Firebase error: HTTP ${r.status}`);
-  return data;
-}
-
-// Firebase stores empty arrays as null and can return arrays as objects.
-// This normalises the data back to what we expect.
+function setDot(id,s){ const d=document.getElementById(id); if(!d)return; d.className='dot'+(s==='sync'?' sync':s==='err'?' err':''); }
+function scoreColor(s){ if(s>=8)return '#4cd97b'; if(s>=5)return '#ffd700'; if(s>=3)return '#ff9340'; return '#ff5f5f'; }
+ 
+// ════════════════════════════════════════════════
+// FIREBASE
+// ════════════════════════════════════════════════
+function fbEp(path){ return `${FB.replace(/\/+$/,'')}/rooms/${path}.json`; }
+function fbBkEp(code){ return `${FB.replace(/\/+$/,'')}/brackets/${code}.json`; }
+ 
+async function fbGet(code){ const r=await fetch(fbEp(code)); if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); }
+async function fbPut(code,data){ const r=await fetch(fbEp(code),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); if(!r.ok)throw new Error('HTTP '+r.status); return data; }
+async function fbBkGet(code){ const r=await fetch(fbBkEp(code)); if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); }
+async function fbBkPut(code,data){ const r=await fetch(fbBkEp(code),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); if(!r.ok)throw new Error('HTTP '+r.status); return data; }
+ 
 function normalise(raw){
-  const d = raw || {};
-  // songs: null → [], object (Firebase array) → real array
-  let songs = d.songs;
-  if (!songs) songs = [];
-  else if (!Array.isArray(songs)) songs = Object.values(songs);
-  // each song's ratings might also be null or object
-  songs = songs.map(s => {
-    if (!s) return null;
-    let ratings = s.ratings;
-    if (!ratings) ratings = {};
-    else if (Array.isArray(ratings)) ratings = {};
-    return { ...s, ratings };
-  }).filter(Boolean);
-  return { songs, users: d.users || {} };
+  const d=raw||{};
+  let songs=d.songs; if(!songs)songs=[]; else if(!Array.isArray(songs))songs=Object.values(songs);
+  songs=songs.map(s=>{if(!s)return null;let rt=s.ratings;if(!rt)rt={};else if(Array.isArray(rt))rt={};return{...s,ratings:rt};}).filter(Boolean);
+  return{songs,users:d.users||{}};
 }
-
+ 
+function normaliseBracket(raw){
+  if(!raw)return null;
+  const b={...raw};
+  if(!b.songs)b.songs=[]; else if(!Array.isArray(b.songs))b.songs=Object.values(b.songs).filter(Boolean);
+  if(!b.members)b.members={};
+  if(!b.ratings)b.ratings={};
+  if(!b.readyMembers)b.readyMembers={};
+  if(!b.matchups)b.matchups={};
+  else{
+    // Normalise votes inside each matchup
+    Object.keys(b.matchups).forEach(mid=>{
+      const m=b.matchups[mid];
+      if(!m.votes)m.votes={};
+    });
+  }
+  return b;
+}
+ 
 async function mergeAndSave(fn){
-  setDot('sync');
+  setDot('dot','sync');
   try{
-    const raw = await fbGet(roomCode);
-    const current = normalise(raw);
-    fn(current);
-    current.users[myId] = { name:myName, emoji:myEmoji };
-    await fbPut(roomCode, current);
-    state = current;
-    lastStr = JSON.stringify(state);
-    renderApp();
-    setDot('ok');
-  } catch(e){
-    setDot('err');
-    toast('⚠️ ' + e.message);
-    throw e;
-  }
+    const d=normalise(await fbGet(roomCode));
+    fn(d); d.users[myId]={name:myName,emoji:myEmoji};
+    await fbPut(roomCode,d);
+    llState=d; llLastStr=JSON.stringify(d);
+    renderLL(); setDot('dot','ok');
+  }catch(e){ setDot('dot','err'); toast('⚠️ '+e.message); throw e; }
 }
-
-function startPolling(){
-  if(pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(async ()=>{
-    try{
-      const raw = await fbGet(roomCode);
-      if(!raw) return;
-      const d = normalise(raw);
-      const s = JSON.stringify(d);
-      if(s !== lastStr){ state=d; lastStr=s; renderApp(); }
-      setDot('ok');
-    } catch(e){ setDot('err'); }
-  }, 3000);
-}
-
-// ─── Firebase Setup Screen ────────────────────────────────
-const fbIn = document.getElementById('fb-in');
-const btnTestFb = document.getElementById('btn-test-fb');
-const fbStatus = document.getElementById('fb-status');
-
-fbIn.oninput = () => {
-  const v = fbIn.value.trim();
-  btnTestFb.disabled = !v.includes('firebaseio.com') && !v.includes('firebasedatabase.app');
-};
-btnTestFb.onclick = async () => {
-  const url = fbIn.value.trim().replace(/\/+$/, '');
-  btnTestFb.disabled = true;
-  btnTestFb.textContent = 'Testing…';
-  fbStatus.style.color = '#ff9340';
-  fbStatus.textContent = 'Connecting to Firebase…';
+ 
+async function mergeAndSaveBracket(fn){
+  setDot('bk-dot','sync');
   try{
-    const r = await fetch(`${url}/ping.json`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:'"ok"' });
-    if(!r.ok) throw new Error(`HTTP ${r.status} — check your Firebase rules are set to test mode`);
-    FB = url;
-    localStorage.setItem('rtv-fb', FB);
-    fbStatus.style.color = '#4cd97b';
-    fbStatus.textContent = '✅ Connected! Loading…';
-    setTimeout(()=> showScreen(myName ? 's-room' : 's-setup'), 800);
-  } catch(e){
-    fbStatus.style.color = '#ff5f5f';
-    fbStatus.textContent = '❌ ' + e.message;
-    btnTestFb.disabled = false;
-    btnTestFb.textContent = 'Test & Save →';
-  }
+    const raw=await fbBkGet(bkCode);
+    const b=normaliseBracket(raw)||{songs:[],members:{},ratings:{},readyMembers:{},matchups:{},status:'rating'};
+    fn(b); b.members[myId]={name:myName,emoji:myEmoji};
+    await fbBkPut(bkCode,b);
+    bkState=b; bkLastStr=JSON.stringify(b);
+    renderBracket(); setDot('bk-dot','ok');
+  }catch(e){ setDot('bk-dot','err'); toast('⚠️ '+e.message); throw e; }
+}
+ 
+function startLLPolling(){
+  if(llPollTimer)clearInterval(llPollTimer);
+  llPollTimer=setInterval(async()=>{
+    try{ const d=normalise(await fbGet(roomCode)); const s=JSON.stringify(d); if(s!==llLastStr){llState=d;llLastStr=s;renderLL();} setDot('dot','ok'); }catch(e){setDot('dot','err');}
+  },3000);
+}
+ 
+function startBkPolling(){
+  if(bkPollTimer)clearInterval(bkPollTimer);
+  bkPollTimer=setInterval(async()=>{
+    try{ const raw=await fbBkGet(bkCode); const b=normaliseBracket(raw); const s=JSON.stringify(b); if(s!==bkLastStr){bkState=b;bkLastStr=s;renderBracket();} setDot('bk-dot','ok'); }catch(e){setDot('bk-dot','err');}
+  },3500);
+}
+ 
+// ════════════════════════════════════════════════
+// FIREBASE SETUP SCREEN
+// ════════════════════════════════════════════════
+const fbIn=document.getElementById('fb-in');
+const btnTestFb=document.getElementById('btn-test-fb');
+fbIn.oninput=()=>btnTestFb.disabled=!fbIn.value.includes('firebaseio.com')&&!fbIn.value.includes('firebasedatabase.app');
+btnTestFb.onclick=async()=>{
+  const url=fbIn.value.trim().replace(/\/+$/,'');
+  btnTestFb.disabled=true; btnTestFb.textContent='Testing…';
+  const st=document.getElementById('fb-status'); st.style.color='#ff9340'; st.textContent='Connecting…';
+  try{
+    const r=await fetch(`${url}/ping.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:'"ok"'});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    FB=url; localStorage.setItem('rtv-fb',FB);
+    st.style.color='#4cd97b'; st.textContent='✅ Connected!';
+    setTimeout(()=>showScreen(myName?'s-home':'s-setup'),800);
+  }catch(e){ st.style.color='#ff5f5f'; st.textContent='❌ '+e.message; btnTestFb.disabled=false; btnTestFb.textContent='Test & Save →'; }
 };
-
-// ─── Init: decide which screen to show ───────────────────
-window.addEventListener('DOMContentLoaded', ()=>{
-  if(!FB){
-    showScreen('s-firebase');
-  } else if(!myName){
-    showScreen('s-setup');
-  } else if(urlRoom){
-    // Coming from a share link — go straight to join
-    showScreen('s-room');
-    // Auto-trigger join after a short delay
-    setTimeout(()=> document.getElementById('btn-join').click(), 300);
-  } else {
-    showScreen('s-room');
-  }
-});
-
-// ─── Name Setup ───────────────────────────────────────────
-const egrid = document.getElementById('egrid');
+if(FB) showScreen(myName?'s-home':'s-setup');
+ 
+// ════════════════════════════════════════════════
+// NAME SETUP SCREEN
+// ════════════════════════════════════════════════
+const egrid=document.getElementById('egrid');
 EMOJIS.forEach(e=>{
-  const b = document.createElement('button');
-  b.className = 'eb' + (e===myEmoji?' s':'');
-  b.textContent = e;
-  b.onclick = ()=>{ myEmoji=e; localStorage.setItem('rtv-emoji',e); egrid.querySelectorAll('.eb').forEach(x=>x.classList.toggle('s',x.textContent===e)); };
+  const b=document.createElement('button'); b.className='eb'+(e===myEmoji?' s':''); b.textContent=e;
+  b.onclick=()=>{ myEmoji=e; localStorage.setItem('rtv-emoji',e); egrid.querySelectorAll('.eb').forEach(x=>x.classList.toggle('s',x.textContent===e)); };
   egrid.appendChild(b);
 });
-const nameIn = document.getElementById('name-in');
-const btnNext = document.getElementById('btn-next');
-nameIn.value = myName;
-if(myName) btnNext.disabled = false;
-nameIn.oninput = ()=> btnNext.disabled = !nameIn.value.trim();
-nameIn.onkeydown = e=>{ if(e.key==='Enter') btnNext.click(); };
-btnNext.onclick = ()=>{
-  myName = nameIn.value.trim();
-  localStorage.setItem('rtv-name', myName);
-  if(urlRoom){ showScreen('s-room'); setTimeout(()=>document.getElementById('btn-join').click(),300); }
-  else showScreen('s-room');
-};
-
-// ─── Room Screen ──────────────────────────────────────────
-document.getElementById('btn-back').onclick = ()=> showScreen('s-setup');
-document.getElementById('btn-change-fb').onclick = ()=>{ localStorage.removeItem('rtv-fb'); FB=''; showScreen('s-firebase'); };
-
-document.getElementById('btn-create').onclick = async function(){
-  const desc = document.getElementById('create-desc');
-  this.style.opacity='0.5'; this.style.pointerEvents='none'; desc.textContent='Creating room…';
+const nameIn=document.getElementById('name-in'),btnNext=document.getElementById('btn-next');
+nameIn.value=myName; if(myName)btnNext.disabled=false;
+nameIn.oninput=()=>btnNext.disabled=!nameIn.value.trim();
+nameIn.onkeydown=e=>{if(e.key==='Enter')btnNext.click();};
+btnNext.onclick=()=>{ myName=nameIn.value.trim(); localStorage.setItem('rtv-name',myName); showScreen('s-home'); };
+ 
+// ════════════════════════════════════════════════
+// HOME SCREEN
+// ════════════════════════════════════════════════
+function setHomeMode(mode){
+  currentMode=mode;
+  const isLive=mode==='live';
+  document.getElementById('live-opts').style.display=isLive?'flex':'none';
+  document.getElementById('bracket-opts').style.display=isLive?'none':'flex';
+  document.getElementById('home-icon').textContent=isLive?'🎧':'🏆';
+  document.getElementById('home-title').textContent=isLive?'Live Listen':'Brackets';
+  document.getElementById('home-sub').textContent=isLive?'Rate songs in real-time with your crew':'Tournament brackets with your group';
+  document.getElementById('mtab-live').classList.toggle('active',isLive);
+  document.getElementById('mtab-brackets').classList.toggle('active',!isLive);
+}
+document.getElementById('mtab-live').onclick=()=>setHomeMode('live');
+document.getElementById('mtab-brackets').onclick=()=>setHomeMode('brackets');
+document.getElementById('btn-home-back').onclick=()=>showScreen('s-setup');
+document.getElementById('btn-home-back-2').onclick=()=>showScreen('s-setup');
+document.getElementById('btn-change-fb').onclick=()=>{ localStorage.removeItem('rtv-fb'); FB=''; showScreen('s-firebase'); };
+ 
+// Join room from URL param
+if(urlRoom){ window.addEventListener('DOMContentLoaded',()=>{ document.getElementById('room-join-in').value=urlRoom; document.getElementById('btn-room-join').disabled=false; }); }
+ 
+// Create room
+document.getElementById('btn-create-room').onclick=async function(){
+  const desc=document.getElementById('create-room-desc'); this.style.opacity='.5'; this.style.pointerEvents='none'; desc.textContent='Creating…';
   try{
-    const code = uid();
-    await fbPut(code, { songs:[], users:{ [myId]:{name:myName,emoji:myEmoji} } });
-    roomCode = code;
-    state = normalise(await fbGet(code));
-    lastStr = JSON.stringify(state);
-    launchApp();
-    startPolling();
-  } catch(e){
-    toast('⚠️ ' + e.message);
-    desc.textContent='Start a session and get a shareable link';
-    this.style.opacity=''; this.style.pointerEvents='';
-  }
+    const code=uid();
+    await fbPut(code,{songs:[],users:{[myId]:{name:myName,emoji:myEmoji}}});
+    roomCode=code; llState=normalise(await fbGet(code)); llLastStr=JSON.stringify(llState);
+    launchLL();
+  }catch(e){ toast('⚠️ '+e.message); desc.textContent='Start a session and get a shareable link'; this.style.opacity=''; this.style.pointerEvents=''; }
 };
-
-const joinIn = document.getElementById('join-in');
-const btnJoin = document.getElementById('btn-join');
-joinIn.oninput = ()=> btnJoin.disabled = joinIn.value.trim().length < 4;
-joinIn.onkeydown = e=>{ if(e.key==='Enter' && !btnJoin.disabled) btnJoin.click(); };
-btnJoin.onclick = async function(){
-  const code = joinIn.value.trim().toUpperCase();
-  this.textContent='Joining…'; this.disabled=true;
+ 
+// Join room
+const roomJoinIn=document.getElementById('room-join-in'),btnRoomJoin=document.getElementById('btn-room-join');
+roomJoinIn.oninput=()=>btnRoomJoin.disabled=roomJoinIn.value.trim().length<4;
+roomJoinIn.onkeydown=e=>{if(e.key==='Enter'&&!btnRoomJoin.disabled)btnRoomJoin.click();};
+btnRoomJoin.onclick=async function(){
+  const code=roomJoinIn.value.trim().toUpperCase(); this.textContent='Joining…'; this.disabled=true;
   try{
-    const d = await fbGet(code);
-    if(!d) throw new Error('Room not found — check the code');
-    roomCode = code; state = normalise(d); lastStr = JSON.stringify(state);
-    await mergeAndSave(s=>{ s.users[myId]={name:myName,emoji:myEmoji}; });
-    launchApp(); startPolling();
-  } catch(e){
-    toast('⚠️ ' + e.message);
-    this.textContent='Join →'; this.disabled=false;
-  }
+    const d=normalise(await fbGet(code)); roomCode=code; llState=d; llLastStr=JSON.stringify(d);
+    await mergeAndSave(s=>{s.users[myId]={name:myName,emoji:myEmoji};});
+    launchLL();
+  }catch(e){ toast('⚠️ '+e.message); this.textContent='Join →'; this.disabled=false; }
 };
-
-// ─── Launch App ───────────────────────────────────────────
-function launchApp(){
-  document.getElementById('me-pill').textContent = myEmoji + ' ' + myName;
-  document.getElementById('code-val').textContent = roomCode;
-  showScreen('s-app');
-  renderApp();
-  if(urlTitle){
-    setTimeout(async ()=>{
-      const { artworkUrl, appleMusicUrl } = await resolveTrackMeta(urlStoreId, urlTitle, urlArtist);
-      await autoAddSong(urlTitle, urlArtist||'', artworkUrl, appleMusicUrl);
-    }, 500);
-  }
-}
-
-// ─── Auto-add from Shortcut ───────────────────────────────
-async function autoAddSong(title, artist, artworkUrl, appleMusicUrl){
-  // Case-insensitive duplicate check across ALL songs (now playing + history)
-  const allSongs = state?.songs || [];
-  const duplicate = allSongs.find(s =>
-    s.title.trim().toLowerCase() === title.trim().toLowerCase() &&
-    s.artist.trim().toLowerCase() === artist.trim().toLowerCase()
-  );
-  if(duplicate){
-    showAlreadyModal(duplicate);
-    return;
-  }
-  // Not a duplicate — add it
-  const id = uid();
-  await mergeAndSave(s=>{
-    s.songs.unshift({id,title,artist,addedBy:myId,addedByName:myName,addedByEmoji:myEmoji,addedAt:Date.now(),ratings:{},artworkUrl,appleMusicUrl});
-  });
-  toast('🎵 "' + title + '" added!');
-}
-
-// ─── Already-added modal ──────────────────────────────────
-let amSongId = null, amStars = 0;
-
-function showAlreadyModal(song){
-  amSongId = song.id;
-  amStars = song.ratings?.[myId]?.stars || 0;
-
-  // Artwork
-  const img = document.getElementById('am-art');
-  const ph  = document.getElementById('am-art-placeholder');
-  if(song.artworkUrl){ img.src=song.artworkUrl; img.style.display='block'; ph.style.display='none'; }
-  else { img.style.display='none'; ph.style.display='flex'; }
-
-  // Meta
-  document.getElementById('am-title').textContent  = song.title;
-  document.getElementById('am-artist').textContent = song.artist;
-
-  // Average
-  const vs = Object.values(song.ratings||{}).map(r=>r.stars);
-  const avg = vs.length ? (vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(1) : null;
-  document.getElementById('am-avg').textContent = avg
-    ? `${avg} avg · ${vs.length} rating${vs.length!==1?'s':''}`
-    : 'No ratings yet';
-
-  // Stars
-  buildAlreadyStars(amStars);
-  document.getElementById('am-submit').disabled = (amStars === 0);
-  document.getElementById('am-submit').textContent = amStars ? 'Update Rating' : 'Submit Rating';
-
-  document.getElementById('already-modal').classList.add('on');
-}
-
-function buildAlreadyStars(lit){
-  const c = document.getElementById('am-stars'); c.innerHTML = '';
-  [1,2,3,4,5].forEach(s=>{
-    const b = document.createElement('span');
-    b.className = 'ms' + (s<=lit?' l':''); b.textContent = '★';
-    b.onclick = ()=>{
-      amStars = s; buildAlreadyStars(s);
-      document.getElementById('am-label').textContent = LABELS[s];
-      document.getElementById('am-submit').disabled = false;
-      document.getElementById('am-submit').textContent = 'Submit Rating';
-    };
-    c.appendChild(b);
-  });
-  document.getElementById('am-label').textContent = lit ? LABELS[lit] : 'Tap a star to rate';
-}
-
-function closeAlreadyModal(){ document.getElementById('already-modal').classList.remove('on'); amSongId=null; amStars=0; }
-
-document.getElementById('am-dismiss').onclick = closeAlreadyModal;
-document.getElementById('already-modal').onclick = e=>{ if(e.target===e.currentTarget) closeAlreadyModal(); };
-document.getElementById('am-submit').onclick = async function(){
-  if(!amSongId || !amStars) return;
-  const sid=amSongId, st=amStars; closeAlreadyModal();
-  await mergeAndSave(s=>{
-    const song=s.songs.find(x=>x.id===sid); if(!song) return;
-    if(!song.ratings) song.ratings={};
-    song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};
-  });
+ 
+// New bracket
+document.getElementById('btn-new-bracket').onclick=()=>{ bkCreateSongs=[]; showScreen('s-bracket'); renderBkCreate(); };
+ 
+// Join bracket
+const bkJoinIn=document.getElementById('bracket-join-in'),btnBkJoin=document.getElementById('btn-bracket-join');
+bkJoinIn.oninput=()=>btnBkJoin.disabled=bkJoinIn.value.trim().length<4;
+bkJoinIn.onkeydown=e=>{if(e.key==='Enter'&&!btnBkJoin.disabled)btnBkJoin.click();};
+btnBkJoin.onclick=async function(){
+  const code=bkJoinIn.value.trim().toUpperCase(); this.textContent='Joining…'; this.disabled=true;
+  try{
+    const raw=await fbBkGet(code); const b=normaliseBracket(raw);
+    if(!b)throw new Error('Bracket not found — check the code');
+    bkCode=code; bkState=b; bkLastStr=JSON.stringify(b);
+    await mergeAndSaveBracket(b=>{ b.members[myId]={name:myName,emoji:myEmoji}; });
+    launchBracket();
+  }catch(e){ toast('⚠️ '+e.message); this.textContent='Join →'; this.disabled=false; }
 };
-// ─── Event delegation for rate buttons (survives re-renders) ─
-document.getElementById('tab-now').addEventListener('click', e=>{
-  const btn = e.target.closest('.rb');
-  if(btn) openModal(btn.dataset.id);
-});
-document.getElementById('tab-hist').addEventListener('click', e=>{
-  const btn = e.target.closest('.rb');
-  if(btn) openModal(btn.dataset.id);
-});
-
-document.getElementById('btn-share').onclick = ()=>{
-  const encoded = btoa(FB);
-  const base = location.origin + location.pathname;
-  const link = `${base}?db=${encoded}&room=${roomCode}`;
-  const msg = `Join my Rate the Vibe session 🎵\n\nTap this link and enter your name — that's it!\n\n${link}`;
-  if(navigator.share) navigator.share({ title:'Rate the Vibe', text: msg, url: link });
+ 
+// ════════════════════════════════════════════════
+// BOTTOM NAV
+// ════════════════════════════════════════════════
+function showBottomNav(){ document.getElementById('bottom-nav').style.display='block'; }
+function hideBottomNav(){ document.getElementById('bottom-nav').style.display='none'; }
+document.getElementById('nav-live').onclick=()=>{
+  document.getElementById('nav-live').classList.add('active'); document.getElementById('nav-brackets').classList.remove('active');
+  if(roomCode){ showScreen('s-app'); } else { setHomeMode('live'); showScreen('s-home'); }
+};
+document.getElementById('nav-brackets').onclick=()=>{
+  document.getElementById('nav-brackets').classList.add('active'); document.getElementById('nav-live').classList.remove('active');
+  if(bkCode){ showScreen('s-bracket'); renderBracket(); } else { setHomeMode('brackets'); showScreen('s-home'); }
+};
+ 
+// ════════════════════════════════════════════════
+// LIVE LISTEN APP
+// ════════════════════════════════════════════════
+function launchLL(){
+  document.getElementById('me-pill').textContent=myEmoji+' '+myName;
+  document.getElementById('code-val').textContent=roomCode;
+  showScreen('s-app'); showBottomNav();
+  document.getElementById('nav-live').classList.add('active'); document.getElementById('nav-brackets').classList.remove('active');
+  renderLL(); startLLPolling();
+  if(urlTitle){ setTimeout(async()=>{ const{artworkUrl,appleMusicUrl}=await resolveTrackMeta(urlStoreId,urlTitle,urlArtist); await autoAddSong(urlTitle,urlArtist||'',artworkUrl,appleMusicUrl); },500); }
+}
+ 
+document.getElementById('btn-share').onclick=()=>{
+  const encoded=btoa(FB), base=location.origin+location.pathname;
+  const link=`${base}?db=${encoded}&room=${roomCode}`;
+  const msg=`Join my Rate the Vibe session 🎵\n\nTap this link:\n${link}`;
+  if(navigator.share)navigator.share({title:'Rate the Vibe',text:msg,url:link});
   else navigator.clipboard?.writeText(link).then(()=>toast('📋 Link copied!'));
 };
-
-// Tabs
-document.querySelectorAll('.tab').forEach(t=>{
-  t.onclick = ()=>{
-    curTab = t.dataset.tab;
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('a')); t.classList.add('a');
-    document.getElementById('tab-now').style.display = curTab==='now'?'block':'none';
-    document.getElementById('tab-hist').style.display = curTab==='hist'?'block':'none';
+ 
+document.querySelectorAll('#s-app .tab').forEach(t=>{
+  t.onclick=()=>{
+    llCurTab=t.dataset.tab;
+    document.querySelectorAll('#s-app .tab').forEach(x=>x.classList.remove('a')); t.classList.add('a');
+    document.getElementById('tab-now').style.display=llCurTab==='now'?'block':'none';
+    document.getElementById('tab-hist').style.display=llCurTab==='hist'?'block':'none';
   };
 });
-
-// ─── iTunes Search ────────────────────────────────────────
-let searchTimer = null;
-let selectedArtwork = null;
-let selectedAppleMusicUrl = null;
-
-async function searchItunes(query){
-  try{
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=6&country=us`;
-    const r = await fetch(url);
-    if(!r.ok) return [];
-    const d = await r.json();
-    return d.results || [];
-  } catch(e){ return []; }
-}
-
-async function lookupByStoreId(storeId){
-  try{
-    const r = await fetch(`https://itunes.apple.com/lookup?id=${storeId}&entity=song`);
-    if(!r.ok) return null;
-    const d = await r.json();
-    const result = d.results?.find(x => x.wrapperType === 'track') || d.results?.[0] || null;
-    console.log('iTunes lookup result:', result?.trackName, result?.artworkUrl100);
-    return result;
-  } catch(e){ console.warn('iTunes lookup failed:', e); return null; }
-}
-
-// Get best artwork + Apple Music URL for a song — tries store ID first, falls back to search
-async function resolveTrackMeta(storeId, title, artist){
-  // 1. Try store ID lookup (fast, exact)
-  if(storeId && storeId !== 'STOREID'){
-    const track = await lookupByStoreId(storeId);
-    if(track?.artworkUrl100){
-      return {
-        artworkUrl: track.artworkUrl100.replace(/\d+x\d+bb/, '600x600bb'),
-        appleMusicUrl: track.trackViewUrl || null
-      };
-    }
-  }
-  // 2. Fallback: search by title + artist
-  if(title){
-    const query = artist ? `${title} ${artist}` : title;
-    const results = await searchItunes(query);
-    // Find best match by comparing title similarity
-    const match = results.find(r =>
-      r.trackName?.toLowerCase() === title.toLowerCase()
-    ) || results[0];
-    if(match?.artworkUrl100){
-      console.log('iTunes search fallback found:', match.trackName);
-      return {
-        artworkUrl: match.artworkUrl100.replace(/\d+x\d+bb/, '600x600bb'),
-        appleMusicUrl: match.trackViewUrl || null
-      };
-    }
-  }
-  return { artworkUrl: null, appleMusicUrl: null };
-}
-
-function showSearchResults(results){
-  const box = document.getElementById('search-results');
-  if(!results.length){ box.style.display='none'; return; }
-  box.style.display='block';
-  box.innerHTML = results.map((r,i)=>`
-    <div class="sr" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)">
-      <img src="${r.artworkUrl60||r.artworkUrl100}" style="width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0">
-      <div style="min-width:0">
-        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.trackName)}</div>
-        <div style="font-size:11px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.artistName)}</div>
-      </div>
-    </div>
-  `).join('');
-  box.querySelectorAll('.sr').forEach((el,i)=>{
-    el.addEventListener('click',()=> pickResult(results[i]));
-    el.addEventListener('touchstart',()=>el.style.background='rgba(255,147,64,.1)',{passive:true});
-    el.addEventListener('touchend',()=>el.style.background='',{passive:true});
-  });
-}
-
-function pickResult(r){
-  document.getElementById('title-in').value = r.trackName;
-  document.getElementById('artist-in').value = r.artistName;
-  document.getElementById('search-results').style.display='none';
-  selectedArtwork = (r.artworkUrl100||'').replace(/\d+x\d+bb/, '600x600bb');
-  selectedAppleMusicUrl = r.trackViewUrl || null;
-  // Show artwork preview
-  const prev = document.getElementById('artwork-preview');
-  document.getElementById('artwork-img').src = selectedArtwork;
-  document.getElementById('artwork-title').textContent = r.trackName;
-  document.getElementById('artwork-artist').textContent = r.artistName;
-  prev.style.display='flex';
-  document.getElementById('btn-add-song').disabled = false;
-}
-
-// Add song form
-document.getElementById('btn-show-form').onclick = ()=>{
-  document.getElementById('btn-show-form').style.display='none';
-  document.getElementById('btn-shortcut').style.display='none';
-  document.getElementById('add-form').style.display='flex';
-  document.getElementById('title-in').focus();
-  // Pre-fill from URL params if present (from iOS Shortcut)
+ 
+// ── Add song form ──
+document.getElementById('btn-show-form').onclick=()=>{
+  document.getElementById('btn-show-form').style.display='none'; document.getElementById('btn-shortcut').style.display='none';
+  document.getElementById('add-form').style.display='flex'; document.getElementById('title-in').focus();
   if(urlTitle){ document.getElementById('title-in').value=urlTitle; document.getElementById('btn-add-song').disabled=false; }
-  if(urlArtist) document.getElementById('artist-in').value=urlArtist;
+  if(urlArtist)document.getElementById('artist-in').value=urlArtist;
 };
-document.getElementById('btn-cancel-form').onclick = resetForm;
-
-document.getElementById('title-in').oninput = function(){
-  document.getElementById('btn-add-song').disabled = !this.value.trim();
-  selectedArtwork = null;
+document.getElementById('btn-cancel-form').onclick=resetLLForm;
+document.getElementById('title-in').oninput=function(){
+  document.getElementById('btn-add-song').disabled=!this.value.trim(); selectedArtwork=null; selectedAppleMusicUrl=null;
   document.getElementById('artwork-preview').style.display='none';
   clearTimeout(searchTimer);
-  const q = this.value.trim();
-  if(q.length < 2){ document.getElementById('search-results').style.display='none'; return; }
-  searchTimer = setTimeout(async ()=>{
-    const results = await searchItunes(q);
-    showSearchResults(results);
-  }, 400);
+  const q=this.value.trim(); if(q.length<2){document.getElementById('search-results').style.display='none';return;}
+  searchTimer=setTimeout(async()=>{ const results=await searchItunes(q); showLLSearchResults(results); },400);
 };
-
-// Close search results when tapping artist field
-document.getElementById('artist-in').onfocus = ()=>{ document.getElementById('search-results').style.display='none'; };
-
-document.getElementById('btn-add-song').onclick = async function(){
-  const title = document.getElementById('title-in').value.trim();
-  const artist = document.getElementById('artist-in').value.trim() || 'Unknown Artist';
-  if(!title) return;
-  const id = uid();
-  const artworkUrl = selectedArtwork || null;
-  const appleMusicUrl = selectedAppleMusicUrl || null;
-  resetForm();
-  await mergeAndSave(s=>{ s.songs.unshift({id,title,artist,addedBy:myId,addedByName:myName,addedByEmoji:myEmoji,addedAt:Date.now(),ratings:{},artworkUrl,appleMusicUrl}); });
+document.getElementById('artist-in').onfocus=()=>document.getElementById('search-results').style.display='none';
+document.getElementById('btn-add-song').onclick=async function(){
+  const title=document.getElementById('title-in').value.trim(), artist=document.getElementById('artist-in').value.trim()||'Unknown Artist';
+  if(!title)return; const id=uid(); const art=selectedArtwork,aml=selectedAppleMusicUrl; resetLLForm();
+  await mergeAndSave(s=>{s.songs.unshift({id,title,artist,addedBy:myId,addedByName:myName,addedByEmoji:myEmoji,addedAt:Date.now(),ratings:{},artworkUrl:art,appleMusicUrl:aml});});
 };
-
-function resetForm(){
+function resetLLForm(){
   document.getElementById('title-in').value=''; document.getElementById('artist-in').value='';
-  document.getElementById('btn-add-song').disabled=true;
-  document.getElementById('add-form').style.display='none';
-  document.getElementById('search-results').style.display='none';
-  document.getElementById('artwork-preview').style.display='none';
-  document.getElementById('btn-show-form').style.display='block';
-  document.getElementById('btn-shortcut').style.display='block';
+  document.getElementById('btn-add-song').disabled=true; document.getElementById('add-form').style.display='none';
+  document.getElementById('search-results').style.display='none'; document.getElementById('artwork-preview').style.display='none';
+  document.getElementById('btn-show-form').style.display='block'; document.getElementById('btn-shortcut').style.display='block';
   selectedArtwork=null; selectedAppleMusicUrl=null;
 }
-
-// ─── iOS Shortcut ─────────────────────────────────────────
-function getShortcutUrl(){
-  const base = location.origin + location.pathname;
-  const encoded = btoa(FB);
-  return `${base}?db=${encoded}&room=${roomCode}&title=TITLE&artist=ARTIST&storeid=STOREID`;
+ 
+// ── iTunes search ──
+async function searchItunes(query){
+  try{ const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=6&country=us`); if(!r.ok)return []; const d=await r.json(); return d.results||[]; }catch(e){return[];}
 }
-
-document.getElementById('btn-shortcut').onclick = ()=>{
-  const url = getShortcutUrl();
-  document.getElementById('shortcut-url-display').textContent = url;
-  document.getElementById('shortcut-modal').classList.add('on');
-};
-document.getElementById('btn-close-shortcut').onclick = ()=> document.getElementById('shortcut-modal').classList.remove('on');
-document.getElementById('shortcut-modal').onclick = e=>{ if(e.target===e.currentTarget) document.getElementById('shortcut-modal').classList.remove('on'); };
-document.getElementById('btn-copy-shortcut').onclick = ()=>{
-  navigator.clipboard?.writeText(getShortcutUrl()).then(()=>toast('📋 URL copied — paste it into your Shortcut!'));
-};
-
-// ─── Render ───────────────────────────────────────────────
-function renderApp(){
-  if(!state) return;
-  const songs = state.songs||[], users = state.users||{};
-  const cur = songs[0]||null, hist = songs.slice(1);
-  document.getElementById('hist-n').textContent = hist.length;
-
-  const na = document.getElementById('now-area');
-  if(cur){
-    na.innerHTML = cardHTML(cur, users, true);
-  } else {
-    na.innerHTML = `<div class="empty"><div style="font-size:40px;margin-bottom:8px">🎵</div><div style="font-size:16px;font-weight:600">Nothing playing yet</div><div style="font-size:12px;color:var(--mu);margin-top:3px">Tap above to add the current song</div></div>`;
-  }
-
-  const ha = document.getElementById('hist-area');
-  if(!hist.length){
-    ha.innerHTML = `<div class="empty"><div style="font-size:40px;margin-bottom:8px">📜</div><div style="font-size:16px;font-weight:600">No history yet</div></div>`;
-  } else {
-    ha.innerHTML = hist.map(s=>cardHTML(s,users,false)).join('');
-  }
+async function lookupByStoreId(id){
+  try{ const r=await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=song`); if(!r.ok)return null; const d=await r.json(); return d.results?.find(x=>x.wrapperType==='track')||d.results?.[0]||null; }catch(e){return null;}
 }
-
-function cardHTML(song, users, isCur){
-  const rt = song.ratings||{}, vs = Object.values(rt).map(r=>r.stars);
-  const avg = vs.length ? (vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(1) : null;
-  const myR = rt[myId]?.stars||0, by = users[song.addedBy]||{};
-  const chips = Object.entries(rt).map(([id,r])=>{ const u=users[id]||{}; return `<div class="chip">${u.emoji||'🎵'} <span style="color:rgba(242,234,216,.75)">${esc(u.name||'?')}</span> <span class="cst">${'★'.repeat(r.stars)}</span></div>`; }).join('');
-  const artEl = song.artworkUrl
-    ? `<img class="sc-art" src="${esc(song.artworkUrl)}" loading="lazy">`
-    : `<div class="sc-art-placeholder">🎵</div>`;
-  const amlEl = song.appleMusicUrl
-    ? `<a class="aml" href="${esc(song.appleMusicUrl)}" target="_blank">♫ Open in Apple Music</a>`
-    : '';
-  return `<div class="sc ${isCur?'now':''}">
+async function resolveTrackMeta(storeId,title,artist){
+  if(storeId&&storeId!=='STOREID'){ const t=await lookupByStoreId(storeId); if(t?.artworkUrl100)return{artworkUrl:t.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:t.trackViewUrl||null}; }
+  if(title){ const q=artist?`${title} ${artist}`:title; const results=await searchItunes(q); const m=results.find(r=>r.trackName?.toLowerCase()===title.toLowerCase())||results[0]; if(m?.artworkUrl100)return{artworkUrl:m.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:m.trackViewUrl||null}; }
+  return{artworkUrl:null,appleMusicUrl:null};
+}
+ 
+function showLLSearchResults(results){
+  const box=document.getElementById('search-results'); if(!results.length){box.style.display='none';return;}
+  box.style.display='block';
+  box.innerHTML=results.map((r,i)=>`<div class="sr" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)"><img src="${r.artworkUrl60||r.artworkUrl100}" style="width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0"><div style="min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.trackName)}</div><div style="font-size:11px;color:var(--mu)">${esc(r.artistName)}</div></div></div>`).join('');
+  box.querySelectorAll('.sr').forEach((el,i)=>{ el.addEventListener('click',()=>pickLLResult(results[i])); });
+}
+function pickLLResult(r){
+  document.getElementById('title-in').value=r.trackName; document.getElementById('artist-in').value=r.artistName;
+  document.getElementById('search-results').style.display='none';
+  selectedArtwork=(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'); selectedAppleMusicUrl=r.trackViewUrl||null;
+  const prev=document.getElementById('artwork-preview'); document.getElementById('artwork-img').src=selectedArtwork; document.getElementById('artwork-title').textContent=r.trackName; document.getElementById('artwork-artist').textContent=r.artistName; prev.style.display='flex';
+  document.getElementById('btn-add-song').disabled=false;
+}
+ 
+// ── Auto-add from shortcut ──
+async function autoAddSong(title,artist,artworkUrl,appleMusicUrl){
+  const all=llState?.songs||[];
+  const dup=all.find(s=>s.title.trim().toLowerCase()===title.trim().toLowerCase()&&s.artist.trim().toLowerCase()===artist.trim().toLowerCase());
+  if(dup){showAlreadyModal(dup);return;}
+  const id=uid();
+  await mergeAndSave(s=>{s.songs.unshift({id,title,artist,addedBy:myId,addedByName:myName,addedByEmoji:myEmoji,addedAt:Date.now(),ratings:{},artworkUrl,appleMusicUrl});});
+  toast(`🎵 "${title}" added!`);
+}
+ 
+// ── Shortcut modal ──
+function getShortcutUrl(){ return `${location.origin+location.pathname}?db=${btoa(FB)}&room=${roomCode}&title=TITLE&artist=ARTIST&storeid=STOREID`; }
+document.getElementById('btn-shortcut').onclick=()=>{ document.getElementById('shortcut-url-display').textContent=getShortcutUrl(); document.getElementById('shortcut-modal').classList.add('on'); };
+document.getElementById('btn-close-shortcut').onclick=()=>document.getElementById('shortcut-modal').classList.remove('on');
+document.getElementById('shortcut-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('shortcut-modal').classList.remove('on');};
+document.getElementById('btn-copy-shortcut').onclick=()=>navigator.clipboard?.writeText(getShortcutUrl()).then(()=>toast('📋 Copied!'));
+ 
+// ── Already-added modal ──
+let _amStars=0;
+function showAlreadyModal(song){
+  amSongId=song.id; _amStars=song.ratings?.[myId]?.stars||0;
+  const img=document.getElementById('am-art'),ph=document.getElementById('am-art-ph');
+  if(song.artworkUrl){img.src=song.artworkUrl;img.style.display='block';ph.style.display='none';}else{img.style.display='none';ph.style.display='flex';}
+  document.getElementById('am-title').textContent=song.title; document.getElementById('am-artist').textContent=song.artist;
+  const vs=Object.values(song.ratings||{}).map(r=>r.stars); const avg=vs.length?(vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(1):null;
+  document.getElementById('am-avg').textContent=avg?`${avg} avg · ${vs.length} rating${vs.length!==1?'s':''}`: 'No ratings yet';
+  buildAmStars(_amStars); document.getElementById('am-submit').disabled=(_amStars===0); document.getElementById('am-submit').textContent=_amStars?'Update Rating':'Submit Rating';
+  document.getElementById('already-modal').classList.add('on');
+}
+function buildAmStars(lit){ const c=document.getElementById('am-stars');c.innerHTML='';[1,2,3,4,5].forEach(s=>{const b=document.createElement('span');b.className='ms'+(s<=lit?' l':'');b.textContent='★';b.onclick=()=>{_amStars=s;buildAmStars(s);document.getElementById('am-label').textContent=LL_LABELS[s];document.getElementById('am-submit').disabled=false;document.getElementById('am-submit').textContent='Submit Rating';};c.appendChild(b);});document.getElementById('am-label').textContent=lit?LL_LABELS[lit]:'Tap a star to rate';}
+function closeAlreadyModal(){ document.getElementById('already-modal').classList.remove('on'); amSongId=null; }
+document.getElementById('am-dismiss').onclick=closeAlreadyModal;
+document.getElementById('already-modal').onclick=e=>{if(e.target===e.currentTarget)closeAlreadyModal();};
+document.getElementById('am-submit').onclick=async function(){
+  if(!amSongId||!_amStars)return; const sid=amSongId,st=_amStars; closeAlreadyModal();
+  await mergeAndSave(s=>{const song=s.songs.find(x=>x.id===sid);if(!song)return;if(!song.ratings)song.ratings={};song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};});
+};
+ 
+// ── Event delegation for LL rate buttons ──
+document.getElementById('tab-now').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
+document.getElementById('tab-hist').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
+ 
+// ── LL rate modal ──
+let _mStars=0;
+function openLLModal(songId){ const song=llState?.songs?.find(s=>s.id===songId);if(!song)return; mSongId=songId; _mStars=song.ratings?.[myId]?.stars||0; document.getElementById('m-title').textContent=song.title; document.getElementById('m-artist').textContent=song.artist; document.getElementById('m-submit').textContent=_mStars?'Update Rating':'Submit Rating'; document.getElementById('m-submit').disabled=(_mStars===0); buildLLStars(_mStars); document.getElementById('modal').classList.add('on'); }
+function buildLLStars(lit){ const c=document.getElementById('m-stars');c.innerHTML='';[1,2,3,4,5].forEach(s=>{const b=document.createElement('span');b.className='ms'+(s<=lit?' l':'');b.textContent='★';b.onclick=()=>{_mStars=s;buildLLStars(s);document.getElementById('m-label').textContent=LL_LABELS[s];document.getElementById('m-submit').disabled=false;document.getElementById('m-submit').textContent='Submit Rating';};c.appendChild(b);});document.getElementById('m-label').textContent=lit?LL_LABELS[lit]:'Tap a star to rate';}
+function closeLLModal(){ document.getElementById('modal').classList.remove('on'); mSongId=null; }
+document.getElementById('m-cancel').onclick=closeLLModal;
+document.getElementById('modal').onclick=e=>{if(e.target===e.currentTarget)closeLLModal();};
+document.getElementById('m-submit').onclick=async function(){
+  if(!mSongId||!_mStars)return; const sid=mSongId,st=_mStars; closeLLModal();
+  await mergeAndSave(s=>{const song=s.songs.find(x=>x.id===sid);if(!song)return;if(!song.ratings)song.ratings={};song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};});
+};
+ 
+// ── LL render ──
+function renderLL(){
+  if(!llState)return;
+  const songs=llState.songs||[],users=llState.users||{},cur=songs[0]||null,hist=songs.slice(1);
+  document.getElementById('hist-n').textContent=hist.length;
+  const na=document.getElementById('now-area');
+  if(cur){ na.innerHTML=llCardHTML(cur,users,true); }
+  else na.innerHTML=`<div class="empty" style="opacity:.4"><div style="font-size:40px;margin-bottom:8px">🎵</div><div style="font-size:16px;font-weight:600">Nothing playing yet</div><div style="font-size:12px;color:var(--mu);margin-top:3px">Tap above to add the current song</div></div>`;
+  const ha=document.getElementById('hist-area');
+  if(!hist.length)ha.innerHTML=`<div class="empty" style="opacity:.4"><div style="font-size:40px;margin-bottom:8px">📜</div><div style="font-size:16px;font-weight:600">No history yet</div></div>`;
+  else ha.innerHTML=hist.map(s=>llCardHTML(s,users,false)).join('');
+}
+function llCardHTML(song,users,isCur){
+  const rt=song.ratings||{},vs=Object.values(rt).map(r=>r.stars);
+  const avg=vs.length?(vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(1):null,myR=rt[myId]?.stars||0,by=users[song.addedBy]||{};
+  const chips=Object.entries(rt).map(([id,r])=>{const u=users[id]||{};return`<div class="chip">${u.emoji||'🎵'} <span style="color:rgba(242,234,216,.75)">${esc(u.name||'?')}</span> <span class="cst">${'★'.repeat(r.stars)}</span></div>`;}).join('');
+  const artEl=song.artworkUrl?`<img class="sc-art" src="${esc(song.artworkUrl)}" loading="lazy">`:`<div class="sc-art-ph">🎵</div>`;
+  const amlEl=song.appleMusicUrl?`<a class="aml" href="${esc(song.appleMusicUrl)}" target="_blank">♫ Open in Apple Music</a>`:'';
+  return`<div class="sc ${isCur?'now':''}">
     ${isCur?'<div class="ntag">▶ NOW PLAYING</div>':''}
-    <div class="sc-top">
-      ${artEl}
-      <div class="sc-info">
-        <div class="stit">${esc(song.title)}</div>
-        <div class="sart">${esc(song.artist)}</div>
-        <div class="smet">${timeAgo(song.addedAt)} · ${by.emoji||'🎵'} ${esc(by.name||'someone')}</div>
-      </div>
-    </div>
+    <div class="sc-top">${artEl}<div class="sc-info"><div class="stit">${esc(song.title)}</div><div class="sart">${esc(song.artist)}</div><div class="smet">${timeAgo(song.addedAt)} · ${by.emoji||'🎵'} ${esc(by.name||'someone')}</div></div></div>
     ${amlEl}
     ${avg?`<div class="avgr"><div class="avgn">${avg}</div><div class="avgs">avg · ${vs.length} rating${vs.length!==1?'s':''}</div></div>`:''}
-    <button class="rb" data-id="${song.id}">${myR?'★'.repeat(myR)+' · '+LABELS[myR]:'⭐ Rate this song'}</button>
+    <button class="rb" data-id="${song.id}">${myR?'★'.repeat(myR)+' · '+LL_LABELS[myR]:'⭐ Rate this song'}</button>
     ${chips?`<div class="chips">${chips}</div>`:''}
   </div>`;
 }
-
-// ─── Rating Modal ─────────────────────────────────────────
-function openModal(songId){
-  const song = state?.songs?.find(s=>s.id===songId); if(!song) return;
-  mSongId=songId; mStars=song.ratings?.[myId]?.stars||0;
-  document.getElementById('m-title').textContent = song.title;
-  document.getElementById('m-artist').textContent = song.artist;
-  document.getElementById('m-submit').textContent = mStars?'Update Rating':'Submit Rating';
-  document.getElementById('m-submit').disabled = (mStars===0);
-  buildStars(mStars);
-  document.getElementById('modal').classList.add('on');
+ 
+// ════════════════════════════════════════════════
+// BRACKET — UTILITIES
+// ════════════════════════════════════════════════
+function bkSong(b,id){ return b.songs.find(s=>s.id===id)||null; }
+function getMatchupsForRound(b,round){ return Object.entries(b.matchups||{}).filter(([,m])=>m.round===round).sort((a,b)=>a[1].order-b[1].order).map(([id,m])=>({...m,id})); }
+function totalRatingsForMember(b,uid){ return Object.keys(b.ratings?.[uid]||{}).length; }
+function allMembersRatedAll(b){ const ids=Object.keys(b.members); return ids.length>0&&ids.every(id=>totalRatingsForMember(b,id)>=b.songs.length); }
+function allMembersReady(b){ const ids=Object.keys(b.members); return ids.length>0&&ids.every(id=>b.readyMembers?.[id]); }
+function isPowerOf2(n){ return n>1&&(n&(n-1))===0; }
+function roundName(b,round){ const total=Math.log2(b.songs.length); if(total-round===0)return'🏆 Final'; if(total-round===1)return'🥊 Semifinal'; if(total-round===2)return'⚡ Quarterfinal'; return`Round ${round+1}`; }
+ 
+function generateFirstRound(b){
+  const shuffled=[...b.songs].sort(()=>Math.random()-.5);
+  const matchups={};
+  for(let i=0;i<shuffled.length;i+=2){
+    const id=uid8();
+    matchups[id]={round:0,order:i/2,song1:shuffled[i].id,song2:shuffled[i+1].id,votes:{},winner:null};
+  }
+  b.matchups=matchups; b.currentRound=0; b.totalRounds=Math.log2(b.songs.length);
 }
-function buildStars(lit){
-  const c = document.getElementById('m-stars'); c.innerHTML='';
-  [1,2,3,4,5].forEach(s=>{
-    const b = document.createElement('span'); b.className='ms'+(s<=lit?' l':''); b.textContent='★';
-    b.onclick = ()=>{ mStars=s; buildStars(s); document.getElementById('m-label').textContent=LABELS[s]; document.getElementById('m-submit').disabled=false; document.getElementById('m-submit').textContent='Submit Rating'; };
-    c.appendChild(b);
+ 
+function resolveMatchupIfReady(b,matchupId){
+  const m=b.matchups[matchupId]; if(!m||m.winner)return false;
+  const memberIds=Object.keys(b.members);
+  if(!memberIds.every(id=>m.votes[id]!==undefined))return false;
+  // Tally votes
+  const tally={};
+  Object.values(m.votes).forEach(sid=>{tally[sid]=(tally[sid]||0)+1;});
+  const s1v=tally[m.song1]||0,s2v=tally[m.song2]||0;
+  m.winner=s1v>s2v?m.song1:s2v>s1v?m.song2:(Math.random()<.5?m.song1:m.song2);
+  // Check if whole round is done
+  const roundMatchups=getMatchupsForRound(b,m.round);
+  if(roundMatchups.every(rm=>b.matchups[rm.id]?.winner)){
+    const winners=roundMatchups.map(rm=>b.matchups[rm.id].winner);
+    if(winners.length===1){ b.bracketWinner=winners[0]; b.status='complete'; }
+    else{
+      const nextRound=m.round+1;
+      for(let i=0;i<winners.length;i+=2){
+        const nid=uid8();
+        b.matchups[nid]={round:nextRound,order:i/2,song1:winners[i],song2:winners[i+1],votes:{},winner:null};
+      }
+      b.currentRound=nextRound;
+    }
+  }
+  return true;
+}
+ 
+function avgRatingForSong(b,songId){
+  let scores=[];
+  Object.values(b.ratings||{}).forEach(userRatings=>{
+    if(userRatings[songId]!==undefined)scores.push(userRatings[songId]);
   });
-  document.getElementById('m-label').textContent = lit?LABELS[lit]:'Tap a star to rate';
+  return scores.length?(scores.reduce((a,c)=>a+c,0)/scores.length):null;
 }
-function closeModal(){ document.getElementById('modal').classList.remove('on'); mSongId=null; mStars=0; }
-document.getElementById('m-cancel').onclick = closeModal;
-document.getElementById('modal').onclick = e=>{ if(e.target===e.currentTarget) closeModal(); };
-document.getElementById('m-submit').onclick = async function(){
-  if(!mSongId||!mStars) return;
-  const sid=mSongId, st=mStars; closeModal();
-  await mergeAndSave(s=>{
-    const song=s.songs.find(x=>x.id===sid); if(!song) return;
-    if(!song.ratings) song.ratings={};
-    song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};
+ 
+// ════════════════════════════════════════════════
+// BRACKET — LAUNCH
+// ════════════════════════════════════════════════
+function launchBracket(){
+  document.getElementById('bk-me-pill').textContent=myEmoji+' '+myName;
+  showScreen('s-bracket'); showBottomNav();
+  document.getElementById('nav-brackets').classList.add('active'); document.getElementById('nav-live').classList.remove('active');
+  renderBracket(); startBkPolling();
+}
+ 
+// ════════════════════════════════════════════════
+// BRACKET — CREATE FLOW
+// ════════════════════════════════════════════════
+function renderBkCreate(){
+  showScreen('s-bracket');
+  document.getElementById('bk-me-pill').textContent=myEmoji+' '+myName;
+  document.getElementById('bk-header-title').textContent='New Bracket';
+  const validSizes=[4,8,16,32];
+  const n=bkCreateSongs.length;
+  const nextValid=validSizes.find(v=>v>=n)||32;
+  const remaining=nextValid-n;
+  const isValid=isPowerOf2(n)&&n>=4;
+  document.getElementById('bk-body').innerHTML=`
+    <div style="margin-top:4px">
+      <div class="cl">Bracket Name</div>
+      <input type="text" id="bk-name-in" placeholder="e.g. Summer Bangers 2025..." value="${esc(document.getElementById('bk-name-in')?.value||'')}" autocomplete="off">
+      <div style="height:16px"></div>
+      <div class="cl">Songs (${n} added · need 4, 8, 16, or 32)</div>
+      ${n===0?`<div class="info-box">Add songs to build your bracket. Valid sizes: 4, 8, 16, or 32 songs.</div>`:''}
+      ${n>0&&!isValid?`<div class="info-box" style="background:rgba(255,95,95,.08);border-color:rgba(255,95,95,.25);color:#ff5f5f">Add ${remaining} more song${remaining!==1?'s':''} to reach ${nextValid}.</div>`:''}
+      ${isValid?`<div class="info-box green">✅ ${n} songs — ready to create!</div>`:''}
+      <div id="bk-create-songs-list">${bkCreateSongs.map(s=>`
+        <div class="bk-song" data-sid="${s.id}">
+          ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}">`:`<div class="bk-art-ph">🎵</div>`}
+          <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
+          <button onclick="removeBkCreateSong('${s.id}')" style="background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
+        </div>`).join('')}</div>
+      <button class="bg" id="bk-add-songs-btn" style="margin-top:8px">+ Add Songs</button>
+      <button class="btn-gold" id="bk-create-btn" ${!isValid?'disabled':''} style="margin-top:12px">Create Bracket 🏆</button>
+      <button class="bg" onclick="showScreen('s-home');setHomeMode('brackets')" style="margin-top:4px">Cancel</button>
+    </div>`;
+  document.getElementById('bk-add-songs-btn').onclick=openBkSearchModal;
+  document.getElementById('bk-create-btn').onclick=doCreateBracket;
+}
+ 
+function removeBkCreateSong(id){ bkCreateSongs=bkCreateSongs.filter(s=>s.id!==id); renderBkCreate(); }
+ 
+async function doCreateBracket(){
+  const nameEl=document.getElementById('bk-name-in');
+  const name=(nameEl?.value||'').trim()||`${myName}'s Bracket`;
+  const code=uid();
+  const bracket={
+    name,hostId:myId,createdAt:Date.now(),status:'rating',
+    songs:bkCreateSongs,
+    members:{[myId]:{name:myName,emoji:myEmoji}},
+    ratings:{},readyMembers:{},matchups:{},currentRound:0,totalRounds:Math.log2(bkCreateSongs.length),bracketWinner:null
+  };
+  try{
+    await fbBkPut(code,bracket);
+    bkCode=code; bkState=normaliseBracket(await fbBkGet(code));
+    bkLastStr=JSON.stringify(bkState);
+    launchBracket();
+  }catch(e){ toast('⚠️ '+e.message); }
+}
+ 
+// ── Bracket song search modal ──
+function openBkSearchModal(){
+  document.getElementById('bks-input').value='';
+  document.getElementById('bks-results').style.display='none';
+  document.getElementById('bks-added').innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join('');
+  document.getElementById('bk-search-modal').classList.add('on');
+}
+document.getElementById('bks-done').onclick=()=>{ document.getElementById('bk-search-modal').classList.remove('on'); renderBkCreate(); };
+document.getElementById('bk-search-modal').onclick=e=>{if(e.target===e.currentTarget){document.getElementById('bk-search-modal').classList.remove('on');renderBkCreate();}};
+document.getElementById('bks-input').oninput=function(){
+  clearTimeout(bkSearchTimer); const q=this.value.trim(); if(q.length<2){document.getElementById('bks-results').style.display='none';return;}
+  bkSearchTimer=setTimeout(async()=>{
+    const results=await searchItunes(q);
+    const box=document.getElementById('bks-results'); if(!results.length){box.style.display='none';return;}
+    box.style.display='block';
+    box.innerHTML=results.map((r,i)=>`<div class="bks-r" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)"><img src="${r.artworkUrl60||r.artworkUrl100}" style="width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0"><div style="min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.trackName)}</div><div style="font-size:11px;color:var(--mu)">${esc(r.artistName)}</div></div><div style="flex-shrink:0;font-size:20px;color:var(--or)">+</div></div>`).join('');
+    box.querySelectorAll('.bks-r').forEach((el,i)=>el.addEventListener('click',()=>addBkCreateSong(results[i])));
+  },400);
+};
+function addBkCreateSong(r){
+  if(bkCreateSongs.find(s=>s.title===r.trackName&&s.artist===r.artistName)){toast('Already added!');return;}
+  if(bkCreateSongs.length>=32){toast('Max 32 songs');return;}
+  bkCreateSongs.push({id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:r.trackViewUrl||null});
+  document.getElementById('bks-added').innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join('');
+  document.getElementById('bks-input').value=''; document.getElementById('bks-results').style.display='none';
+  toast(`✓ "${r.trackName}" added`);
+}
+ 
+// ════════════════════════════════════════════════
+// BRACKET — MAIN RENDER
+// ════════════════════════════════════════════════
+function renderBracket(){
+  if(!bkState||!bkCode)return;
+  const b=bkState;
+  document.getElementById('bk-header-title').textContent=b.name||'Bracket';
+  if(b.status==='rating')renderBkRating(b);
+  else if(b.status==='voting')renderBkVoting(b);
+  else if(b.status==='complete')renderBkComplete(b);
+}
+ 
+// ── RATING PHASE ──
+function renderBkRating(b){
+  const myRatings=b.ratings?.[myId]||{};
+  const total=b.songs.length, rated=Object.keys(myRatings).length;
+  const allRated=allMembersRatedAll(b);
+  const iReady=!!b.readyMembers?.[myId];
+  const allReady=allMembersReady(b);
+  document.getElementById('bk-body').innerHTML=`
+    <div class="codebar" style="margin-bottom:14px">
+      <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div>
+      <button class="shbtn" id="bk-share-btn">Share 📤</button>
+    </div>
+    <div class="info-box" style="margin-bottom:14px">
+      <strong>Rating Phase</strong> · Rate all ${total} songs privately. Once everyone's done, you can start the bracket.
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600">Your progress: ${rated}/${total}</div>
+      <button onclick="openBkProgressModal()" style="background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--mu);font-size:12px;cursor:pointer">👥 Group</button>
+    </div>
+    <div class="score-bar" style="margin-bottom:16px"><div class="score-fill" style="width:${total?rated/total*100:0}%;background:var(--or)"></div></div>
+    ${b.songs.map(s=>{
+      const r=myRatings[s.id];
+      const hasRating=r!==undefined;
+      return`<div class="bk-song ${hasRating?'rated':''}" style="cursor:pointer" onclick="openBkRateModal('${s.id}')">
+        ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
+        <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
+        ${hasRating?`<div class="bk-rating-badge" style="color:${scoreColor(r)}">${r}</div>`:`<div class="bk-unrated">Tap to rate</div>`}
+      </div>`;
+    }).join('')}
+    ${allRated?`
+      <div class="info-box green" style="margin-top:8px">✅ Everyone has rated all songs!</div>
+      <button class="btn-gold" id="bk-ready-btn" ${iReady?'disabled':''} style="margin-top:8px">
+        ${iReady?'⏳ Waiting for others…':'🏆 Ready to Start Bracket!'}
+      </button>
+      <div style="font-size:12px;color:var(--mu);text-align:center;margin-top:8px">
+        ${Object.keys(b.members).filter(id=>b.readyMembers?.[id]).length}/${Object.keys(b.members).length} members ready
+      </div>
+    `:`<div style="font-size:13px;color:var(--mu);text-align:center;margin-top:12px">Rating others' songs will remain private until everyone is ready.</div>`}
+  `;
+  document.getElementById('bk-share-btn')?.addEventListener('click',shareBracket);
+  if(allRated&&!iReady){
+    document.getElementById('bk-ready-btn')?.addEventListener('click',async()=>{
+      await mergeAndSaveBracket(b=>{
+        b.readyMembers[myId]=true;
+        if(allMembersReady(b)){ generateFirstRound(b); b.status='voting'; }
+      });
+    });
+  }
+}
+ 
+// ── VOTING PHASE ──
+function renderBkVoting(b){
+  const totalRounds=b.totalRounds||Math.log2(b.songs.length);
+  let html=`
+    <div class="codebar" style="margin-bottom:14px">
+      <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div>
+      <button class="shbtn" id="bk-share-btn">Share 📤</button>
+    </div>`;
+  for(let r=0;r<=b.currentRound;r++){
+    const matchups=getMatchupsForRound(b,r);
+    if(!matchups.length)continue;
+    html+=`<div class="round-label">${roundName(b,r)}</div>`;
+    matchups.forEach(m=>{
+      const s1=bkSong(b,m.song1),s2=bkSong(b,m.song2);
+      if(!s1||!s2)return;
+      const isDone=!!m.winner;
+      const myVote=m.votes?.[myId];
+      const memberIds=Object.keys(b.members);
+      const votedCount=Object.keys(m.votes||{}).length;
+      const winnerSong=isDone?bkSong(b,m.winner):null;
+      if(isDone){
+        // Reveal ratings
+        const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
+        html+=`<div class="matchup done">
+          <div class="matchup-header">✅ ${roundName(b,r)} · All votes in</div>
+          <div class="matchup-songs">
+            <div class="ms-side ${m.winner===s1.id?'winner':'loser'}">
+              ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
+              <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div>
+              ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}</div>`:''}
+              ${m.winner===s1.id?`<div class="ms-win-label">🏆 WINNER</div>`:''}
+            </div>
+            <div class="matchup-vs">vs</div>
+            <div class="ms-side ${m.winner===s2.id?'winner':'loser'}">
+              ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
+              <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div>
+              ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}</div>`:''}
+              ${m.winner===s2.id?`<div class="ms-win-label">🏆 WINNER</div>`:''}
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`${u.emoji} ${r1!==undefined?r1:'?'} / ${r2!==undefined?r2:'?'}`;}).join(' · ')}</div>
+        </div>`;
+      } else {
+        // Voting open
+        const canVote=!myVote;
+        html+=`<div class="matchup active" data-mid="${m.id}">
+          <div class="matchup-header">🗳️ ${roundName(b,r)} · Vote now${myVote?' · Your vote cast':''}</div>
+          <div class="matchup-songs">
+            <div class="ms-side ${myVote===s1.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote('${m.id}','${s1.id}')`:''}" >
+              ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
+              <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div>
+              ${myVote===s1.id?`<div class="ms-vote-label">✓ Your vote</div>`:''}
+            </div>
+            <div class="matchup-vs">vs</div>
+            <div class="ms-side ${myVote===s2.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote('${m.id}','${s2.id}')`:''}" >
+              ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
+              <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div>
+              ${myVote===s2.id?`<div class="ms-vote-label">✓ Your vote</div>`:''}
+            </div>
+          </div>
+          <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" title="${b.members[uid]?.name||''}">${b.members[uid]?.emoji||'🎵'}</span>`).join('')}</div>
+          <div style="font-size:11px;color:var(--mu);margin-top:6px">${votedCount}/${memberIds.length} voted · waiting for all votes to reveal</div>
+        </div>`;
+      }
+    });
+  }
+  document.getElementById('bk-body').innerHTML=html;
+  document.getElementById('bk-share-btn')?.addEventListener('click',shareBracket);
+}
+ 
+async function castVote(matchupId,songId){
+  await mergeAndSaveBracket(b=>{
+    if(!b.matchups[matchupId])return;
+    if(b.matchups[matchupId].votes[myId])return; // already voted
+    b.matchups[matchupId].votes[myId]=songId;
+    resolveMatchupIfReady(b,matchupId);
+  });
+}
+ 
+// ── COMPLETE PHASE ──
+function renderBkComplete(b){
+  const winner=bkSong(b,b.bracketWinner);
+  // Build ranked list from matchup history
+  const allMatchups=Object.values(b.matchups);
+  const totalRounds=b.totalRounds||Math.log2(b.songs.length);
+  // Assign finish position based on which round they lost in
+  const positions={}; // songId → position label
+  b.songs.forEach(s=>positions[s.id]='First Round');
+  allMatchups.forEach(m=>{
+    if(!m.winner)return;
+    const loser=m.song1===m.winner?m.song2:m.song1;
+    const label=roundName(b,m.round);
+    positions[loser]=`Out in ${label}`;
+  });
+  if(b.bracketWinner)positions[b.bracketWinner]='🏆 Champion';
+  // Sort songs: winner first, then by round they lost (later = higher rank)
+  const ranked=[...b.songs].sort((a,b_)=>{
+    const ra=allMatchups.filter(m=>m.winner&&(m.song1===a.id||m.song2===a.id)&&m.winner!==a.id).map(m=>m.round)[0]??99;
+    const rb=allMatchups.filter(m=>m.winner&&(m.song1===b_.id||m.song2===b_.id)&&m.winner!==b_.id).map(m=>m.round)[0]??99;
+    if(b_.bracketWinner===b_.id)return 1; if(b.bracketWinner===a.id)return -1;
+    return rb-ra;
+  });
+  let html=`
+    <div style="text-align:center;padding:24px 0 16px">
+      <div style="font-size:52px">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0 4px">Champion</div>
+      ${winner?.artworkUrl?`<img src="${esc(winner.artworkUrl)}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;margin:8px auto;display:block">`:''}
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-top:4px">${esc(winner?.title||'')}</div>
+      <div style="font-size:14px;color:var(--mu)">${esc(winner?.artist||'')}</div>
+      ${winner?.appleMusicUrl?`<a class="aml" href="${esc(winner.appleMusicUrl)}" target="_blank" style="display:inline-flex;margin-top:10px">♫ Open in Apple Music</a>`:''}
+    </div>
+    <div class="round-label">Final Rankings & Ratings</div>
+    <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:16px">`;
+  ranked.forEach((s,i)=>{
+    const avg=avgRatingForSong(b,s.id);
+    html+=`<div class="bracket-rank">
+      <div class="rank-num ${i===0?'gold':''}">${i===0?'🥇':i+1}</div>
+      ${s.artworkUrl?`<img class="rank-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="rank-art-ph">🎵</div>`}
+      <div class="rank-info"><div class="rank-title">${esc(s.title)}</div><div class="rank-artist">${esc(s.artist)}</div><div style="font-size:10px;color:var(--mu);margin-top:2px">${positions[s.id]||''}</div></div>
+      ${avg!==null?`<div class="rank-score" style="color:${scoreColor(avg)}">${avg.toFixed(1)}</div>`:''}
+    </div>`;
+  });
+  html+=`</div>
+    <div class="round-label" style="margin-top:18px">Full Bracket Replay</div>`;
+  for(let r=0;r<(b.totalRounds||totalRounds);r++){
+    const matchups=getMatchupsForRound(b,r);
+    if(!matchups.length)continue;
+    html+=`<div style="font-size:11px;letter-spacing:1px;color:var(--mu);margin:10px 0 6px;text-transform:uppercase">${roundName(b,r)}</div>`;
+    matchups.forEach(m=>{
+      const s1=bkSong(b,m.song1),s2=bkSong(b,m.song2); if(!s1||!s2)return;
+      const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
+      html+=`<div class="matchup done" style="margin-bottom:10px">
+        <div class="matchup-songs">
+          <div class="ms-side ${m.winner===s1.id?'winner':'loser'}">
+            ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`}
+            <div class="ms-title">${esc(s1.title)}</div>
+            ${avg1!==null?`<div class="ms-score" style="font-size:16px">${avg1.toFixed(1)}</div>`:''}
+            ${m.winner===s1.id?`<div class="ms-win-label">🏆</div>`:''}
+          </div>
+          <div class="matchup-vs">vs</div>
+          <div class="ms-side ${m.winner===s2.id?'winner':'loser'}">
+            ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`}
+            <div class="ms-title">${esc(s2.title)}</div>
+            ${avg2!==null?`<div class="ms-score" style="font-size:16px">${avg2.toFixed(1)}</div>`:''}
+            ${m.winner===s2.id?`<div class="ms-win-label">🏆</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('bk-body').innerHTML=html;
+}
+ 
+// ════════════════════════════════════════════════
+// BRACKET — MODALS
+// ════════════════════════════════════════════════
+ 
+// ── Rate song modal ──
+function openBkRateModal(songId){
+  const b=bkState; if(!b)return;
+  const song=bkSong(b,songId); if(!song)return;
+  bkRateSongId=songId;
+  const existing=b.ratings?.[myId]?.[songId];
+  bkRateScore=existing!==undefined?existing:null;
+  const art=document.getElementById('bkr-art'),ph=document.getElementById('bkr-art-ph');
+  if(song.artworkUrl){art.src=song.artworkUrl;art.style.display='block';ph.style.display='none';}else{art.style.display='none';ph.style.display='flex';}
+  document.getElementById('bkr-title').textContent=song.title;
+  document.getElementById('bkr-artist').textContent=song.artist;
+  updateBkRateDisplay();
+  document.getElementById('bk-rate-modal').classList.add('on');
+}
+function updateBkRateDisplay(){
+  const s=bkRateScore;
+  const disp=document.getElementById('bkr-score');
+  const bar=document.getElementById('bkr-bar');
+  const save=document.getElementById('bkr-save');
+  if(s===null){disp.textContent='—';disp.style.color='var(--mu)';bar.style.width='0';bar.style.background='var(--or)';save.disabled=true;}
+  else{disp.textContent=s;disp.style.color=scoreColor(s);bar.style.width=`${s/10*100}%`;bar.style.background=scoreColor(s);save.disabled=false;}
+}
+document.getElementById('bkr-minus').onclick=()=>{
+  if(bkRateScore===null)bkRateScore=5;
+  else bkRateScore=Math.max(0,Math.round((bkRateScore-0.5)*10)/10);
+  updateBkRateDisplay();
+};
+document.getElementById('bkr-plus').onclick=()=>{
+  if(bkRateScore===null)bkRateScore=5;
+  else bkRateScore=Math.min(10,Math.round((bkRateScore+0.5)*10)/10);
+  updateBkRateDisplay();
+};
+document.getElementById('bkr-cancel').onclick=()=>{ document.getElementById('bk-rate-modal').classList.remove('on'); bkRateSongId=null; bkRateScore=null; };
+document.getElementById('bk-rate-modal').onclick=e=>{if(e.target===e.currentTarget){document.getElementById('bk-rate-modal').classList.remove('on');bkRateSongId=null;bkRateScore=null;}};
+document.getElementById('bkr-save').onclick=async function(){
+  if(bkRateSongId===null||bkRateScore===null)return;
+  const sid=bkRateSongId,sc=bkRateScore;
+  document.getElementById('bk-rate-modal').classList.remove('on'); bkRateSongId=null; bkRateScore=null;
+  await mergeAndSaveBracket(b=>{
+    if(!b.ratings)b.ratings={};
+    if(!b.ratings[myId])b.ratings[myId]={};
+    b.ratings[myId][sid]=sc;
+    // Auto-check if all members ready
+    if(allMembersRatedAll(b)&&allMembersReady(b)&&b.status==='rating'){ generateFirstRound(b); b.status='voting'; }
   });
 };
+ 
+// ── Progress modal ──
+function openBkProgressModal(){
+  const b=bkState; if(!b)return;
+  const total=b.songs.length;
+  document.getElementById('bkp-list').innerHTML=Object.entries(b.members).map(([uid,u])=>{
+    const rated=totalRatingsForMember(b,uid);
+    const pct=total?rated/total*100:0;
+    const isReady=!!b.readyMembers?.[uid];
+    return`<div class="prog-row">
+      <div style="font-size:24px">${u.emoji}</div>
+      <div class="prog-info">
+        <div class="prog-name">${esc(u.name)} ${uid===myId?'(you)':''} ${isReady?'✅':''}</div>
+        <div class="prog-count">${rated}/${total} songs rated</div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('bk-progress-modal').classList.add('on');
+}
+document.getElementById('bkp-close').onclick=()=>document.getElementById('bk-progress-modal').classList.remove('on');
+document.getElementById('bk-progress-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('bk-progress-modal').classList.remove('on');};
+ 
+// ── Share bracket ──
+function shareBracket(){
+  const base=location.origin+location.pathname;
+  const link=`${base}?db=${btoa(FB)}&bracket=${bkCode}`;
+  const msg=`Join my bracket "${bkState?.name||'Bracket'}" 🏆\n\nTap to join:\n${link}`;
+  if(navigator.share)navigator.share({title:bkState?.name||'Bracket',text:msg,url:link});
+  else navigator.clipboard?.writeText(bkCode).then(()=>toast('📋 Bracket code copied: '+bkCode));
+}
+ 
+// ── Handle bracket URL param ──
+const urlBracket=params.get('bracket');
+if(urlBracket){ window.addEventListener('DOMContentLoaded',()=>{ if(FB&&myName){ document.getElementById('bracket-join-in').value=urlBracket; document.getElementById('btn-bracket-join').disabled=false; setHomeMode('brackets'); showScreen('s-home'); } }); }
 </script>
-
 </body>
 </html>
