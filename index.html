@@ -496,6 +496,7 @@ const urlWho        = params.get('who');
 const urlBracket    = params.get('bracket');
 const urlNewBracket = params.get('newbracket');
 const urlSongs      = params.get('songs');
+const urlPlaylist   = params.get('playlist');
 // Restore identity from shortcut URL so user doesn't have to re-enter name
 if(urlWho){
   const whoParts = urlWho.split('__');
@@ -1073,7 +1074,7 @@ function renderBkCreate(){
   var songListHTML = bkCreateSongs.map(bkSongRowHTML).join('');
 
   var shortcutBase = location.origin + location.pathname;
-  var shortcutUrl = shortcutBase + '?db=' + btoa(FB) + '&newbracket=1&who=' + encodeURIComponent(myName) + '__' + encodeURIComponent(myEmoji) + '&songs=SONGS';
+  var shortcutUrl = shortcutBase + '?db=' + btoa(FB) + '&newbracket=1&who=' + encodeURIComponent(myName) + '__' + encodeURIComponent(myEmoji) + '&playlist=PLAYLIST_URL&songs=SONGS';
 
   document.getElementById('bk-body').innerHTML =
     '<div style="margin-top:4px">'
@@ -1097,7 +1098,9 @@ function renderBkCreate(){
     +     '<div><strong>5.</strong> Outside the loop, add <strong>"Combine Text"</strong> → tap separator → choose <strong>Custom</strong> → type <code>||</code></div>'
     +     '<div><strong>6.</strong> Add <strong>"URL Encode"</strong> (connects automatically)</div>'
     +     '<div><strong>7.</strong> Add <strong>"Open URLs"</strong> → paste the URL below → find <code>SONGS</code> in the URL → replace it with the <strong>URL Encoded Text</strong> variable</div>'
-    +     '<div><strong>8.</strong> Rename shortcut → tap <strong>Done</strong> → long-press → <strong>Add to Home Screen</strong></div>'
+    +     '<div><strong>8.</strong> Before "Open URLs", add a <strong>"Text"</strong> action → paste your Apple Music playlist link → rename it <code>PlaylistURL</code></div>'
+    +     '<div><strong>9.</strong> In the "Open URLs" URL: replace <code>PLAYLIST_URL</code> with the <strong>PlaylistURL</strong> variable</div>'
+    +     '<div><strong>10.</strong> Rename shortcut → tap <strong>Done</strong> → long-press → <strong>Add to Home Screen</strong></div>'
     +   '</div>'
     +   '<div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:10px" id="bk-shortcut-url-display">' + shortcutUrl + '</div>'
     +   '<button class="bp" id="bk-copy-shortcut-url" style="margin-top:0;font-size:13px;padding:11px">Copy Shortcut URL 📋</button>'
@@ -1238,6 +1241,7 @@ async function doCreateBracket(){
   const code=uid();
   const bracket={
     name,hostId:myId,createdAt:Date.now(),status:'rating',
+    playlistUrl:sessionStorage.getItem('pending-playlist')||null,
     songs:bkCreateSongs,
     members:{[myId]:{name:myName,emoji:myEmoji}},
     ratings:{},readyMembers:{},matchups:{},currentRound:0,totalRounds:Math.log2(bkCreateSongs.length),bracketWinner:null
@@ -1283,6 +1287,12 @@ function addBkCreateSong(r){
 // ════════════════════════════════════════════════
 // BRACKET — MAIN RENDER
 // ════════════════════════════════════════════════
+
+function playlistLinkHTML(b){
+  if(!b||!b.playlistUrl)return '';
+  return '<a href="'+esc(b.playlistUrl)+'" target="_blank" class="aml" style="display:inline-flex;margin-bottom:12px">\u266b Open Playlist in Apple Music</a>';
+}
+
 function renderBracket(){
   if(!bkState||!bkCode)return;
   const b=bkState;
@@ -1303,6 +1313,7 @@ function renderBkRating(b){
       <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div>
       <button class="shbtn" id="bk-share-btn">Share 📤</button>
     </div>
+    ${playlistLinkHTML(b)}
     <div class="info-box" style="margin-bottom:14px">
       <strong>Rating Phase</strong> · Rate all ${total} songs privately. Once everyone's done, you can start the bracket.
     </div>
@@ -1347,7 +1358,8 @@ function renderBkVoting(b){
     <div class="codebar" style="margin-bottom:14px">
       <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div>
       <button class="shbtn" id="bk-share-btn">Share 📤</button>
-    </div>`;
+    </div>
+    ${playlistLinkHTML(b)}`;
   for(let r=0;r<=b.currentRound;r++){
     const matchups=getMatchupsForRound(b,r);
     if(!matchups.length)continue;
@@ -1450,6 +1462,7 @@ function renderBkComplete(b){
       <div style="font-size:14px;color:var(--mu)">${esc(winner?.artist||'')}</div>
       ${winner?.appleMusicUrl?`<a class="aml" href="${esc(winner.appleMusicUrl)}" target="_blank" style="display:inline-flex;margin-top:10px">♫ Open in Apple Music</a>`:''}
     </div>
+    ${playlistLinkHTML(b)}
     <div class="round-label">Final Rankings & Ratings</div>
     <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:16px">`;
   ranked.forEach((s,i)=>{
@@ -1579,6 +1592,7 @@ function shareBracket(){
 function handleUrlParams(){
   // ── Bracket playlist shortcut: ?newbracket=1&songs=ENCODED&who=... ──
   if(urlNewBracket && urlSongs && myName){
+    if(urlPlaylist) sessionStorage.setItem('pending-playlist', decodeURIComponent(urlPlaylist));
     bkCreateSongs=[]; bkCreateSongsOriginal=[]; bkCreateIsShuffled=false;
     showBottomNav();
     document.getElementById('nav-brackets').classList.add('active');
