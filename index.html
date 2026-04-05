@@ -33,6 +33,7 @@ input::placeholder,textarea::placeholder{color:var(–mu)}
 /* ── BUTTONS ── */
 .bp{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-family:‘Outfit’,sans-serif;font-weight:600;cursor:pointer;text-align:center;background:linear-gradient(135deg,#ff9340,#ff5f5f);color:#fff;margin-top:12px}
 .bp:disabled{opacity:.35;pointer-events:none}
+.bp.dim{opacity:.35;pointer-events:none}
 .bg{display:block;width:100%;padding:14px;border:1px solid var(–bdr);border-radius:12px;font-size:15px;font-family:‘Outfit’,sans-serif;font-weight:600;cursor:pointer;text-align:center;background:rgba(255,255,255,.06);color:var(–mu);margin-top:8px}
 .bg:disabled{opacity:.35;pointer-events:none}
 .btn-gold{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#111;margin-top:12px;display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-family:‘Outfit’,sans-serif;font-weight:700;cursor:pointer;text-align:center}
@@ -216,8 +217,8 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
     <div class="step"><div class="stn">2</div><div class="stt">Tap <strong>Add project</strong> → any name → skip Analytics → <strong>Create project</strong></div></div>
     <div class="step"><div class="stn">3</div><div class="stt">Left menu → <strong>Build → Realtime Database → Create database</strong> → any region → <strong>Start in test mode</strong></div></div>
     <div class="step"><div class="stn">4</div><div class="stt">Copy the URL — looks like <code>https://myapp-default-rtdb.firebaseio.com</code></div></div>
-    <input type="url" id="fb-in" placeholder="https://your-app-default-rtdb.firebaseio.com" autocomplete="off" autocapitalize="none">
-    <button class="bp" id="btn-test-fb" disabled>Test &amp; Save →</button>
+    <input type="text" id="fb-in" placeholder="https://your-app-default-rtdb.firebaseio.com" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <button class="bp" id="btn-test-fb" style="opacity:.4">Test &amp; Save →</button>
     <div id="fb-status" style="font-size:13px;margin-top:10px;min-height:20px;text-align:center"></div>
   </div>
 </div>
@@ -576,16 +577,23 @@ function startBkPolling(){
 // ════════════════════════════════════════════════
 const fbIn=document.getElementById('fb-in');
 const btnTestFb=document.getElementById('btn-test-fb');
-function checkFbInput(){ 
-  const v=fbIn.value.trim();
-  btnTestFb.disabled=!v.includes('firebaseio.com')&&!v.includes('firebasedatabase.app');
+
+function checkFbInput(){
+  const v=(fbIn.value||'').trim();
+  const valid=v.includes('firebaseio.com')||v.includes('firebasedatabase.app');
+  btnTestFb.style.opacity=valid?'1':'0.4';
+  btnTestFb.style.pointerEvents=valid?'auto':'none';
 }
-fbIn.oninput=checkFbInput;
-fbIn.onchange=checkFbInput;
-fbIn.onpaste=()=>setTimeout(checkFbInput,50);
-fbIn.onkeyup=checkFbInput;
-// Pre-fill if already saved
+
+// Use addEventListener (more reliable than .oninput on iOS)
+['input','change','keyup','keydown'].forEach(ev=>fbIn.addEventListener(ev,checkFbInput));
+// Handle paste: fire after the value is actually inserted
+fbIn.addEventListener('paste',()=>{setTimeout(checkFbInput,100);setTimeout(checkFbInput,500);});
+
+// Pre-fill if already saved, and poll every 300ms while on this screen
 if(FB){ fbIn.value=FB; checkFbInput(); }
+const fbCheckInterval=setInterval(checkFbInput,300);
+
 btnTestFb.onclick=async()=>{
   const url=fbIn.value.trim().replace(/\/+$/,'');
   btnTestFb.disabled=true; btnTestFb.textContent='Testing…';
@@ -594,6 +602,7 @@ btnTestFb.onclick=async()=>{
     const r=await fetch(`${url}/ping.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:'"ok"'});
     if(!r.ok)throw new Error(`HTTP ${r.status}`);
     FB=url; localStorage.setItem('rtv-fb',FB);
+    clearInterval(fbCheckInterval);
     st.style.color='#4cd97b'; st.textContent='✅ Connected!';
     setTimeout(()=>showScreen(myName?'s-home':'s-setup'),800);
   }catch(e){ st.style.color='#ff5f5f'; st.textContent='❌ '+e.message; btnTestFb.disabled=false; btnTestFb.textContent='Test & Save →'; }
