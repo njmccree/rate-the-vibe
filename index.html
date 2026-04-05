@@ -456,6 +456,8 @@ let bkCode=null, bkState=null, bkLastStr='', bkPollTimer=null;
 let bkRateSongId=null, bkRateScore=null;
 let bkVoteMatchupId=null;
 let bkCreateSongs=[];
+let bkCreateSongsOriginal=[]; // preserves playlist import order
+let bkCreateIsShuffled=false;
 let currentMode='live'; // 'live' | 'brackets'
  
 // URL params
@@ -635,7 +637,7 @@ btnRoomJoin.onclick=async function(){
 };
  
 // New bracket
-document.getElementById('btn-new-bracket').onclick=()=>{ bkCreateSongs=[]; showScreen('s-bracket'); renderBkCreate(); };
+document.getElementById('btn-new-bracket').onclick=()=>{ bkCreateSongs=[]; bkCreateSongsOriginal=[]; bkCreateIsShuffled=false; showScreen('s-bracket'); renderBkCreate(); };
  
 // Join bracket
 const bkJoinIn=document.getElementById('bracket-join-in'),btnBkJoin=document.getElementById('btn-bracket-join');
@@ -905,35 +907,151 @@ function renderBkCreate(){
   showScreen('s-bracket');
   document.getElementById('bk-me-pill').textContent=myEmoji+' '+myName;
   document.getElementById('bk-header-title').textContent='New Bracket';
-  const validSizes=[4,8,16,32];
+  const validSizes=[4,8,16,32,64];
   const n=bkCreateSongs.length;
-  const nextValid=validSizes.find(v=>v>=n)||32;
+  const nextValid=validSizes.find(v=>v>=n)||64;
   const remaining=nextValid-n;
-  const isValid=isPowerOf2(n)&&n>=4;
+  const isValid=isPowerOf2(n)&&n>=4&&n<=64;
+  const hasOriginal=bkCreateSongsOriginal.length>0;
   document.getElementById('bk-body').innerHTML=`
     <div style="margin-top:4px">
       <div class="cl">Bracket Name</div>
       <input type="text" id="bk-name-in" placeholder="e.g. Summer Bangers 2025..." value="${esc(document.getElementById('bk-name-in')?.value||'')}" autocomplete="off">
+ 
       <div style="height:16px"></div>
-      <div class="cl">Songs (${n} added · need 4, 8, 16, or 32)</div>
-      ${n===0?`<div class="info-box">Add songs to build your bracket. Valid sizes: 4, 8, 16, or 32 songs.</div>`:''}
-      ${n>0&&!isValid?`<div class="info-box" style="background:rgba(255,95,95,.08);border-color:rgba(255,95,95,.25);color:#ff5f5f">Add ${remaining} more song${remaining!==1?'s':''} to reach ${nextValid}.</div>`:''}
-      ${isValid?`<div class="info-box green">✅ ${n} songs — ready to create!</div>`:''}
-      <div id="bk-create-songs-list">${bkCreateSongs.map(s=>`
-        <div class="bk-song" data-sid="${s.id}">
+      <div class="cl">Import from Apple Music Playlist</div>
+      <div style="display:flex;gap:8px">
+        <input type="url" id="bk-playlist-url" placeholder="Paste Apple Music playlist link..." autocomplete="off" autocapitalize="none" style="flex:1;font-size:13px">
+        <button id="bk-import-btn" style="flex-shrink:0;padding:0 14px;background:linear-gradient(135deg,#ff2d55,#ff5f5f);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif">Import</button>
+      </div>
+      <div id="bk-import-status" style="font-size:12px;color:var(--mu);margin-top:6px;min-height:18px"></div>
+ 
+      <div style="height:12px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="cl" style="margin-bottom:0">Songs (${n} · valid: 4, 8, 16, 32, 64)</div>
+        ${n>1?`<div style="display:flex;gap:6px">
+          ${!bkCreateIsShuffled?`<button id="bk-shuffle-btn" style="padding:5px 10px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">🔀 Shuffle</button>`:''}
+          ${bkCreateIsShuffled&&hasOriginal?`<button id="bk-restore-btn" style="padding:5px 10px;background:rgba(255,147,64,.1);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">↩️ Restore Order</button>`:''}
+        </div>`:''}
+      </div>
+      <div style="height:8px"></div>
+      ${n===0?`<div class="info-box">Import a playlist above or tap "+ Add Songs" to search. Valid sizes: 4, 8, 16, 32, or 64.</div>`:''}
+      ${n>0&&!isValid?`<div class="info-box" style="background:rgba(255,95,95,.08);border-color:rgba(255,95,95,.25);color:#ff5f5f">Need ${remaining} more song${remaining!==1?'s':''} to reach ${nextValid}. (Max 64)</div>`:''}
+      ${isValid?`<div class="info-box green">✅ ${n} songs${bkCreateIsShuffled?' · shuffled order':hasOriginal?' · playlist order':''} — ready!</div>`:''}
+      <div id="bk-create-songs-list">${bkCreateSongs.map((s,i)=>`
+        <div class="bk-song" data-sid="${s.id}" style="cursor:default">
+          <div style="font-size:11px;color:var(--mu);width:20px;flex-shrink:0;text-align:center">${i+1}</div>
           ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}">`:`<div class="bk-art-ph">🎵</div>`}
           <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
           <button onclick="removeBkCreateSong('${s.id}')" style="background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
         </div>`).join('')}</div>
-      <button class="bg" id="bk-add-songs-btn" style="margin-top:8px">+ Add Songs</button>
+      <button class="bg" id="bk-add-songs-btn" style="margin-top:8px">+ Add Songs Manually</button>
       <button class="btn-gold" id="bk-create-btn" ${!isValid?'disabled':''} style="margin-top:12px">Create Bracket 🏆</button>
       <button class="bg" onclick="showScreen('s-home');setHomeMode('brackets')" style="margin-top:4px">Cancel</button>
     </div>`;
   document.getElementById('bk-add-songs-btn').onclick=openBkSearchModal;
   document.getElementById('bk-create-btn').onclick=doCreateBracket;
+  document.getElementById('bk-import-btn').onclick=doImportPlaylist;
+  document.getElementById('bk-shuffle-btn')?.addEventListener('click',()=>{
+    if(!bkCreateIsShuffled) bkCreateSongsOriginal=[...bkCreateSongs];
+    bkCreateSongs=[...bkCreateSongs].sort(()=>Math.random()-.5);
+    bkCreateIsShuffled=true; renderBkCreate();
+  });
+  document.getElementById('bk-restore-btn')?.addEventListener('click',()=>{
+    bkCreateSongs=[...bkCreateSongsOriginal]; bkCreateIsShuffled=false; renderBkCreate();
+  });
 }
  
-function removeBkCreateSong(id){ bkCreateSongs=bkCreateSongs.filter(s=>s.id!==id); renderBkCreate(); }
+function removeBkCreateSong(id){
+  bkCreateSongs=bkCreateSongs.filter(s=>s.id!==id);
+  bkCreateSongsOriginal=bkCreateSongsOriginal.filter(s=>s.id!==id);
+  if(bkCreateSongs.length===bkCreateSongsOriginal.length) bkCreateIsShuffled=false;
+  renderBkCreate();
+}
+ 
+// ── Apple Music playlist import ──
+async function doImportPlaylist(){
+  const urlEl=document.getElementById('bk-playlist-url');
+  const status=document.getElementById('bk-import-status');
+  const url=(urlEl?.value||'').trim();
+  if(!url||!url.includes('music.apple.com')){status.style.color='#ff5f5f';status.textContent='⚠️ Paste a valid Apple Music playlist link';return;}
+  const btn=document.getElementById('bk-import-btn');
+  btn.disabled=true; btn.textContent='Loading…'; status.style.color='var(--mu)'; status.textContent='Fetching playlist…';
+  try{
+    const tracks=await fetchAppleMusicPlaylist(url);
+    if(!tracks||tracks.length===0)throw new Error('No tracks found in playlist');
+    status.textContent=`Found ${tracks.length} tracks. Fetching artwork…`;
+    const songs=[];
+    // Batch-search each track on iTunes (in chunks to avoid rate limits)
+    for(let i=0;i<Math.min(tracks.length,64);i++){
+      const t=tracks[i];
+      status.textContent=`Loading song ${i+1}/${Math.min(tracks.length,64)}…`;
+      const q=`${t.name} ${t.artist}`;
+      const results=await searchItunes(q);
+      const match=results.find(r=>r.trackName?.toLowerCase()===t.name.toLowerCase())||results[0];
+      songs.push({
+        id:uid8(),
+        title:t.name,
+        artist:t.artist||'Unknown Artist',
+        artworkUrl:match?.artworkUrl100?(match.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb')):null,
+        appleMusicUrl:match?.trackViewUrl||null
+      });
+    }
+    bkCreateSongs=songs;
+    bkCreateSongsOriginal=[...songs];
+    bkCreateIsShuffled=false;
+    status.style.color='#4cd97b'; status.textContent=`✅ ${songs.length} songs imported!`;
+    btn.disabled=false; btn.textContent='Import';
+    renderBkCreate();
+  }catch(e){
+    status.style.color='#ff5f5f'; status.textContent='⚠️ '+e.message+'. Try adding songs manually.';
+    btn.disabled=false; btn.textContent='Import';
+  }
+}
+ 
+async function fetchAppleMusicPlaylist(url){
+  // Use CORS proxy to fetch the Apple Music page
+  const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const r=await fetch(proxyUrl);
+  if(!r.ok)throw new Error('Could not fetch playlist page');
+  const data=await r.json();
+  const html=data.contents||'';
+ 
+  // Strategy 1: JSON-LD schema.org MusicPlaylist (most reliable)
+  const ldMatches=[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)];
+  for(const m of ldMatches){
+    try{
+      const ld=JSON.parse(m[1]);
+      if(ld['@type']==='MusicPlaylist'&&Array.isArray(ld.track)&&ld.track.length>0){
+        return ld.track.map(t=>({name:t.name,artist:t.byArtist?.name||'Unknown'}));
+      }
+    }catch(e){}
+  }
+ 
+  // Strategy 2: serialized-server-data JSON blob (Apple Music SPA data)
+  const sdMatch=html.match(/<script id="serialized-server-data"[^>]*>([\s\S]*?)<\/script>/i);
+  if(sdMatch){
+    try{
+      const sd=JSON.parse(sdMatch[1]);
+      const tracks=[];
+      function findTracks(obj){
+        if(!obj||typeof obj!=='object')return;
+        if(Array.isArray(obj)){obj.forEach(findTracks);return;}
+        // Look for track objects with name + artistName
+        if(obj.type==='songs'&&obj.attributes?.name&&obj.attributes?.artistName){
+          tracks.push({name:obj.attributes.name,artist:obj.attributes.artistName});return;
+        }
+        Object.values(obj).forEach(findTracks);
+      }
+      findTracks(sd);
+      if(tracks.length>0)return tracks;
+    }catch(e){}
+  }
+ 
+  // Strategy 3: og:description meta (sometimes lists first few tracks)
+  // This is a last resort — usually only has a description, not track list
+  throw new Error('Could not parse playlist tracks from Apple Music page');
+}
  
 async function doCreateBracket(){
   const nameEl=document.getElementById('bk-name-in');
@@ -974,8 +1092,11 @@ document.getElementById('bks-input').oninput=function(){
 };
 function addBkCreateSong(r){
   if(bkCreateSongs.find(s=>s.title===r.trackName&&s.artist===r.artistName)){toast('Already added!');return;}
-  if(bkCreateSongs.length>=32){toast('Max 32 songs');return;}
-  bkCreateSongs.push({id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:r.trackViewUrl||null});
+  if(bkCreateSongs.length>=64){toast('Max 64 songs');return;}
+  const song={id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:r.trackViewUrl||null};
+  bkCreateSongs.push(song);
+  // Keep original in sync if not shuffled
+  if(!bkCreateIsShuffled) bkCreateSongsOriginal.push(song);
   document.getElementById('bks-added').innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join('');
   document.getElementById('bks-input').value=''; document.getElementById('bks-results').style.display='none';
   toast(`✓ "${r.trackName}" added`);
