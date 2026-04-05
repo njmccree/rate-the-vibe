@@ -643,7 +643,39 @@ const nameIn=document.getElementById('name-in'),btnNext=document.getElementById(
 nameIn.value=myName; if(myName)btnNext.disabled=false;
 nameIn.oninput=()=>btnNext.disabled=!nameIn.value.trim();
 nameIn.onkeydown=e=>{if(e.key==='Enter')btnNext.click();};
-btnNext.onclick=()=>{ myName=nameIn.value.trim(); localStorage.setItem('rtv-name',myName); showScreen('s-home'); };
+btnNext.onclick=()=>{
+  myName=nameIn.value.trim(); localStorage.setItem('rtv-name',myName);
+  var pendingBracket = sessionStorage.getItem('pending-bracket');
+  var pendingSongs   = sessionStorage.getItem('pending-songs');
+  if(pendingBracket){
+    sessionStorage.removeItem('pending-bracket');
+    showScreen('s-home');
+    // Simulate URL params for auto-join
+    setTimeout(async function(){
+      var code = pendingBracket.toUpperCase();
+      try{
+        var raw = await fbBkGet(code);
+        var b = normaliseBracket(raw);
+        if(!b) throw new Error('Bracket not found');
+        bkCode=code; bkState=b; bkLastStr=JSON.stringify(b);
+        await mergeAndSaveBracket(function(s){ s.members[myId]={name:myName,emoji:myEmoji}; });
+        launchBracket(); startBkPolling();
+      }catch(e){
+        document.getElementById('bracket-join-in').value=code;
+        document.getElementById('btn-bracket-join').disabled=false;
+        setHomeMode('brackets');
+      }
+    }, 100);
+  } else if(pendingSongs){
+    sessionStorage.removeItem('pending-songs');
+    showBottomNav();
+    document.getElementById('nav-brackets').classList.add('active');
+    document.getElementById('nav-live').classList.remove('active');
+    setTimeout(function(){ handleShortcutSongs(pendingSongs); }, 100);
+  } else {
+    showScreen('s-home');
+  }
+};
 
 
 // ════════════════════════════════════════════════
@@ -859,8 +891,8 @@ async function lookupByStoreId(id){
   try{ const r=await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=song`); if(!r.ok)return null; const d=await r.json(); return d.results?.find(x=>x.wrapperType==='track')||d.results?.[0]||null; }catch(e){return null;}
 }
 async function resolveTrackMeta(storeId,title,artist){
-  if(storeId&&storeId!=='STOREID'){ const t=await lookupByStoreId(storeId); if(t?.artworkUrl100)return{artworkUrl:t.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:t.trackViewUrl||null}; }
-  if(title){ const q=artist?`${title} ${artist}`:title; const results=await searchItunes(q); const m=results.find(r=>r.trackName?.toLowerCase()===title.toLowerCase())||results[0]; if(m?.artworkUrl100)return{artworkUrl:m.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:m.trackViewUrl||null}; }
+  if(storeId&&storeId!=='STOREID'){ const t=await lookupByStoreId(storeId); if(t?.artworkUrl100)return{artworkUrl:t.artworkUrl100.replace(/\d+x\d+bb/,'400x400bb'),appleMusicUrl:t.trackViewUrl||null}; }
+  if(title){ const q=artist?`${title} ${artist}`:title; const results=await searchItunes(q); const m=results.find(r=>r.trackName?.toLowerCase()===title.toLowerCase())||results[0]; if(m?.artworkUrl100)return{artworkUrl:m.artworkUrl100.replace(/\d+x\d+bb/,'400x400bb'),appleMusicUrl:m.trackViewUrl||null}; }
   return{artworkUrl:null,appleMusicUrl:null};
 }
 
@@ -873,7 +905,7 @@ function showLLSearchResults(results){
 function pickLLResult(r){
   document.getElementById('title-in').value=r.trackName; document.getElementById('artist-in').value=r.artistName;
   document.getElementById('search-results').style.display='none';
-  selectedArtwork=(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'); selectedAppleMusicUrl=r.trackViewUrl||null;
+  selectedArtwork=(r.artworkUrl100||'').replace(/\d+x\d+bb/,'400x400bb'); selectedAppleMusicUrl=r.trackViewUrl||null;
   const prev=document.getElementById('artwork-preview'); document.getElementById('artwork-img').src=selectedArtwork; document.getElementById('artwork-title').textContent=r.trackName; document.getElementById('artwork-artist').textContent=r.artistName; prev.style.display='flex';
   document.getElementById('btn-add-song').disabled=false;
 }
@@ -1183,7 +1215,7 @@ async function importPastedSongs(){
     const match = results.find(r => r.trackName?.toLowerCase() === title.toLowerCase()) || results[0];
     if(match){
       songs.push({id:uid8(), title:match.trackName, artist:match.artistName,
-        artworkUrl: (match.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),
+        artworkUrl: (match.artworkUrl100||'').replace(/\d+x\d+bb/,'400x400bb'),
         appleMusicUrl: match.trackViewUrl||null});
     } else {
       // Add as-is even if iTunes didn't find it
@@ -1248,7 +1280,7 @@ async function handleShortcutSongs(encoded){
           id: uid8(),
           title: match.trackName,
           artist: match.artistName,
-          artworkUrl: (match.artworkUrl100||'').replace(/\d+x\d+bb/, '600x600bb'),
+          artworkUrl: (match.artworkUrl100||match.artworkUrl60||''),
           appleMusicUrl: match.trackViewUrl || null
         });
       } else {
@@ -1304,7 +1336,7 @@ document.getElementById('bks-input').oninput=function(){
 function addBkCreateSong(r){
   if(bkCreateSongs.find(s=>s.title===r.trackName&&s.artist===r.artistName)){toast('Already added!');return;}
   if(bkCreateSongs.length>=64){toast('Max 64 songs');return;}
-  const song={id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:r.trackViewUrl||null};
+  const song={id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||'').replace(/\d+x\d+bb/,'400x400bb'),appleMusicUrl:r.trackViewUrl||null};
   bkCreateSongs.push(song);
   // Keep original in sync if not shuffled
   if(!bkCreateIsShuffled) bkCreateSongsOriginal.push(song);
@@ -1607,7 +1639,7 @@ document.getElementById('bk-progress-modal').onclick=e=>{if(e.target===e.current
 
 function shareBracket(){
   const base=location.origin+location.pathname;
-  const link=`${base}?db=${btoa(FB)}&bracket=${bkCode}`;
+  const link=`${base}?db=${btoa(FB)}&bracket=${bkCode}&who=${encodeURIComponent(myName)}__${encodeURIComponent(myEmoji)}`;
   const msg=`Join my bracket "${bkState?.name||'Bracket'}" 🏆\n\nTap to join:\n${link}`;
   if(navigator.share)navigator.share({title:bkState?.name||'Bracket',text:msg,url:link});
   else navigator.clipboard?.writeText(bkCode).then(()=>toast('📋 Bracket code copied: '+bkCode));
@@ -1643,10 +1675,30 @@ function handleUrlParams(){
     return;
   }
   // ── Join existing bracket: ?bracket=CODE ──
-  if(urlBracket && myName){
-    document.getElementById('bracket-join-in').value=urlBracket;
-    document.getElementById('btn-bracket-join').disabled=false;
-    setHomeMode('brackets');
+  if(urlBracket){
+    if(myName){
+      // Auto-join immediately
+      setTimeout(async function(){
+        var code = urlBracket.toUpperCase();
+        try{
+          var raw = await fbBkGet(code);
+          var b = normaliseBracket(raw);
+          if(!b) throw new Error('Bracket not found');
+          bkCode=code; bkState=b; bkLastStr=JSON.stringify(b);
+          await mergeAndSaveBracket(function(s){ s.members[myId]={name:myName,emoji:myEmoji}; });
+          launchBracket(); startBkPolling();
+        }catch(e){ 
+          // Fall back to pre-fill so user can try manually
+          document.getElementById('bracket-join-in').value=code;
+          document.getElementById('btn-bracket-join').disabled=false;
+          setHomeMode('brackets');
+          toast('⚠️ Could not auto-join: '+e.message);
+        }
+      }, 50);
+    } else {
+      // No name yet — save code and restore after setup
+      sessionStorage.setItem('pending-bracket', urlBracket);
+    }
     return;
   }
   // ── Pre-fill room code if provided without auto-join ──
