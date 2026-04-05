@@ -437,32 +437,6 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 
 <script>
 
-// ── DEBUG ──────────────────────────────────────
-(function(){
-  var panel = document.createElement('div');
-  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.95);color:#0f0;font-family:monospace;font-size:11px;padding:8px;z-index:9999;max-height:40vh;overflow-y:auto;border-top:2px solid #0f0';
-  panel.innerHTML = '<b style="color:#ff0">🔍 DEBUG</b><div id="dbg-out"></div>';
-  document.body.appendChild(panel);
-  window._dbg = document.getElementById('dbg-out');
-})();
-function log(msg, color) {
-  var el = window._dbg;
-  if(!el) return;
-  var d = document.createElement('div');
-  d.style.color = color||'#0f0';
-  d.textContent = (new Date()).toISOString().slice(11,19)+' '+msg;
-  el.appendChild(d);
-  el.parentNode.scrollTop = el.parentNode.scrollHeight;
-}
-window.onerror = function(msg,src,line,col,err){
-  log('ERR: '+msg+' L'+line, '#f00');
-  return false;
-};
-window.addEventListener('unhandledrejection',function(e){
-  log('PROMISE ERR: '+(e.reason?e.reason.message||String(e.reason):String(e)),'#f00');
-});
-log('Script started','#ff0');
-// ── END DEBUG ──────────────────────────────────
 
 // ════════════════════════════════════════════════
 // CONSTANTS & STATE
@@ -471,7 +445,6 @@ const EMOJIS = ['🎵','🎸','🥁','🎹','🎺','🎻','🎤','🎧','🦄','
 const LL_LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
 
 let FB = 'https://rate-the-song-default-rtdb.firebaseio.com';
-log('FB hardcoded: ' + FB, '#0ff');
 let myId = localStorage.getItem('rtv-id') || (()=>{const i=uid();localStorage.setItem('rtv-id',i);return i;})();
 let myName = localStorage.getItem('rtv-name') || '';
 let myEmoji = localStorage.getItem('rtv-emoji') || '🎵';
@@ -498,6 +471,19 @@ const urlRoom   = params.get('room');
 const urlTitle  = params.get('title');
 const urlArtist = params.get('artist');
 const urlStoreId = params.get('storeid');
+const urlWho     = params.get('who');
+// Restore identity from shortcut URL so user doesn't have to re-enter name
+if(urlWho){
+  const whoParts = urlWho.split('__');
+  if(whoParts[0] && !myName){
+    myName = decodeURIComponent(whoParts[0]);
+    localStorage.setItem('rtv-name', myName);
+  }
+  if(whoParts[1]){
+    myEmoji = decodeURIComponent(whoParts[1]);
+    localStorage.setItem('rtv-emoji', myEmoji);
+  }
+}
 if(urlDb){ try{ FB=atob(urlDb); localStorage.setItem('rtv-fb',FB); }catch(e){} }
 
 // ════════════════════════════════════════════════
@@ -507,7 +493,7 @@ function uid(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 function uid8(){ return Math.random().toString(36).slice(2,10); }
 function timeAgo(ts){ const s=(Date.now()-ts)/1e3; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function showScreen(id){ log('showScreen('+id+')', '#0ff'); var el=document.getElementById(id); if(!el){log('ERROR: element #'+id+' not found!','#f00');return;} document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); el.classList.add('on'); log('#'+id+' now visible','#0f0'); }
+function showScreen(id){ const el=document.getElementById(id); if(!el)return; document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); el.classList.add('on'); }
 let _tt; function toast(msg){ let t=document.querySelector('.toast'); if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);} t.textContent=msg; clearTimeout(_tt); _tt=setTimeout(()=>t?.remove(),3000); }
 function setDot(id,s){ const d=document.getElementById(id); if(!d)return; d.className='dot'+(s==='sync'?' sync':s==='err'?' err':''); }
 function scoreColor(s){ if(s>=8)return '#4cd97b'; if(s>=5)return '#ffd700'; if(s>=3)return '#ff9340'; return '#ff5f5f'; }
@@ -588,8 +574,7 @@ function startBkPolling(){
 // ════════════════════════════════════════════════
 // FIREBASE SETUP SCREEN
 // ════════════════════════════════════════════════
-// ── Firebase Setup ──────────────────────────────
-// Button is always tappable — validate on click, no event magic needed
+// ── Firebase Setup // Button is always tappable — validate on click, no event magic needed
 document.getElementById('btn-test-fb').onclick = function(){
   const fbIn = document.getElementById('fb-in');
   const url  = (fbIn.value || '').trim().replace(/\/+$/, '');
@@ -616,7 +601,7 @@ document.getElementById('btn-test-fb').onclick = function(){
   setTimeout(function(){ showScreen(myName ? 's-home' : 's-setup'); }, 600);
 };
 
-log('Calling showScreen, myName=' + JSON.stringify(myName)); showScreen(myName?'s-home':'s-setup'); log('showScreen done, target=' + (myName?'s-home':'s-setup'), '#0f0');
+showScreen(myName?'s-home':'s-setup');
 
 // ════════════════════════════════════════════════
 // NAME SETUP SCREEN
@@ -741,7 +726,6 @@ document.querySelectorAll('#s-app .tab').forEach(t=>{
   };
 });
 
-// ── Add song form ──
 document.getElementById('btn-show-form').onclick=()=>{
   document.getElementById('btn-show-form').style.display='none'; document.getElementById('btn-shortcut').style.display='none';
   document.getElementById('add-form').style.display='flex'; document.getElementById('title-in').focus();
@@ -770,7 +754,6 @@ function resetLLForm(){
   selectedArtwork=null; selectedAppleMusicUrl=null;
 }
 
-// ── iTunes search ──
 async function searchItunes(query){
   try{ const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=6&country=us`); if(!r.ok)return []; const d=await r.json(); return d.results||[]; }catch(e){return[];}
 }
@@ -797,7 +780,6 @@ function pickLLResult(r){
   document.getElementById('btn-add-song').disabled=false;
 }
 
-// ── Auto-add from shortcut ──
 async function autoAddSong(title,artist,artworkUrl,appleMusicUrl){
   const all=llState?.songs||[];
   const dup=all.find(s=>s.title.trim().toLowerCase()===title.trim().toLowerCase()&&s.artist.trim().toLowerCase()===artist.trim().toLowerCase());
@@ -807,15 +789,13 @@ async function autoAddSong(title,artist,artworkUrl,appleMusicUrl){
   toast(`🎵 "${title}" added!`);
 }
 
-// ── Shortcut modal ──
-function getShortcutUrl(){ return `${location.origin+location.pathname}?db=${btoa(FB)}&room=${roomCode}&title=TITLE&artist=ARTIST&storeid=STOREID`; }
+function getShortcutUrl(){ const base=location.origin+location.pathname; return `${base}?db=${btoa(FB)}&room=${roomCode}&who=${encodeURIComponent(myName)}__${encodeURIComponent(myEmoji)}&title=TITLE&artist=ARTIST&storeid=STOREID`; }
 document.getElementById('btn-shortcut').onclick=()=>{ document.getElementById('shortcut-url-display').textContent=getShortcutUrl(); document.getElementById('shortcut-modal').classList.add('on'); };
 document.getElementById('btn-close-shortcut').onclick=()=>document.getElementById('shortcut-modal').classList.remove('on');
 document.getElementById('shortcut-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('shortcut-modal').classList.remove('on');};
 document.getElementById('btn-copy-shortcut').onclick=()=>navigator.clipboard?.writeText(getShortcutUrl()).then(()=>toast('📋 Copied!'));
 
-// ── Already-added modal ──
-let _amStars=0;
+// ── Already-added modal let _amStars=0;
 function showAlreadyModal(song){
   amSongId=song.id; _amStars=song.ratings?.[myId]?.stars||0;
   const img=document.getElementById('am-art'),ph=document.getElementById('am-art-ph');
@@ -835,12 +815,10 @@ document.getElementById('am-submit').onclick=async function(){
   await mergeAndSave(s=>{const song=s.songs.find(x=>x.id===sid);if(!song)return;if(!song.ratings)song.ratings={};song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};});
 };
 
-// ── Event delegation for LL rate buttons ──
-document.getElementById('tab-now').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
+// ── Event delegation for LL rate buttons document.getElementById('tab-now').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
 document.getElementById('tab-hist').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
 
-// ── LL rate modal ──
-let _mStars=0;
+// ── LL rate modal let _mStars=0;
 function openLLModal(songId){ const song=llState?.songs?.find(s=>s.id===songId);if(!song)return; mSongId=songId; _mStars=song.ratings?.[myId]?.stars||0; document.getElementById('m-title').textContent=song.title; document.getElementById('m-artist').textContent=song.artist; document.getElementById('m-submit').textContent=_mStars?'Update Rating':'Submit Rating'; document.getElementById('m-submit').disabled=(_mStars===0); buildLLStars(_mStars); document.getElementById('modal').classList.add('on'); }
 function buildLLStars(lit){ const c=document.getElementById('m-stars');c.innerHTML='';[1,2,3,4,5].forEach(s=>{const b=document.createElement('span');b.className='ms'+(s<=lit?' l':'');b.textContent='★';b.onclick=()=>{_mStars=s;buildLLStars(s);document.getElementById('m-label').textContent=LL_LABELS[s];document.getElementById('m-submit').disabled=false;document.getElementById('m-submit').textContent='Submit Rating';};c.appendChild(b);});document.getElementById('m-label').textContent=lit?LL_LABELS[lit]:'Tap a star to rate';}
 function closeLLModal(){ document.getElementById('modal').classList.remove('on'); mSongId=null; }
@@ -851,7 +829,6 @@ document.getElementById('m-submit').onclick=async function(){
   await mergeAndSave(s=>{const song=s.songs.find(x=>x.id===sid);if(!song)return;if(!song.ratings)song.ratings={};song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};});
 };
 
-// ── LL render ──
 function renderLL(){
   if(!llState)return;
   const songs=llState.songs||[],users=llState.users||{},cur=songs[0]||null,hist=songs.slice(1);
@@ -976,14 +953,15 @@ function renderBkCreate(){
       <!-- Shortcut panel -->
       <div id="bk-import-tab-shortcut" style="background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">Import an entire playlist in one tap</div>
-        <div style="font-size:12px;color:var(--mu);line-height:1.7;margin-bottom:12px">
-          <div>1. Open <strong>Shortcuts</strong> app → tap <strong>+</strong></div>
-          <div>2. Add action: <strong>"Find Music"</strong> → set Filter to your playlist</div>
-          <div>3. Add action: <strong>"Repeat with Each"</strong> item in Music</div>
-          <div>4. Inside the loop, add <strong>"Text"</strong>: type the Magic Variable <strong>Name</strong>, then <code>__</code>, then Magic Variable <strong>Artist</strong></div>
-          <div>5. Add action: <strong>"Combine Text"</strong> → separator <code>||</code></div>
-          <div>6. Add action: <strong>"URL Encode"</strong> on the combined text</div>
-          <div>7. Add action: <strong>"Open URLs"</strong> → paste the URL below, replace <code>SONGS</code> with the URL Encoded result</div>
+        <div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px">
+          <div><strong>1.</strong> Open <strong>Shortcuts</strong> app → tap <strong>+</strong> → <strong>Add Action</strong></div>
+          <div><strong>2.</strong> Search <strong>"Get Playlist"</strong> → add it → tap the playlist field → pick your playlist</div>
+          <div><strong>3.</strong> Add <strong>"Repeat with Each"</strong> → confirm it repeats items in your Playlist</div>
+          <div><strong>4.</strong> Inside the loop, add <strong>"Text"</strong> → tap inside the text box → tap the variable picker → choose <strong>Repeat Item → Name</strong> → type <code>__</code> → tap variable picker again → <strong>Repeat Item → Artist</strong></div>
+          <div><strong>5.</strong> Outside the loop, add <strong>"Combine Text"</strong> → tap separator → choose <strong>Custom</strong> → type <code>||</code></div>
+          <div><strong>6.</strong> Add <strong>"URL Encode"</strong> (connects automatically)</div>
+          <div><strong>7.</strong> Add <strong>"Open URLs"</strong> → paste the URL below → find <code>SONGS</code> in the URL → replace it with the <strong>URL Encoded Text</strong> variable</div>
+          <div><strong>8.</strong> Rename shortcut → tap <strong>Done</strong> → long-press → <strong>Add to Home Screen</strong></div>
         </div>
         <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:10px" id="bk-shortcut-url-display"></div>
         <button class="bp" id="bk-copy-shortcut-url" style="margin-top:0;font-size:13px;padding:11px">Copy Shortcut URL 📋</button>
@@ -1038,7 +1016,7 @@ function renderBkCreate(){
 
   // Shortcut URL
   const base=location.origin+location.pathname;
-  const shortcutUrl=`${base}?db=${btoa(FB)}&newbracket=1&songs=SONGS`;
+  const shortcutUrl=`${base}?db=${btoa(FB)}&newbracket=1&who=${encodeURIComponent(myName)}__${encodeURIComponent(myEmoji)}&songs=SONGS`;
   document.getElementById('bk-shortcut-url-display').textContent=shortcutUrl;
   document.getElementById('bk-copy-shortcut-url').addEventListener('click',()=>{
     navigator.clipboard?.writeText(shortcutUrl).then(()=>toast('📋 Shortcut URL copied!'));
@@ -1066,7 +1044,6 @@ function removeBkCreateSong(id){
   renderBkCreate();
 }
 
-// ── Apple Music playlist import ──
 async function doImportPlaylist(){
   // This is now handled by iOS Shortcut or paste — kept for backward compatibility
 }
@@ -1164,7 +1141,6 @@ async function doCreateBracket(){
   }catch(e){ toast('⚠️ '+e.message); }
 }
 
-// ── Bracket song search modal ──
 function openBkSearchModal(){
   document.getElementById('bks-input').value='';
   document.getElementById('bks-results').style.display='none';
@@ -1207,7 +1183,6 @@ function renderBracket(){
   else if(b.status==='complete')renderBkComplete(b);
 }
 
-// ── RATING PHASE ──
 function renderBkRating(b){
   const myRatings=b.ratings?.[myId]||{};
   const total=b.songs.length, rated=Object.keys(myRatings).length;
@@ -1257,7 +1232,6 @@ function renderBkRating(b){
   }
 }
 
-// ── VOTING PHASE ──
 function renderBkVoting(b){
   const totalRounds=b.totalRounds||Math.log2(b.songs.length);
   let html=`
@@ -1336,7 +1310,6 @@ async function castVote(matchupId,songId){
   });
 }
 
-// ── COMPLETE PHASE ──
 function renderBkComplete(b){
   const winner=bkSong(b,b.bracketWinner);
   // Build ranked list from matchup history
@@ -1414,7 +1387,6 @@ function renderBkComplete(b){
 // BRACKET — MODALS
 // ════════════════════════════════════════════════
 
-// ── Rate song modal ──
 function openBkRateModal(songId){
   const b=bkState; if(!b)return;
   const song=bkSong(b,songId); if(!song)return;
@@ -1461,7 +1433,6 @@ document.getElementById('bkr-save').onclick=async function(){
   });
 };
 
-// ── Progress modal ──
 function openBkProgressModal(){
   const b=bkState; if(!b)return;
   const total=b.songs.length;
@@ -1483,7 +1454,6 @@ function openBkProgressModal(){
 document.getElementById('bkp-close').onclick=()=>document.getElementById('bk-progress-modal').classList.remove('on');
 document.getElementById('bk-progress-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('bk-progress-modal').classList.remove('on');};
 
-// ── Share bracket ──
 function shareBracket(){
   const base=location.origin+location.pathname;
   const link=`${base}?db=${btoa(FB)}&bracket=${bkCode}`;
@@ -1492,8 +1462,7 @@ function shareBracket(){
   else navigator.clipboard?.writeText(bkCode).then(()=>toast('📋 Bracket code copied: '+bkCode));
 }
 
-// ── Handle bracket URL param ──
-const urlBracket=params.get('bracket');
+// ── Handle bracket URL param const urlBracket=params.get('bracket');
 const urlNewBracket=params.get('newbracket');
 const urlSongs=params.get('songs');
 
