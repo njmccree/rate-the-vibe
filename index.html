@@ -578,44 +578,30 @@ function startBkPolling(){
 // ════════════════════════════════════════════════
 // ── Firebase Setup ──────────────────────────────
 // Button is always tappable — validate on click, no event magic needed
-document.getElementById('btn-test-fb').onclick = async function(){
+document.getElementById('btn-test-fb').onclick = function(){
   const fbIn = document.getElementById('fb-in');
   const url  = (fbIn.value || '').trim().replace(/\/+$/, '');
   const st   = document.getElementById('fb-status');
 
   if(!url){
-    st.style.color='#ff5f5f'; st.textContent='⚠️ Paste your Firebase database URL above';
+    st.style.color='#ff5f5f';
+    st.textContent='⚠️ Paste your Firebase database URL above';
     return;
   }
   if(!url.includes('firebaseio.com') && !url.includes('firebasedatabase.app')){
-    st.style.color='#ff5f5f'; st.textContent='⚠️ URL should contain firebaseio.com';
+    st.style.color='#ff5f5f';
+    st.textContent='⚠️ URL should contain firebaseio.com — copy it from Firebase console';
     return;
   }
 
-  this.style.opacity='0.5'; this.textContent='Testing…';
-  st.style.color='#ff9340'; st.textContent='Connecting to Firebase…';
-
-  try{
-    // Use a plain GET — no custom headers = no CORS preflight needed
-    // Any HTTP response (even 401/403 if rules expired) means we reached Firebase
-    const r = await fetch(url + '/.json');
-    // r.status 200 or 401 = valid Firebase URL
-    // We accept anything except a network-level failure
-    FB = url; localStorage.setItem('rtv-fb', FB);
-    if(r.status === 401 || r.status === 403){
-      st.style.color='#4cd97b'; st.textContent='✅ Connected! (Update your Firebase rules if you see errors later)';
-    } else {
-      st.style.color='#4cd97b'; st.textContent='✅ Connected!';
-    }
-    this.textContent='Connected ✓';
-    setTimeout(()=>showScreen(myName?'s-home':'s-setup'), 800);
-  }catch(e){
-    // Network-level failure — try saving anyway since URL format looks valid
-    st.style.color='#ff9340'; st.textContent='⚠️ Could not verify — saving anyway. Error: ' + e.message;
-    FB = url; localStorage.setItem('rtv-fb', FB);
-    this.textContent='Saved ✓';
-    setTimeout(()=>showScreen(myName?'s-home':'s-setup'), 1500);
-  }
+  // Save immediately — no network test (works from any origin including GitHub Pages)
+  FB = url;
+  localStorage.setItem('rtv-fb', FB);
+  st.style.color = '#4cd97b';
+  st.textContent = '✅ Saved!';
+  this.textContent = 'Saved ✓';
+  this.style.background = 'linear-gradient(135deg,#4cd97b,#2ecc71)';
+  setTimeout(function(){ showScreen(myName ? 's-home' : 's-setup'); }, 600);
 };
 
 if(FB){ showScreen(myName?'s-home':'s-setup'); } else { showScreen('s-firebase'); }
