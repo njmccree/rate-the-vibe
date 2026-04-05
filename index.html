@@ -576,7 +576,16 @@ function startBkPolling(){
 // ════════════════════════════════════════════════
 const fbIn=document.getElementById('fb-in');
 const btnTestFb=document.getElementById('btn-test-fb');
-fbIn.oninput=()=>btnTestFb.disabled=!fbIn.value.includes('firebaseio.com')&&!fbIn.value.includes('firebasedatabase.app');
+function checkFbInput(){ 
+  const v=fbIn.value.trim();
+  btnTestFb.disabled=!v.includes('firebaseio.com')&&!v.includes('firebasedatabase.app');
+}
+fbIn.oninput=checkFbInput;
+fbIn.onchange=checkFbInput;
+fbIn.onpaste=()=>setTimeout(checkFbInput,50);
+fbIn.onkeyup=checkFbInput;
+// Pre-fill if already saved
+if(FB){ fbIn.value=FB; checkFbInput(); }
 btnTestFb.onclick=async()=>{
   const url=fbIn.value.trim().replace(/\/+$/,'');
   btnTestFb.disabled=true; btnTestFb.textContent='Testing…';
