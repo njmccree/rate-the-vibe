@@ -930,454 +930,370 @@ function renderBkCreate(){
   const remaining=nextValid-n;
   const isValid=isPowerOf2(n)&&n>=4&&n<=64;
   const hasOriginal=bkCreateSongsOriginal.length>0;
+  const savedName=document.getElementById('bk-name-in')?.value||'';
   document.getElementById('bk-body').innerHTML=`
     <div style="margin-top:4px">
       <div class="cl">Bracket Name</div>
-      <input type="text" id="bk-name-in" placeholder="e.g. Summer Bangers 2025..." value="${esc(document.getElementById('bk-name-in')?.value||'')}" autocomplete="off">
+      <input type="text" id="bk-name-in" placeholder="e.g. Summer Bangers 2025..." value="${esc(savedName)}" autocomplete="off">
 
-      <div style="height:16px"></div>
-      <div class="cl">Import from Apple Music Playlist</div>
-      <div style="display:flex;gap:8px">
-        <input type="url" id="bk-playlist-url" placeholder="Paste Apple Music playlist link..." autocomplete="off" autocapitalize="none" style="flex:1;font-size:13px">
-        <button id="bk-import-btn" style="flex-shrink:0;padding:0 14px;background:linear-gradient(135deg,#ff2d55,#ff5f5f);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif">Import</button>
-      </div>
-      <div id="bk-import-status" style="font-size:12px;color:var(--mu);margin-top:6px;min-height:18px"></div>
+      <div style="height:18px"></div>
+      <div class="cl">Add Songs</div>
 
-      <div style="height:12px"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="cl" style="margin-bottom:0">Songs (${n} · valid: 4, 8, 16, 32, 64)</div>
-        ${n>1?`<div style="display:flex;gap:6px">
-          ${!bkCreateIsShuffled?`<button id="bk-shuffle-btn" style="padding:5px 10px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">🔀 Shuffle</button>`:''}
-          ${bkCreateIsShuffled&&hasOriginal?`<button id="bk-restore-btn" style="padding:5px 10px;background:rgba(255,147,64,.1);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">↩️ Restore Order</button>`:''}
-        </div>`:''}
+      <!-- Import tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button id="bk-tab-shortcut" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--or-bdr);background:var(--or-dim);color:var(--or)">⚡ iOS Shortcut</button>
+        <button id="bk-tab-paste" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)">📋 Paste List</button>
+        <button id="bk-tab-search" style="flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)">🔍 Search</button>
       </div>
-      <div style="height:8px"></div>
-      ${n===0?`<div class="info-box">Import a playlist above or tap "+ Add Songs" to search. Valid sizes: 4, 8, 16, 32, or 64.</div>`:''}
-      ${n>0&&!isValid?`<div class="info-box" style="background:rgba(255,95,95,.08);border-color:rgba(255,95,95,.25);color:#ff5f5f">Need ${remaining} more song${remaining!==1?'s':''} to reach ${nextValid}. (Max 64)</div>`:''}
-      ${isValid?`<div class="info-box green">✅ ${n} songs${bkCreateIsShuffled?' · shuffled order':hasOriginal?' · playlist order':''} — ready!</div>`:''}
-      <div id="bk-create-songs-list">${bkCreateSongs.map((s,i)=>`
-        <div class="bk-song" data-sid="${s.id}" style="cursor:default">
-          <div style="font-size:11px;color:var(--mu);width:20px;flex-shrink:0;text-align:center">${i+1}</div>
-          ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}">`:`<div class="bk-art-ph">🎵</div>`}
-          <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
-          <button onclick="removeBkCreateSong('${s.id}')" style="background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
-        </div>`).join('')}</div>
-      <button class="bg" id="bk-add-songs-btn" style="margin-top:8px">+ Add Songs Manually</button>
-      <button class="btn-gold" id="bk-create-btn" ${!isValid?'disabled':''} style="margin-top:12px">Create Bracket 🏆</button>
-      <button class="bg" onclick="showScreen('s-home');setHomeMode('brackets')" style="margin-top:4px">Cancel</button>
-    </div>`;
-  document.getElementById('bk-add-songs-btn').onclick=openBkSearchModal;
-  document.getElementById('bk-create-btn').onclick=doCreateBracket;
-  document.getElementById('bk-import-btn').onclick=doImportPlaylist;
-  document.getElementById('bk-shuffle-btn')?.addEventListener('click',()=>{
-    if(!bkCreateIsShuffled) bkCreateSongsOriginal=[...bkCreateSongs];
-    bkCreateSongs=[...bkCreateSongs].sort(()=>Math.random()-.5);
-    bkCreateIsShuffled=true; renderBkCreate();
-  });
-  document.getElementById('bk-restore-btn')?.addEventListener('click',()=>{
-    bkCreateSongs=[...bkCreateSongsOriginal]; bkCreateIsShuffled=false; renderBkCreate();
-  });
+
+      <!-- Shortcut panel -->
+      <div id="bk-import-tab-shortcut" style="background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Import an entire playlist in one tap</div>
+        <div style="font-size:12px;color:var(--mu);line-height:1.7;margin-bottom:12px">
+          <div>1. Open <strong>Shortcuts</strong> app → tap <strong>+</strong></div>
+          <div>2. Add action: <strong>"Find Music"</strong> → set Filter to your playlist</div>
+          <div>3. Add action: <strong>"Repeat with Each"</strong> item in Music</div>
+          <div>4. Inside the loop, add <strong>"Text"</strong>: type the Magic Variable <strong>Name</strong>, then <code>__</code>, then Magic Variable <strong>Artist</strong></div>
+          <div>5. Add action: <strong>"Combine Text"</strong> → separator <code>||</code></div>
+          <div>6. Add action: <strong>"URL Encode"</strong> on the combined text</div>
+          <div>7. Add action: <strong>"Open URLs"</strong> → paste the URL below, replace <code>SONGS</code> with the URL Encoded result</div>
+        </div>
+        <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:10px" id="bk-shortcut-url-display"></div>
+        <button class="bp" id="bk-copy-shortcut-url" style="margin-top:0;font-size:13px;padding:11px">Copy Shortcut URL 📋</button>
+      </div>
+
+      <!-- Paste panel (hidden by default) -->
+      <div id="bk-import-tab-paste" style="display:none;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">Paste song titles</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:8px">One song per line. Format: <code>Song Name</code> or <code>Song Name - Artist</code></div>
+        <textarea id="bk-paste-area" placeholder="Vampire - Olivia Rodrigo&#10;Blinding Lights - The Weeknd&#10;Bohemian Rhapsody..." style="min-height:120px;font-size:13px"></textarea>
+
+```
+    <div id="bk-import-status" style="font-size:12px;color:var(--mu);margin-top:6px;min-height:18px"></div>
+    <button class="bp" id="bk-paste-btn" style="margin-top:8px;font-size:13px;padding:11px">Import Songs →</button>
+  </div>
+
+  <!-- Songs count + ordering -->
+  ${n>0?`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:600;color:var(--tx)">${n} songs ${isValid?'✅':n>64?'(max 64)':'(need '+remaining+' more for '+nextValid+')'}</div>
+    <div style="display:flex;gap:6px">
+      ${!bkCreateIsShuffled?`<button id="bk-shuffle-btn" style="padding:5px 10px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">🔀 Shuffle</button>`:''}
+      ${bkCreateIsShuffled&&hasOriginal?`<button id="bk-restore-btn" style="padding:5px 10px;background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif">↩️ Restore</button>`:''}
+    </div>
+  </div>`:''}
+  ${!isValid&&n>0?`<div style="font-size:12px;color:#ff5f5f;margin-bottom:8px">Add ${remaining} more song${remaining!==1?'s':''} to reach ${nextValid}.</div>`:''}
+  ${n===0?'<div style="font-size:13px;color:var(--mu);text-align:center;padding:16px 0">No songs yet. Use one of the import methods above.</div>':''}
+
+  <div id="bk-create-songs-list">${bkCreateSongs.map((s,i)=>`
+    <div class="bk-song">
+      <div style="font-size:11px;color:var(--mu);width:20px;flex-shrink:0;text-align:center;font-weight:600">${i+1}</div>
+      ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
+      <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
+      <button onclick="removeBkCreateSong('${s.id}')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
+    </div>`).join('')}</div>
+
+  <div style="height:4px"></div>
+  <button class="btn-gold" id="bk-create-btn" ${!isValid?'disabled':''}>Create Bracket 🏆</button>
+  <button class="bg" onclick="showScreen('s-home');setHomeMode('brackets')">Cancel</button>
+</div>`;
+```
+
+// Tab switching
+const tabs = {shortcut:‘bk-import-tab-shortcut’, paste:‘bk-import-tab-paste’};
+function setImportTab(active){
+document.getElementById(‘bk-tab-shortcut’).style.cssText=`flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid ${active==='shortcut'?'var(--or-bdr)':'var(--bdr)'};background:${active==='shortcut'?'var(--or-dim)':'var(--surf)'};color:${active==='shortcut'?'var(--or)':'var(--mu)'}`;
+document.getElementById(‘bk-tab-paste’).style.cssText=`flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid ${active==='paste'?'var(--or-bdr)':'var(--bdr)'};background:${active==='paste'?'var(--or-dim)':'var(--surf)'};color:${active==='paste'?'var(--or)':'var(--mu)'}`;
+document.getElementById(‘bk-tab-search’).style.cssText=`flex:1;padding:9px 6px;border-radius:10px;font-size:12px;font-family:'Outfit',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--bdr);background:var(--surf);color:var(--mu)`;
+document.getElementById(‘bk-import-tab-shortcut’).style.display=active===‘shortcut’?‘block’:‘none’;
+document.getElementById(‘bk-import-tab-paste’).style.display=active===‘paste’?‘block’:‘none’;
+}
+document.getElementById(‘bk-tab-shortcut’).addEventListener(‘click’,()=>setImportTab(‘shortcut’));
+document.getElementById(‘bk-tab-paste’).addEventListener(‘click’,()=>setImportTab(‘paste’));
+document.getElementById(‘bk-tab-search’).addEventListener(‘click’,()=>{setImportTab(‘none’);openBkSearchModal();});
+
+// Shortcut URL
+const base=location.origin+location.pathname;
+const shortcutUrl=`${base}?db=${btoa(FB)}&newbracket=1&songs=SONGS`;
+document.getElementById(‘bk-shortcut-url-display’).textContent=shortcutUrl;
+document.getElementById(‘bk-copy-shortcut-url’).addEventListener(‘click’,()=>{
+navigator.clipboard?.writeText(shortcutUrl).then(()=>toast(‘📋 Shortcut URL copied!’));
+});
+
+// Paste import
+document.getElementById(‘bk-paste-btn’)?.addEventListener(‘click’, importPastedSongs);
+
+// Ordering
+document.getElementById(‘bk-create-btn’)?.addEventListener(‘click’, doCreateBracket);
+document.getElementById(‘bk-shuffle-btn’)?.addEventListener(‘click’,()=>{
+if(!bkCreateIsShuffled) bkCreateSongsOriginal=[…bkCreateSongs];
+bkCreateSongs=[…bkCreateSongs].sort(()=>Math.random()-.5);
+bkCreateIsShuffled=true; renderBkCreate();
+});
+document.getElementById(‘bk-restore-btn’)?.addEventListener(‘click’,()=>{
+bkCreateSongs=[…bkCreateSongsOriginal]; bkCreateIsShuffled=false; renderBkCreate();
+});
 }
 
 function removeBkCreateSong(id){
-  bkCreateSongs=bkCreateSongs.filter(s=>s.id!==id);
-  bkCreateSongsOriginal=bkCreateSongsOriginal.filter(s=>s.id!==id);
-  if(bkCreateSongs.length===bkCreateSongsOriginal.length) bkCreateIsShuffled=false;
-  renderBkCreate();
+bkCreateSongs=bkCreateSongs.filter(s=>s.id!==id);
+bkCreateSongsOriginal=bkCreateSongsOriginal.filter(s=>s.id!==id);
+if(bkCreateSongs.length===bkCreateSongsOriginal.length) bkCreateIsShuffled=false;
+renderBkCreate();
 }
 
 // ── Apple Music playlist import ──
 async function doImportPlaylist(){
-  const urlEl=document.getElementById('bk-playlist-url');
-  const status=document.getElementById('bk-import-status');
-  const url=(urlEl?.value||'').trim();
-  if(!url||!url.includes('music.apple.com')){status.style.color='#ff5f5f';status.textContent='⚠️ Paste a valid Apple Music playlist link';return;}
-  const btn=document.getElementById('bk-import-btn');
-  btn.disabled=true; btn.textContent='Loading…'; status.style.color='var(--mu)'; status.textContent='Fetching playlist…';
-  try{
-    const tracks=await fetchAppleMusicPlaylist(url);
-    if(!tracks||tracks.length===0)throw new Error('No tracks found in playlist');
-    status.textContent=`Found ${tracks.length} tracks. Fetching artwork…`;
-    const songs=[];
-    // Batch-search each track on iTunes (in chunks to avoid rate limits)
-    for(let i=0;i<Math.min(tracks.length,64);i++){
-      const t=tracks[i];
-      status.textContent=`Loading song ${i+1}/${Math.min(tracks.length,64)}…`;
-      const q=`${t.name} ${t.artist}`;
-      const results=await searchItunes(q);
-      const match=results.find(r=>r.trackName?.toLowerCase()===t.name.toLowerCase())||results[0];
-      songs.push({
-        id:uid8(),
-        title:t.name,
-        artist:t.artist||'Unknown Artist',
-        artworkUrl:match?.artworkUrl100?(match.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb')):null,
-        appleMusicUrl:match?.trackViewUrl||null
-      });
-    }
-    bkCreateSongs=songs;
-    bkCreateSongsOriginal=[...songs];
-    bkCreateIsShuffled=false;
-    status.style.color='#4cd97b'; status.textContent=`✅ ${songs.length} songs imported!`;
-    btn.disabled=false; btn.textContent='Import';
-    renderBkCreate();
-  }catch(e){
-    status.style.color='#ff5f5f'; status.textContent='⚠️ '+e.message+'. Try adding songs manually.';
-    btn.disabled=false; btn.textContent='Import';
-  }
+// This is now handled by iOS Shortcut or paste — kept for backward compatibility
 }
 
-async function fetchAppleMusicPlaylist(url){
-  const idMatch=url.match(/pl\.[a-zA-Z0-9_-]+/);
-  if(!idMatch)throw new Error('Invalid Apple Music URL');
-  const playlistId=idMatch[0];
+async function importPastedSongs(){
+const ta = document.getElementById(‘bk-paste-area’);
+const status = document.getElementById(‘bk-import-status’);
+if(!ta) return;
+const lines = ta.value.split(’\n’).map(l=>l.trim()).filter(Boolean);
+if(!lines.length){ status.style.color=’#ff5f5f’; status.textContent=‘⚠️ Paste at least one song title’; return; }
+if(lines.length > 64){ status.style.color=’#ff5f5f’; status.textContent=‘⚠️ Max 64 songs’; return; }
+const btn = document.getElementById(‘bk-paste-btn’);
+btn.disabled = true; btn.textContent = ‘Searching…’;
+status.style.color = ‘var(–mu)’; status.textContent = ‘Searching iTunes for each song…’;
+const songs = [];
+for(let i=0; i<lines.length; i++){
+const line = lines[i];
+// Support “Song - Artist” or “Song” formats
+const dashIdx = line.lastIndexOf(’ - ‘);
+const title = dashIdx > 0 ? line.slice(0, dashIdx).trim() : line.trim();
+const artistHint = dashIdx > 0 ? line.slice(dashIdx+3).trim() : ‘’;
+status.textContent = `Searching ${i+1}/${lines.length}: ${title}…`;
+const q = artistHint ? `${title} ${artistHint}` : title;
+const results = await searchItunes(q);
+const match = results.find(r => r.trackName?.toLowerCase() === title.toLowerCase()) || results[0];
+if(match){
+songs.push({id:uid8(), title:match.trackName, artist:match.artistName,
+artworkUrl: (match.artworkUrl100||’’).replace(/\d+x\d+bb/,‘600x600bb’),
+appleMusicUrl: match.trackViewUrl||null});
+} else {
+// Add as-is even if iTunes didn’t find it
+songs.push({id:uid8(), title, artist: artistHint||‘Unknown Artist’, artworkUrl:null, appleMusicUrl:null});
+}
+}
+bkCreateSongs = songs;
+bkCreateSongsOriginal = […songs];
+bkCreateIsShuffled = false;
+status.style.color = ‘#4cd97b’; status.textContent = `✅ ${songs.length} songs loaded!`;
+btn.disabled = false; btn.textContent = ‘Import Songs’;
+document.getElementById(‘bk-import-tab-paste’).style.display = ‘none’;
+renderBkCreate();
+}
 
-  // Try multiple CORS proxies in order
-  const proxies=[
-    u=>'https://corsproxy.io/?'+encodeURIComponent(u),
-    u=>'https://api.allorigins.win/get?url='+encodeURIComponent(u),
-    u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u),
-  ];
-  let html='';
-  for(const proxyFn of proxies){
-    try{
-      const ctrl=new AbortController();
-      const timer=setTimeout(()=>ctrl.abort(),10000);
-      const r=await fetch(proxyFn(url),{signal:ctrl.signal});
-      clearTimeout(timer);
-      if(!r.ok)continue;
-      const ct=r.headers.get('content-type')||'';
-      if(ct.includes('json')){const d=await r.json();html=d.contents||d.body||'';}
-      else html=await r.text();
-      if(html.length>1000)break;
-    }catch(e){}
-  }
-  if(!html)throw new Error('Could not reach Apple Music. Check your connection');
-
-  // Extract Apple Music embedded JWT and call their API directly
-  const jwtMatch=html.match(/eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6[A-Za-z0-9\-_]+(?:\.[A-Za-z0-9\-_]+){2}/);
-  if(jwtMatch){
-    try{
-      let allTracks=[];
-      let apiUrl='https://api.music.apple.com/v1/catalog/us/playlists/'+playlistId+'?include=tracks&limit=100';
-      while(apiUrl){
-        const ctrl2=new AbortController();
-        const timer2=setTimeout(()=>ctrl2.abort(),8000);
-        const ar=await fetch(apiUrl,{headers:{'Authorization':'Bearer '+jwtMatch[0],'Origin':'https://music.apple.com'},signal:ctrl2.signal});
-        clearTimeout(timer2);
-        if(!ar.ok)break;
-        const ad=await ar.json();
-        const tracks=ad.data?.[0]?.relationships?.tracks?.data||[];
-        allTracks=[...allTracks,...tracks];
-        const nextPath=ad.data?.[0]?.relationships?.tracks?.next;
-        apiUrl=nextPath?'https://api.music.apple.com'+nextPath:null;
-      }
-      if(allTracks.length>0)return allTracks.map(t=>({name:t.attributes.name,artist:t.attributes.artistName}));
-    }catch(e){}
-  }
-
-  // Parse Ember Fastboot shoebox SSR data
-  for(const m of html.matchAll(/<script type="fastboot\/shoebox"[^>]*>([\s\S]*?)<\/script>/gi)){
-    try{
-      const tracks=[];
-      const re=/"name":"((?:[^"\\]|\\.)*)","(?:artistName|artist)":"((?:[^"\\]|\\.)*?)"/g;
-      let mt;
-      while((mt=re.exec(m[1]))!==null){
-        const name=mt[1].replace(/\\"/g,'"');
-        const artist=mt[2].replace(/\\"/g,'"');
-        if(name&&artist&&name.length<200)tracks.push({name,artist});
-      }
-      const seen=new Set();
-      const unique=tracks.filter(t=>{const k=t.name+'|'+t.artist;if(seen.has(k))return false;seen.add(k);return true;});
-      if(unique.length>=2)return unique;
-    }catch(e){}
-  }
-
-  // Parse JSON-LD schema.org
-  for(const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)){
-    try{
-      const ld=JSON.parse(m[1]);
-      if(ld?.['@type']==='MusicPlaylist'&&ld.track?.length>0)
-        return ld.track.map(t=>({name:t.name,artist:t.byArtist?.name||'Unknown'}));
-    }catch(e){}
-  }
-
-  // Broad scan for trackName/artistName pairs anywhere in the page
-  const tracks2=[];
-  const re2=/"trackName":"((?:[^"\\]|\\.)*)","[^"]*":"(?:[^"\\]|\\.)*","artistName":"((?:[^"\\]|\\.)*)"/g;
-  let m2;
-  while((m2=re2.exec(html))!==null){
-    tracks2.push({name:m2[1].replace(/\\"/g,'"'),artist:m2[2].replace(/\\"/g,'"')});
-  }
-  if(tracks2.length>=2){
-    const seen=new Set();
-    return tracks2.filter(t=>{const k=t.name+'|'+t.artist;if(seen.has(k))return false;seen.add(k);return true;});
-  }
-
-  throw new Error('Could not read playlist. It may be private, or Apple is blocking access');
+// Handle ?songs= URL param from iOS Shortcut
+async function handleShortcutSongs(encoded){
+try{
+const decoded = decodeURIComponent(encoded);
+const pairs = decoded.split(’||’).map(p => {
+const sep = p.indexOf(’__’);
+if(sep > 0) return { name: p.slice(0,sep), artist: p.slice(sep+2) };
+return { name: p, artist: ‘’ };
+}).filter(p => p.name);
+if(!pairs.length) return;
+// Go straight to bracket create with these songs
+bkCreateSongs = []; bkCreateSongsOriginal = []; bkCreateIsShuffled = false;
+showScreen(‘s-bracket’);
+document.getElementById(‘bk-me-pill’).textContent = myEmoji+’ ‘+myName;
+document.getElementById(‘bk-header-title’).textContent = ‘New Bracket’;
+document.getElementById(‘bk-body’).innerHTML = `<div style="padding:30px 0;text-align:center"><div style="font-size:36px;margin-bottom:10px">⏳</div><div style="font-size:15px;font-weight:600">Importing ${pairs.length} songs…</div><div id="bk-shortcut-status" style="font-size:13px;color:var(--mu);margin-top:6px"></div></div>`;
+const songs = [];
+for(let i=0; i<Math.min(pairs.length,64); i++){
+const p = pairs[i];
+document.getElementById(‘bk-shortcut-status’).textContent = `Loading ${i+1}/${Math.min(pairs.length,64)}: ${p.name}`;
+const q = p.artist ? `${p.name} ${p.artist}` : p.name;
+const results = await searchItunes(q);
+const match = results.find(r => r.trackName?.toLowerCase() === p.name.toLowerCase()) || results[0];
+if(match){
+songs.push({id:uid8(), title:match.trackName, artist:match.artistName,
+artworkUrl:(match.artworkUrl100||’’).replace(/\d+x\d+bb/,‘600x600bb’),
+appleMusicUrl:match.trackViewUrl||null});
+} else {
+songs.push({id:uid8(), title:p.name, artist:p.artist||‘Unknown Artist’, artworkUrl:null, appleMusicUrl:null});
+}
+}
+bkCreateSongs = songs; bkCreateSongsOriginal = […songs]; bkCreateIsShuffled = false;
+renderBkCreate();
+} catch(e) { toast(‘⚠️ Could not load songs from Shortcut’); renderBkCreate(); }
 }
 
 async function doCreateBracket(){
-  const nameEl=document.getElementById('bk-name-in');
-  const name=(nameEl?.value||'').trim()||`${myName}'s Bracket`;
-  const code=uid();
-  const bracket={
-    name,hostId:myId,createdAt:Date.now(),status:'rating',
-    songs:bkCreateSongs,
-    members:{[myId]:{name:myName,emoji:myEmoji}},
-    ratings:{},readyMembers:{},matchups:{},currentRound:0,totalRounds:Math.log2(bkCreateSongs.length),bracketWinner:null
-  };
-  try{
-    await fbBkPut(code,bracket);
-    bkCode=code; bkState=normaliseBracket(await fbBkGet(code));
-    bkLastStr=JSON.stringify(bkState);
-    launchBracket();
-  }catch(e){ toast('⚠️ '+e.message); }
+const nameEl=document.getElementById(‘bk-name-in’);
+const name=(nameEl?.value||’’).trim()||`${myName}'s Bracket`;
+const code=uid();
+const bracket={
+name,hostId:myId,createdAt:Date.now(),status:‘rating’,
+songs:bkCreateSongs,
+members:{[myId]:{name:myName,emoji:myEmoji}},
+ratings:{},readyMembers:{},matchups:{},currentRound:0,totalRounds:Math.log2(bkCreateSongs.length),bracketWinner:null
+};
+try{
+await fbBkPut(code,bracket);
+bkCode=code; bkState=normaliseBracket(await fbBkGet(code));
+bkLastStr=JSON.stringify(bkState);
+launchBracket();
+}catch(e){ toast(’⚠️ ’+e.message); }
 }
 
 // ── Bracket song search modal ──
 function openBkSearchModal(){
-  document.getElementById('bks-input').value='';
-  document.getElementById('bks-results').style.display='none';
-  document.getElementById('bks-added').innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join('');
-  document.getElementById('bk-search-modal').classList.add('on');
+document.getElementById(‘bks-input’).value=’’;
+document.getElementById(‘bks-results’).style.display=‘none’;
+document.getElementById(‘bks-added’).innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join(’’);
+document.getElementById(‘bk-search-modal’).classList.add(‘on’);
 }
-document.getElementById('bks-done').onclick=()=>{ document.getElementById('bk-search-modal').classList.remove('on'); renderBkCreate(); };
-document.getElementById('bk-search-modal').onclick=e=>{if(e.target===e.currentTarget){document.getElementById('bk-search-modal').classList.remove('on');renderBkCreate();}};
-document.getElementById('bks-input').oninput=function(){
-  clearTimeout(bkSearchTimer); const q=this.value.trim(); if(q.length<2){document.getElementById('bks-results').style.display='none';return;}
-  bkSearchTimer=setTimeout(async()=>{
-    const results=await searchItunes(q);
-    const box=document.getElementById('bks-results'); if(!results.length){box.style.display='none';return;}
-    box.style.display='block';
-    box.innerHTML=results.map((r,i)=>`<div class="bks-r" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)"><img src="${r.artworkUrl60||r.artworkUrl100}" style="width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0"><div style="min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.trackName)}</div><div style="font-size:11px;color:var(--mu)">${esc(r.artistName)}</div></div><div style="flex-shrink:0;font-size:20px;color:var(--or)">+</div></div>`).join('');
-    box.querySelectorAll('.bks-r').forEach((el,i)=>el.addEventListener('click',()=>addBkCreateSong(results[i])));
-  },400);
+document.getElementById(‘bks-done’).onclick=()=>{ document.getElementById(‘bk-search-modal’).classList.remove(‘on’); renderBkCreate(); };
+document.getElementById(‘bk-search-modal’).onclick=e=>{if(e.target===e.currentTarget){document.getElementById(‘bk-search-modal’).classList.remove(‘on’);renderBkCreate();}};
+document.getElementById(‘bks-input’).oninput=function(){
+clearTimeout(bkSearchTimer); const q=this.value.trim(); if(q.length<2){document.getElementById(‘bks-results’).style.display=‘none’;return;}
+bkSearchTimer=setTimeout(async()=>{
+const results=await searchItunes(q);
+const box=document.getElementById(‘bks-results’); if(!results.length){box.style.display=‘none’;return;}
+box.style.display=‘block’;
+box.innerHTML=results.map((r,i)=>`<div class="bks-r" data-i="${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)"><img src="${r.artworkUrl60||r.artworkUrl100}" style="width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0"><div style="min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.trackName)}</div><div style="font-size:11px;color:var(--mu)">${esc(r.artistName)}</div></div><div style="flex-shrink:0;font-size:20px;color:var(--or)">+</div></div>`).join(’’);
+box.querySelectorAll(’.bks-r’).forEach((el,i)=>el.addEventListener(‘click’,()=>addBkCreateSong(results[i])));
+},400);
 };
 function addBkCreateSong(r){
-  if(bkCreateSongs.find(s=>s.title===r.trackName&&s.artist===r.artistName)){toast('Already added!');return;}
-  if(bkCreateSongs.length>=64){toast('Max 64 songs');return;}
-  const song={id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||'').replace(/\d+x\d+bb/,'600x600bb'),appleMusicUrl:r.trackViewUrl||null};
-  bkCreateSongs.push(song);
-  // Keep original in sync if not shuffled
-  if(!bkCreateIsShuffled) bkCreateSongsOriginal.push(song);
-  document.getElementById('bks-added').innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join('');
-  document.getElementById('bks-input').value=''; document.getElementById('bks-results').style.display='none';
-  toast(`✓ "${r.trackName}" added`);
+if(bkCreateSongs.find(s=>s.title===r.trackName&&s.artist===r.artistName)){toast(‘Already added!’);return;}
+if(bkCreateSongs.length>=64){toast(‘Max 64 songs’);return;}
+const song={id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artworkUrl100||’’).replace(/\d+x\d+bb/,‘600x600bb’),appleMusicUrl:r.trackViewUrl||null};
+bkCreateSongs.push(song);
+// Keep original in sync if not shuffled
+if(!bkCreateIsShuffled) bkCreateSongsOriginal.push(song);
+document.getElementById(‘bks-added’).innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join(’’);
+document.getElementById(‘bks-input’).value=’’; document.getElementById(‘bks-results’).style.display=‘none’;
+toast(`✓ "${r.trackName}" added`);
 }
 
 // ════════════════════════════════════════════════
 // BRACKET — MAIN RENDER
 // ════════════════════════════════════════════════
 function renderBracket(){
-  if(!bkState||!bkCode)return;
-  const b=bkState;
-  document.getElementById('bk-header-title').textContent=b.name||'Bracket';
-  if(b.status==='rating')renderBkRating(b);
-  else if(b.status==='voting')renderBkVoting(b);
-  else if(b.status==='complete')renderBkComplete(b);
+if(!bkState||!bkCode)return;
+const b=bkState;
+document.getElementById(‘bk-header-title’).textContent=b.name||‘Bracket’;
+if(b.status===‘rating’)renderBkRating(b);
+else if(b.status===‘voting’)renderBkVoting(b);
+else if(b.status===‘complete’)renderBkComplete(b);
 }
 
 // ── RATING PHASE ──
 function renderBkRating(b){
-  const myRatings=b.ratings?.[myId]||{};
-  const total=b.songs.length, rated=Object.keys(myRatings).length;
-  const allRated=allMembersRatedAll(b);
-  const iReady=!!b.readyMembers?.[myId];
-  const allReady=allMembersReady(b);
-  document.getElementById('bk-body').innerHTML=`
-    <div class="codebar" style="margin-bottom:14px">
-      <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div>
-      <button class="shbtn" id="bk-share-btn">Share 📤</button>
-    </div>
-    <div class="info-box" style="margin-bottom:14px">
-      <strong>Rating Phase</strong> · Rate all ${total} songs privately. Once everyone's done, you can start the bracket.
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-size:13px;font-weight:600">Your progress: ${rated}/${total}</div>
-      <button onclick="openBkProgressModal()" style="background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--mu);font-size:12px;cursor:pointer">👥 Group</button>
-    </div>
-    <div class="score-bar" style="margin-bottom:16px"><div class="score-fill" style="width:${total?rated/total*100:0}%;background:var(--or)"></div></div>
-    ${b.songs.map(s=>{
-      const r=myRatings[s.id];
-      const hasRating=r!==undefined;
-      return`<div class="bk-song ${hasRating?'rated':''}" style="cursor:pointer" onclick="openBkRateModal('${s.id}')">
-        ${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
-        <div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
-        ${hasRating?`<div class="bk-rating-badge" style="color:${scoreColor(r)}">${r}</div>`:`<div class="bk-unrated">Tap to rate</div>`}
-      </div>`;
-    }).join('')}
-    ${allRated?`
-      <div class="info-box green" style="margin-top:8px">✅ Everyone has rated all songs!</div>
-      <button class="btn-gold" id="bk-ready-btn" ${iReady?'disabled':''} style="margin-top:8px">
-        ${iReady?'⏳ Waiting for others…':'🏆 Ready to Start Bracket!'}
-      </button>
-      <div style="font-size:12px;color:var(--mu);text-align:center;margin-top:8px">
-        ${Object.keys(b.members).filter(id=>b.readyMembers?.[id]).length}/${Object.keys(b.members).length} members ready
-      </div>
-    `:`<div style="font-size:13px;color:var(--mu);text-align:center;margin-top:12px">Rating others' songs will remain private until everyone is ready.</div>`}
-  `;
-  document.getElementById('bk-share-btn')?.addEventListener('click',shareBracket);
-  if(allRated&&!iReady){
-    document.getElementById('bk-ready-btn')?.addEventListener('click',async()=>{
-      await mergeAndSaveBracket(b=>{
-        b.readyMembers[myId]=true;
-        if(allMembersReady(b)){ generateFirstRound(b); b.status='voting'; }
-      });
-    });
-  }
+const myRatings=b.ratings?.[myId]||{};
+const total=b.songs.length, rated=Object.keys(myRatings).length;
+const allRated=allMembersRatedAll(b);
+const iReady=!!b.readyMembers?.[myId];
+const allReady=allMembersReady(b);
+document.getElementById(‘bk-body’).innerHTML=` <div class="codebar" style="margin-bottom:14px"> <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div> <button class="shbtn" id="bk-share-btn">Share 📤</button> </div> <div class="info-box" style="margin-bottom:14px"> <strong>Rating Phase</strong> · Rate all ${total} songs privately. Once everyone's done, you can start the bracket. </div> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"> <div style="font-size:13px;font-weight:600">Your progress: ${rated}/${total}</div> <button onclick="openBkProgressModal()" style="background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--mu);font-size:12px;cursor:pointer">👥 Group</button> </div> <div class="score-bar" style="margin-bottom:16px"><div class="score-fill" style="width:${total?rated/total*100:0}%;background:var(--or)"></div></div> ${b.songs.map(s=>{ const r=myRatings[s.id]; const hasRating=r!==undefined; return`<div class="bk-song ${hasRating?'rated':''}" style="cursor:pointer" onclick="openBkRateModal('${s.id}')">
+${s.artworkUrl?`<img class="bk-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="bk-art-ph">🎵</div>`}
+<div class="bk-info"><div class="bk-title">${esc(s.title)}</div><div class="bk-artist">${esc(s.artist)}</div></div>
+${hasRating?`<div class="bk-rating-badge" style="color:${scoreColor(r)}">${r}</div>`:`<div class="bk-unrated">Tap to rate</div>`}
+</div>`; }).join('')} ${allRated?`
+<div class="info-box green" style="margin-top:8px">✅ Everyone has rated all songs!</div>
+<button class=“btn-gold” id=“bk-ready-btn” ${iReady?‘disabled’:’’} style=“margin-top:8px”>
+${iReady?‘⏳ Waiting for others…’:‘🏆 Ready to Start Bracket!’}
+</button>
+<div style="font-size:12px;color:var(--mu);text-align:center;margin-top:8px">
+${Object.keys(b.members).filter(id=>b.readyMembers?.[id]).length}/${Object.keys(b.members).length} members ready
+</div>
+`:`<div style="font-size:13px;color:var(--mu);text-align:center;margin-top:12px">Rating others’ songs will remain private until everyone is ready.</div>`} `;
+document.getElementById(‘bk-share-btn’)?.addEventListener(‘click’,shareBracket);
+if(allRated&&!iReady){
+document.getElementById(‘bk-ready-btn’)?.addEventListener(‘click’,async()=>{
+await mergeAndSaveBracket(b=>{
+b.readyMembers[myId]=true;
+if(allMembersReady(b)){ generateFirstRound(b); b.status=‘voting’; }
+});
+});
+}
 }
 
 // ── VOTING PHASE ──
 function renderBkVoting(b){
-  const totalRounds=b.totalRounds||Math.log2(b.songs.length);
-  let html=`
-    <div class="codebar" style="margin-bottom:14px">
-      <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div>
-      <button class="shbtn" id="bk-share-btn">Share 📤</button>
-    </div>`;
-  for(let r=0;r<=b.currentRound;r++){
-    const matchups=getMatchupsForRound(b,r);
-    if(!matchups.length)continue;
-    html+=`<div class="round-label">${roundName(b,r)}</div>`;
-    matchups.forEach(m=>{
-      const s1=bkSong(b,m.song1),s2=bkSong(b,m.song2);
-      if(!s1||!s2)return;
-      const isDone=!!m.winner;
-      const myVote=m.votes?.[myId];
-      const memberIds=Object.keys(b.members);
-      const votedCount=Object.keys(m.votes||{}).length;
-      const winnerSong=isDone?bkSong(b,m.winner):null;
-      if(isDone){
-        // Reveal ratings
-        const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
-        html+=`<div class="matchup done">
-          <div class="matchup-header">✅ ${roundName(b,r)} · All votes in</div>
-          <div class="matchup-songs">
-            <div class="ms-side ${m.winner===s1.id?'winner':'loser'}">
-              ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
-              <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div>
-              ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}</div>`:''}
-              ${m.winner===s1.id?`<div class="ms-win-label">🏆 WINNER</div>`:''}
-            </div>
-            <div class="matchup-vs">vs</div>
-            <div class="ms-side ${m.winner===s2.id?'winner':'loser'}">
-              ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
-              <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div>
-              ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}</div>`:''}
-              ${m.winner===s2.id?`<div class="ms-win-label">🏆 WINNER</div>`:''}
-            </div>
-          </div>
-          <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`${u.emoji} ${r1!==undefined?r1:'?'} / ${r2!==undefined?r2:'?'}`;}).join(' · ')}</div>
-        </div>`;
-      } else {
-        // Voting open
-        const canVote=!myVote;
-        html+=`<div class="matchup active" data-mid="${m.id}">
-          <div class="matchup-header">🗳️ ${roundName(b,r)} · Vote now${myVote?' · Your vote cast':''}</div>
-          <div class="matchup-songs">
-            <div class="ms-side ${myVote===s1.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote('${m.id}','${s1.id}')`:''}" >
-              ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
-              <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div>
-              ${myVote===s1.id?`<div class="ms-vote-label">✓ Your vote</div>`:''}
-            </div>
-            <div class="matchup-vs">vs</div>
-            <div class="ms-side ${myVote===s2.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote('${m.id}','${s2.id}')`:''}" >
-              ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`}
-              <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div>
-              ${myVote===s2.id?`<div class="ms-vote-label">✓ Your vote</div>`:''}
-            </div>
-          </div>
-          <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" title="${b.members[uid]?.name||''}">${b.members[uid]?.emoji||'🎵'}</span>`).join('')}</div>
-          <div style="font-size:11px;color:var(--mu);margin-top:6px">${votedCount}/${memberIds.length} voted · waiting for all votes to reveal</div>
-        </div>`;
-      }
-    });
-  }
-  document.getElementById('bk-body').innerHTML=html;
-  document.getElementById('bk-share-btn')?.addEventListener('click',shareBracket);
+const totalRounds=b.totalRounds||Math.log2(b.songs.length);
+let html=` <div class="codebar" style="margin-bottom:14px"> <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div> <button class="shbtn" id="bk-share-btn">Share 📤</button> </div>`;
+for(let r=0;r<=b.currentRound;r++){
+const matchups=getMatchupsForRound(b,r);
+if(!matchups.length)continue;
+html+=`<div class="round-label">${roundName(b,r)}</div>`;
+matchups.forEach(m=>{
+const s1=bkSong(b,m.song1),s2=bkSong(b,m.song2);
+if(!s1||!s2)return;
+const isDone=!!m.winner;
+const myVote=m.votes?.[myId];
+const memberIds=Object.keys(b.members);
+const votedCount=Object.keys(m.votes||{}).length;
+const winnerSong=isDone?bkSong(b,m.winner):null;
+if(isDone){
+// Reveal ratings
+const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
+html+=`<div class="matchup done"> <div class="matchup-header">✅ ${roundName(b,r)} · All votes in</div> <div class="matchup-songs"> <div class="ms-side ${m.winner===s1.id?'winner':'loser'}"> ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div> ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}</div>`:''} ${m.winner===s1.id?`<div class="ms-win-label">🏆 WINNER</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${m.winner===s2.id?'winner':'loser'}"> ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div> ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}</div>`:''} ${m.winner===s2.id?`<div class="ms-win-label">🏆 WINNER</div>`:''} </div> </div> <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`${u.emoji} ${r1!==undefined?r1:’?’} / ${r2!==undefined?r2:’?’}`;}).join(' · ')}</div> </div>`;
+} else {
+// Voting open
+const canVote=!myVote;
+html+=`<div class="matchup active" data-mid="${m.id}"> <div class="matchup-header">🗳️ ${roundName(b,r)} · Vote now${myVote?' · Your vote cast':''}</div> <div class="matchup-songs"> <div class="ms-side ${myVote===s1.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote(’${m.id}’,’${s1.id}’)`:''}" > ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div> ${myVote===s1.id?`<div class="ms-vote-label">✓ Your vote</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${myVote===s2.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote(’${m.id}’,’${s2.id}’)`:''}" > ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div> ${myVote===s2.id?`<div class="ms-vote-label">✓ Your vote</div>`:''} </div> </div> <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" title="${b.members[uid]?.name||''}">${b.members[uid]?.emoji||‘🎵’}</span>`).join('')}</div> <div style="font-size:11px;color:var(--mu);margin-top:6px">${votedCount}/${memberIds.length} voted · waiting for all votes to reveal</div> </div>`;
+}
+});
+}
+document.getElementById(‘bk-body’).innerHTML=html;
+document.getElementById(‘bk-share-btn’)?.addEventListener(‘click’,shareBracket);
 }
 
 async function castVote(matchupId,songId){
-  await mergeAndSaveBracket(b=>{
-    if(!b.matchups[matchupId])return;
-    if(b.matchups[matchupId].votes[myId])return; // already voted
-    b.matchups[matchupId].votes[myId]=songId;
-    resolveMatchupIfReady(b,matchupId);
-  });
+await mergeAndSaveBracket(b=>{
+if(!b.matchups[matchupId])return;
+if(b.matchups[matchupId].votes[myId])return; // already voted
+b.matchups[matchupId].votes[myId]=songId;
+resolveMatchupIfReady(b,matchupId);
+});
 }
 
 // ── COMPLETE PHASE ──
 function renderBkComplete(b){
-  const winner=bkSong(b,b.bracketWinner);
-  // Build ranked list from matchup history
-  const allMatchups=Object.values(b.matchups);
-  const totalRounds=b.totalRounds||Math.log2(b.songs.length);
-  // Assign finish position based on which round they lost in
-  const positions={}; // songId → position label
-  b.songs.forEach(s=>positions[s.id]='First Round');
-  allMatchups.forEach(m=>{
-    if(!m.winner)return;
-    const loser=m.song1===m.winner?m.song2:m.song1;
-    const label=roundName(b,m.round);
-    positions[loser]=`Out in ${label}`;
-  });
-  if(b.bracketWinner)positions[b.bracketWinner]='🏆 Champion';
-  // Sort songs: winner first, then by round they lost (later = higher rank)
-  const ranked=[...b.songs].sort((a,b_)=>{
-    const ra=allMatchups.filter(m=>m.winner&&(m.song1===a.id||m.song2===a.id)&&m.winner!==a.id).map(m=>m.round)[0]??99;
-    const rb=allMatchups.filter(m=>m.winner&&(m.song1===b_.id||m.song2===b_.id)&&m.winner!==b_.id).map(m=>m.round)[0]??99;
-    if(b_.bracketWinner===b_.id)return 1; if(b.bracketWinner===a.id)return -1;
-    return rb-ra;
-  });
-  let html=`
-    <div style="text-align:center;padding:24px 0 16px">
-      <div style="font-size:52px">🏆</div>
-      <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0 4px">Champion</div>
-      ${winner?.artworkUrl?`<img src="${esc(winner.artworkUrl)}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;margin:8px auto;display:block">`:''}
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-top:4px">${esc(winner?.title||'')}</div>
-      <div style="font-size:14px;color:var(--mu)">${esc(winner?.artist||'')}</div>
-      ${winner?.appleMusicUrl?`<a class="aml" href="${esc(winner.appleMusicUrl)}" target="_blank" style="display:inline-flex;margin-top:10px">♫ Open in Apple Music</a>`:''}
-    </div>
-    <div class="round-label">Final Rankings & Ratings</div>
-    <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:16px">`;
-  ranked.forEach((s,i)=>{
-    const avg=avgRatingForSong(b,s.id);
-    html+=`<div class="bracket-rank">
-      <div class="rank-num ${i===0?'gold':''}">${i===0?'🥇':i+1}</div>
-      ${s.artworkUrl?`<img class="rank-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="rank-art-ph">🎵</div>`}
-      <div class="rank-info"><div class="rank-title">${esc(s.title)}</div><div class="rank-artist">${esc(s.artist)}</div><div style="font-size:10px;color:var(--mu);margin-top:2px">${positions[s.id]||''}</div></div>
-      ${avg!==null?`<div class="rank-score" style="color:${scoreColor(avg)}">${avg.toFixed(1)}</div>`:''}
-    </div>`;
-  });
-  html+=`</div>
-    <div class="round-label" style="margin-top:18px">Full Bracket Replay</div>`;
-  for(let r=0;r<(b.totalRounds||totalRounds);r++){
-    const matchups=getMatchupsForRound(b,r);
-    if(!matchups.length)continue;
-    html+=`<div style="font-size:11px;letter-spacing:1px;color:var(--mu);margin:10px 0 6px;text-transform:uppercase">${roundName(b,r)}</div>`;
-    matchups.forEach(m=>{
-      const s1=bkSong(b,m.song1),s2=bkSong(b,m.song2); if(!s1||!s2)return;
-      const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
-      html+=`<div class="matchup done" style="margin-bottom:10px">
-        <div class="matchup-songs">
-          <div class="ms-side ${m.winner===s1.id?'winner':'loser'}">
-            ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`}
-            <div class="ms-title">${esc(s1.title)}</div>
-            ${avg1!==null?`<div class="ms-score" style="font-size:16px">${avg1.toFixed(1)}</div>`:''}
-            ${m.winner===s1.id?`<div class="ms-win-label">🏆</div>`:''}
-          </div>
-          <div class="matchup-vs">vs</div>
-          <div class="ms-side ${m.winner===s2.id?'winner':'loser'}">
-            ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`}
-            <div class="ms-title">${esc(s2.title)}</div>
-            ${avg2!==null?`<div class="ms-score" style="font-size:16px">${avg2.toFixed(1)}</div>`:''}
-            ${m.winner===s2.id?`<div class="ms-win-label">🏆</div>`:''}
-          </div>
-        </div>
-      </div>`;
-    });
-  }
-  document.getElementById('bk-body').innerHTML=html;
+const winner=bkSong(b,b.bracketWinner);
+// Build ranked list from matchup history
+const allMatchups=Object.values(b.matchups);
+const totalRounds=b.totalRounds||Math.log2(b.songs.length);
+// Assign finish position based on which round they lost in
+const positions={}; // songId → position label
+b.songs.forEach(s=>positions[s.id]=‘First Round’);
+allMatchups.forEach(m=>{
+if(!m.winner)return;
+const loser=m.song1===m.winner?m.song2:m.song1;
+const label=roundName(b,m.round);
+positions[loser]=`Out in ${label}`;
+});
+if(b.bracketWinner)positions[b.bracketWinner]=‘🏆 Champion’;
+// Sort songs: winner first, then by round they lost (later = higher rank)
+const ranked=[…b.songs].sort((a,b_)=>{
+const ra=allMatchups.filter(m=>m.winner&&(m.song1===a.id||m.song2===a.id)&&m.winner!==a.id).map(m=>m.round)[0]??99;
+const rb=allMatchups.filter(m=>m.winner&&(m.song1===b_.id||m.song2===b_.id)&&m.winner!==b_.id).map(m=>m.round)[0]??99;
+if(b_.bracketWinner===b_.id)return 1; if(b.bracketWinner===a.id)return -1;
+return rb-ra;
+});
+let html=` <div style="text-align:center;padding:24px 0 16px"> <div style="font-size:52px">🏆</div> <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0 4px">Champion</div> ${winner?.artworkUrl?`<img src="${esc(winner.artworkUrl)}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;margin:8px auto;display:block">`:''} <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-top:4px">${esc(winner?.title||'')}</div> <div style="font-size:14px;color:var(--mu)">${esc(winner?.artist||'')}</div> ${winner?.appleMusicUrl?`<a class="aml" href="${esc(winner.appleMusicUrl)}" target="_blank" style="display:inline-flex;margin-top:10px">♫ Open in Apple Music</a>`:''} </div> <div class="round-label">Final Rankings & Ratings</div> <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:16px">`;
+ranked.forEach((s,i)=>{
+const avg=avgRatingForSong(b,s.id);
+html+=`<div class="bracket-rank"> <div class="rank-num ${i===0?'gold':''}">${i===0?'🥇':i+1}</div> ${s.artworkUrl?`<img class="rank-art" src="${esc(s.artworkUrl)}" loading="lazy">`:`<div class="rank-art-ph">🎵</div>`} <div class="rank-info"><div class="rank-title">${esc(s.title)}</div><div class="rank-artist">${esc(s.artist)}</div><div style="font-size:10px;color:var(--mu);margin-top:2px">${positions[s.id]||''}</div></div> ${avg!==null?`<div class="rank-score" style="color:${scoreColor(avg)}">${avg.toFixed(1)}</div>`:''} </div>`;
+});
+html+=`</div> <div class="round-label" style="margin-top:18px">Full Bracket Replay</div>`;
+for(let r=0;r<(b.totalRounds||totalRounds);r++){
+const matchups=getMatchupsForRound(b,r);
+if(!matchups.length)continue;
+html+=`<div style="font-size:11px;letter-spacing:1px;color:var(--mu);margin:10px 0 6px;text-transform:uppercase">${roundName(b,r)}</div>`;
+matchups.forEach(m=>{
+const s1=bkSong(b,m.song1),s2=bkSong(b,m.song2); if(!s1||!s2)return;
+const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
+html+=`<div class="matchup done" style="margin-bottom:10px"> <div class="matchup-songs"> <div class="ms-side ${m.winner===s1.id?'winner':'loser'}"> ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div> ${avg1!==null?`<div class="ms-score" style="font-size:16px">${avg1.toFixed(1)}</div>`:''} ${m.winner===s1.id?`<div class="ms-win-label">🏆</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${m.winner===s2.id?'winner':'loser'}"> ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-bottom:6px">`:`<div class="ms-art-ph" style="width:40px;height:40px;font-size:16px">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div> ${avg2!==null?`<div class="ms-score" style="font-size:16px">${avg2.toFixed(1)}</div>`:''} ${m.winner===s2.id?`<div class="ms-win-label">🏆</div>`:''} </div> </div> </div>`;
+});
+}
+document.getElementById(‘bk-body’).innerHTML=html;
 }
 
 // ════════════════════════════════════════════════
@@ -1386,85 +1302,98 @@ function renderBkComplete(b){
 
 // ── Rate song modal ──
 function openBkRateModal(songId){
-  const b=bkState; if(!b)return;
-  const song=bkSong(b,songId); if(!song)return;
-  bkRateSongId=songId;
-  const existing=b.ratings?.[myId]?.[songId];
-  bkRateScore=existing!==undefined?existing:null;
-  const art=document.getElementById('bkr-art'),ph=document.getElementById('bkr-art-ph');
-  if(song.artworkUrl){art.src=song.artworkUrl;art.style.display='block';ph.style.display='none';}else{art.style.display='none';ph.style.display='flex';}
-  document.getElementById('bkr-title').textContent=song.title;
-  document.getElementById('bkr-artist').textContent=song.artist;
-  updateBkRateDisplay();
-  document.getElementById('bk-rate-modal').classList.add('on');
+const b=bkState; if(!b)return;
+const song=bkSong(b,songId); if(!song)return;
+bkRateSongId=songId;
+const existing=b.ratings?.[myId]?.[songId];
+bkRateScore=existing!==undefined?existing:null;
+const art=document.getElementById(‘bkr-art’),ph=document.getElementById(‘bkr-art-ph’);
+if(song.artworkUrl){art.src=song.artworkUrl;art.style.display=‘block’;ph.style.display=‘none’;}else{art.style.display=‘none’;ph.style.display=‘flex’;}
+document.getElementById(‘bkr-title’).textContent=song.title;
+document.getElementById(‘bkr-artist’).textContent=song.artist;
+updateBkRateDisplay();
+document.getElementById(‘bk-rate-modal’).classList.add(‘on’);
 }
 function updateBkRateDisplay(){
-  const s=bkRateScore;
-  const disp=document.getElementById('bkr-score');
-  const bar=document.getElementById('bkr-bar');
-  const save=document.getElementById('bkr-save');
-  if(s===null){disp.textContent='—';disp.style.color='var(--mu)';bar.style.width='0';bar.style.background='var(--or)';save.disabled=true;}
-  else{disp.textContent=s;disp.style.color=scoreColor(s);bar.style.width=`${s/10*100}%`;bar.style.background=scoreColor(s);save.disabled=false;}
+const s=bkRateScore;
+const disp=document.getElementById(‘bkr-score’);
+const bar=document.getElementById(‘bkr-bar’);
+const save=document.getElementById(‘bkr-save’);
+if(s===null){disp.textContent=’—’;disp.style.color=‘var(–mu)’;bar.style.width=‘0’;bar.style.background=‘var(–or)’;save.disabled=true;}
+else{disp.textContent=s;disp.style.color=scoreColor(s);bar.style.width=`${s/10*100}%`;bar.style.background=scoreColor(s);save.disabled=false;}
 }
-document.getElementById('bkr-minus').onclick=()=>{
-  if(bkRateScore===null)bkRateScore=5;
-  else bkRateScore=Math.max(0,Math.round((bkRateScore-0.5)*10)/10);
-  updateBkRateDisplay();
+document.getElementById(‘bkr-minus’).onclick=()=>{
+if(bkRateScore===null)bkRateScore=5;
+else bkRateScore=Math.max(0,Math.round((bkRateScore-0.5)*10)/10);
+updateBkRateDisplay();
 };
-document.getElementById('bkr-plus').onclick=()=>{
-  if(bkRateScore===null)bkRateScore=5;
-  else bkRateScore=Math.min(10,Math.round((bkRateScore+0.5)*10)/10);
-  updateBkRateDisplay();
+document.getElementById(‘bkr-plus’).onclick=()=>{
+if(bkRateScore===null)bkRateScore=5;
+else bkRateScore=Math.min(10,Math.round((bkRateScore+0.5)*10)/10);
+updateBkRateDisplay();
 };
-document.getElementById('bkr-cancel').onclick=()=>{ document.getElementById('bk-rate-modal').classList.remove('on'); bkRateSongId=null; bkRateScore=null; };
-document.getElementById('bk-rate-modal').onclick=e=>{if(e.target===e.currentTarget){document.getElementById('bk-rate-modal').classList.remove('on');bkRateSongId=null;bkRateScore=null;}};
-document.getElementById('bkr-save').onclick=async function(){
-  if(bkRateSongId===null||bkRateScore===null)return;
-  const sid=bkRateSongId,sc=bkRateScore;
-  document.getElementById('bk-rate-modal').classList.remove('on'); bkRateSongId=null; bkRateScore=null;
-  await mergeAndSaveBracket(b=>{
-    if(!b.ratings)b.ratings={};
-    if(!b.ratings[myId])b.ratings[myId]={};
-    b.ratings[myId][sid]=sc;
-    // Auto-check if all members ready
-    if(allMembersRatedAll(b)&&allMembersReady(b)&&b.status==='rating'){ generateFirstRound(b); b.status='voting'; }
-  });
+document.getElementById(‘bkr-cancel’).onclick=()=>{ document.getElementById(‘bk-rate-modal’).classList.remove(‘on’); bkRateSongId=null; bkRateScore=null; };
+document.getElementById(‘bk-rate-modal’).onclick=e=>{if(e.target===e.currentTarget){document.getElementById(‘bk-rate-modal’).classList.remove(‘on’);bkRateSongId=null;bkRateScore=null;}};
+document.getElementById(‘bkr-save’).onclick=async function(){
+if(bkRateSongId===null||bkRateScore===null)return;
+const sid=bkRateSongId,sc=bkRateScore;
+document.getElementById(‘bk-rate-modal’).classList.remove(‘on’); bkRateSongId=null; bkRateScore=null;
+await mergeAndSaveBracket(b=>{
+if(!b.ratings)b.ratings={};
+if(!b.ratings[myId])b.ratings[myId]={};
+b.ratings[myId][sid]=sc;
+// Auto-check if all members ready
+if(allMembersRatedAll(b)&&allMembersReady(b)&&b.status===‘rating’){ generateFirstRound(b); b.status=‘voting’; }
+});
 };
 
 // ── Progress modal ──
 function openBkProgressModal(){
-  const b=bkState; if(!b)return;
-  const total=b.songs.length;
-  document.getElementById('bkp-list').innerHTML=Object.entries(b.members).map(([uid,u])=>{
-    const rated=totalRatingsForMember(b,uid);
-    const pct=total?rated/total*100:0;
-    const isReady=!!b.readyMembers?.[uid];
-    return`<div class="prog-row">
-      <div style="font-size:24px">${u.emoji}</div>
-      <div class="prog-info">
-        <div class="prog-name">${esc(u.name)} ${uid===myId?'(you)':''} ${isReady?'✅':''}</div>
-        <div class="prog-count">${rated}/${total} songs rated</div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('bk-progress-modal').classList.add('on');
+const b=bkState; if(!b)return;
+const total=b.songs.length;
+document.getElementById(‘bkp-list’).innerHTML=Object.entries(b.members).map(([uid,u])=>{
+const rated=totalRatingsForMember(b,uid);
+const pct=total?rated/total*100:0;
+const isReady=!!b.readyMembers?.[uid];
+return`<div class="prog-row"> <div style="font-size:24px">${u.emoji}</div> <div class="prog-info"> <div class="prog-name">${esc(u.name)} ${uid===myId?'(you)':''} ${isReady?'✅':''}</div> <div class="prog-count">${rated}/${total} songs rated</div> <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div> </div> </div>`;
+}).join(’’);
+document.getElementById(‘bk-progress-modal’).classList.add(‘on’);
 }
-document.getElementById('bkp-close').onclick=()=>document.getElementById('bk-progress-modal').classList.remove('on');
-document.getElementById('bk-progress-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('bk-progress-modal').classList.remove('on');};
+document.getElementById(‘bkp-close’).onclick=()=>document.getElementById(‘bk-progress-modal’).classList.remove(‘on’);
+document.getElementById(‘bk-progress-modal’).onclick=e=>{if(e.target===e.currentTarget)document.getElementById(‘bk-progress-modal’).classList.remove(‘on’);};
 
 // ── Share bracket ──
 function shareBracket(){
-  const base=location.origin+location.pathname;
-  const link=`${base}?db=${btoa(FB)}&bracket=${bkCode}`;
-  const msg=`Join my bracket "${bkState?.name||'Bracket'}" 🏆\n\nTap to join:\n${link}`;
-  if(navigator.share)navigator.share({title:bkState?.name||'Bracket',text:msg,url:link});
-  else navigator.clipboard?.writeText(bkCode).then(()=>toast('📋 Bracket code copied: '+bkCode));
+const base=location.origin+location.pathname;
+const link=`${base}?db=${btoa(FB)}&bracket=${bkCode}`;
+const msg=`Join my bracket "${bkState?.name||'Bracket'}" 🏆\n\nTap to join:\n${link}`;
+if(navigator.share)navigator.share({title:bkState?.name||‘Bracket’,text:msg,url:link});
+else navigator.clipboard?.writeText(bkCode).then(()=>toast(’📋 Bracket code copied: ’+bkCode));
 }
 
 // ── Handle bracket URL param ──
-const urlBracket=params.get('bracket');
-if(urlBracket){ window.addEventListener('DOMContentLoaded',()=>{ if(FB&&myName){ document.getElementById('bracket-join-in').value=urlBracket; document.getElementById('btn-bracket-join').disabled=false; setHomeMode('brackets'); showScreen('s-home'); } }); }
+const urlBracket=params.get(‘bracket’);
+const urlNewBracket=params.get(‘newbracket’);
+const urlSongs=params.get(‘songs’);
+
+if(urlBracket){ window.addEventListener(‘DOMContentLoaded’,()=>{ if(FB&&myName){ document.getElementById(‘bracket-join-in’).value=urlBracket; document.getElementById(‘btn-bracket-join’).disabled=false; setHomeMode(‘brackets’); showScreen(‘s-home’); } }); }
+
+// Handle iOS Shortcut playlist import (?newbracket=1&songs=ENCODED)
+if(urlNewBracket&&urlSongs){
+window.addEventListener(‘DOMContentLoaded’,()=>{
+if(FB&&myName){
+bkCreateSongs=[]; bkCreateSongsOriginal=[]; bkCreateIsShuffled=false;
+showBottomNav();
+document.getElementById(‘nav-brackets’).classList.add(‘active’);
+document.getElementById(‘nav-live’).classList.remove(‘active’);
+handleShortcutSongs(urlSongs);
+} else if(FB&&!myName){
+// Store songs for after name setup
+sessionStorage.setItem(‘pending-songs’, urlSongs);
+showScreen(‘s-setup’);
+}
+});
+}
 </script>
 
 </body>
