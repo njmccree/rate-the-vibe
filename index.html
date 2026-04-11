@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- v1775883064 -->
+<meta charset="UTF-8"><!-- v1775883621 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Rate the Vibe 🎵</title>
@@ -211,6 +211,10 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 .replies{margin-top:8px;padding-top:8px;border-top:1px solid var(–bdr);display:flex;flex-direction:column;gap:8px}
 .reply{background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px}
 .reply-input-row{display:flex;gap:6px;margin-top:6px}
+
+/* Loading fallback - hidden when JS works */
+#js-fallback{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(–bg);color:var(–mu);font-size:15px;gap:12px;z-index:9999}
+.js-ok #js-fallback{display:none}
 
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -524,6 +528,7 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 const EMOJIS = ['🎵','🎸','🥁','🎹','🎺','🎻','🎤','🎧','🦄','🔥','💫','⚡'];
 const LL_LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
 
+document.body.classList.add('js-ok');
 let FB = 'https://rate-the-song-default-rtdb.firebaseio.com';
 let myId = localStorage.getItem('rtv-id') || (()=>{const i=uid();localStorage.setItem('rtv-id',i);return i;})();
 let myName = localStorage.getItem('rtv-name') || '';
