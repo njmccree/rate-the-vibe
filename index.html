@@ -233,6 +233,35 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 
 </head>
 <body>
+<div id="__dbg" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#1a0000;color:#ff6666;font-family:monospace;font-size:12px;padding:8px;max-height:60vh;overflow-y:auto;word-break:break-all;display:block">JS loading...</div>
+<script>
+(function(){
+  var d=document.getElementById('__dbg');
+  function log(msg,col){
+    d.style.display='block';
+    var line=document.createElement('div');
+    line.style.color=col||'#ff6666';
+    line.style.borderBottom='1px solid #330000';
+    line.style.padding='3px 0';
+    line.textContent=(new Date().toISOString().slice(11,19))+' '+msg;
+    d.appendChild(line);
+    d.scrollTop=d.scrollHeight;
+  }
+  d.textContent='';
+  log('page loaded - JS running','#66ff66');
+  window.__log=log;
+  window.onerror=function(msg,src,line,col,err){
+    log('ERROR line '+line+': '+msg,'#ff4444');
+    if(err&&err.stack){
+      err.stack.split('\n').slice(0,4).forEach(function(l){log('  '+l,'#ff8888');});
+    }
+    return false;
+  };
+  window.addEventListener('unhandledrejection',function(e){
+    log('PROMISE REJECT: '+(e.reason?e.reason.message||String(e.reason):String(e)),'#ff4444');
+  });
+})();
+</script>
 
 <!-- ══════════════ FIREBASE SETUP ══════════════ -->
 
@@ -576,6 +605,7 @@ if(urlWho){
 if(urlDb){ try{ FB=atob(urlDb); localStorage.setItem('rtv-fb',FB); }catch(e){} }
 
 const SESH_KEY = 'rtv-sessions';
+if(window.__log)window.__log('SESH_KEY OK, FB='+FB.slice(0,20),'#aaffaa');
 const MAX_SESSIONS = 30;
 
 // ════════════════════════════════════════════════
@@ -693,7 +723,10 @@ document.getElementById('btn-test-fb').onclick = function(){
   setTimeout(function(){ showScreen(myName ? 's-home' : 's-setup'); }, 600);
 };
 
+if(window.__log)window.__log('startup: showScreen '+(myName?'s-home':'s-setup'),'#aaffaa');
 showScreen(myName?'s-home':'s-setup');
+if(window.__log)window.__log('showScreen done - hiding debug in 5s','#aaffaa');
+setTimeout(function(){var d=document.getElementById('__dbg');if(d)d.style.display='none';},5000);
 // Handle shortcut/deep-link URL params now that DOM is ready and identity is set
 handleUrlParams();
 
