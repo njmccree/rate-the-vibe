@@ -2,9 +2,7 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- v2 -->
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+<meta charset="UTF-8"><!-- v1775883064 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Rate the Vibe 🎵</title>
@@ -518,33 +516,6 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 
 <script>
 
-// ── INLINE ERROR CATCHER ─────────────────────────────────────────────────────
-(function(){
-  var panel = document.createElement('div');
-  panel.id = 'errdiv';
-  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:50vh;overflow-y:auto;border-top:2px solid #0f0;display:block';
-  panel.innerHTML = '<b style="color:#ff0">🔍 DEBUG</b><div id="errlog">starting...</div>';
-  document.body.appendChild(panel);
-  var log = document.getElementById('errlog');
-  window._log = function(msg, col){
-    var d = document.createElement('div');
-    d.style.color = col||'#0f0';
-    d.textContent = new Date().toISOString().slice(11,19)+' '+msg;
-    log.appendChild(d);
-    panel.scrollTop = panel.scrollHeight;
-  };
-  window.onerror = function(msg,src,line,col,err){
-    window._log('ERR L'+line+': '+msg, '#f00');
-    if(err&&err.stack) window._log(err.stack.split('\n')[1]||'', '#f88');
-    return false;
-  };
-  window.addEventListener('unhandledrejection',function(e){
-    window._log('PROMISE: '+(e.reason?e.reason.message||String(e.reason):String(e)),'#f00');
-  });
-  window._log('script started','#ff0');
-})();
-// ── END ERROR CATCHER ────────────────────────────────────────────────────────
-
 
 
 // ════════════════════════════════════════════════
@@ -554,7 +525,6 @@ const EMOJIS = ['🎵','🎸','🥁','🎹','🎺','🎻','🎤','🎧','🦄','
 const LL_LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
 
 let FB = 'https://rate-the-song-default-rtdb.firebaseio.com';
-if(window._log)window._log('FB set, myName='+localStorage.getItem('rtv-name'),'#0ff');
 let myId = localStorage.getItem('rtv-id') || (()=>{const i=uid();localStorage.setItem('rtv-id',i);return i;})();
 let myName = localStorage.getItem('rtv-name') || '';
 let myEmoji = localStorage.getItem('rtv-emoji') || '🎵';
@@ -718,9 +688,7 @@ document.getElementById('btn-test-fb').onclick = function(){
   setTimeout(function(){ showScreen(myName ? 's-home' : 's-setup'); }, 600);
 };
 
-if(window._log)window._log('calling showScreen → '+(myName?'s-home':'s-setup'),'#0ff');
 showScreen(myName?'s-home':'s-setup');
-if(window._log)window._log('showScreen done','#0f0');
 // Handle shortcut/deep-link URL params now that DOM is ready and identity is set
 handleUrlParams();
 
