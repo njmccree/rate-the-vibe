@@ -551,9 +551,9 @@ code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size
 
 
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // CONSTANTS & STATE
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 const EMOJIS = ['🎵','🎸','🥁','🎹','🎺','🎻','🎤','🎧','🦄','🔥','💫','⚡'];
 const LL_LABELS = ['','Trash 🗑️','Meh 😑','Decent 👍','Banger 🔥','GOAT 🐐'];
 
@@ -608,9 +608,9 @@ const SESH_KEY = 'rtv-sessions';
 if(window.__log)window.__log('SESH_KEY OK, FB='+FB.slice(0,20),'#aaffaa');
 const MAX_SESSIONS = 30;
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // UTILS
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function uid(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 function uid8(){ return Math.random().toString(36).slice(2,10); }
 function timeAgo(ts){ const s=(Date.now()-ts)/1e3; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
@@ -620,9 +620,9 @@ let _tt; function toast(msg){ let t=document.querySelector('.toast'); if(!t){t=d
 function setDot(id,s){ const d=document.getElementById(id); if(!d)return; d.className='dot'+(s==='sync'?' sync':s==='err'?' err':''); }
 function scoreColor(s){ if(s>=8)return '#4cd97b'; if(s>=5)return '#ffd700'; if(s>=3)return '#ff9340'; return '#ff5f5f'; }
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // FIREBASE
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function fbEp(path){ return `${FB.replace(/\/+$/,'')}/rooms/${path}.json`; }
 function fbBkEp(code){ return `${FB.replace(/\/+$/,'')}/brackets/${code}.json`; }
 
@@ -693,10 +693,10 @@ function startBkPolling(){
   },3500);
 }
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // FIREBASE SETUP SCREEN
-// ════════════════════════════════════════════════
-// ── Firebase Setup // Button is always tappable — validate on click, no event magic needed
+// ------------------------------------------------
+// -- Firebase Setup // Button is always tappable -- validate on click, no event magic needed
 document.getElementById('btn-test-fb').onclick = function(){
   const fbIn = document.getElementById('fb-in');
   const url  = (fbIn.value || '').trim().replace(/\/+$/, '');
@@ -709,16 +709,16 @@ document.getElementById('btn-test-fb').onclick = function(){
   }
   if(!url.includes('firebaseio.com') && !url.includes('firebasedatabase.app')){
     st.style.color='#ff5f5f';
-    st.textContent='⚠️ URL should contain firebaseio.com — copy it from Firebase console';
+    st.textContent='⚠️ URL should contain firebaseio.com -- copy it from Firebase console';
     return;
   }
 
-  // Save immediately — no network test (works from any origin including GitHub Pages)
+  // Save immediately -- no network test (works from any origin including GitHub Pages)
   FB = url;
   localStorage.setItem('rtv-fb', FB);
   st.style.color = '#4cd97b';
   st.textContent = '✅ Saved!';
-  this.textContent = 'Saved ✓';
+  this.textContent = 'Saved v';
   this.style.background = 'linear-gradient(135deg,#4cd97b,#2ecc71)';
   setTimeout(function(){ showScreen(myName ? 's-home' : 's-setup'); }, 600);
 };
@@ -730,9 +730,9 @@ setTimeout(function(){var d=document.getElementById('__dbg');if(d)d.style.displa
 // Handle shortcut/deep-link URL params now that DOM is ready and identity is set
 handleUrlParams();
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // NAME SETUP SCREEN
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 const egrid=document.getElementById('egrid');
 EMOJIS.forEach(e=>{
   const b=document.createElement('button'); b.className='eb'+(e===myEmoji?' s':''); b.textContent=e;
@@ -779,9 +779,9 @@ btnNext.onclick=()=>{
 
 
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // MY BRACKETS SCREEN
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function showMyBrackets(){
   setBkBodyHandler(null);
   document.getElementById('bk-me-pill').textContent = myEmoji+' '+myName;
@@ -815,14 +815,14 @@ function showMyBrackets(){
       }
       var openBtn = '<button class="bk-mgmt-open" data-code="'+code+'"'
         + ' style="flex:2;padding:8px;background:var(--or-dim);border:1px solid var(--or-bdr);'
-        + 'border-radius:10px;color:var(--or);font-size:12px;font-weight:600;cursor:pointer">Open →</button>';
+        + 'border-radius:10px;color:var(--or);font-size:12px;font-weight:600;cursor:pointer">Open -></button>';
 
       html += '<div class="sesh-card" style="flex-direction:column;align-items:stretch;gap:10px">'
             + '<div style="display:flex;align-items:center;gap:12px">'
             +   '<div class="sesh-icon">🏆</div>'
             +   '<div class="sesh-info">'
             +     '<div class="sesh-name">'+name+'</div>'
-            +     '<div class="sesh-meta">'+(isHost?'You created':'You joined')+' · '+timeAgoShort(s.ts)+'</div>'
+            +     '<div class="sesh-meta">'+(isHost?'You created':'You joined')+'  .  '+timeAgoShort(s.ts)+'</div>'
             +     '<div class="sesh-code">'+code+'</div>'
             +   '</div>'
             + '</div>'
@@ -864,7 +864,7 @@ async function rejoinBracket(code){
   }catch(e){ toast('⚠️ '+e.message); }
 }
 
-// ── Confirm modal helpers ─────────────────────────────────────────────────────
+// -- Confirm modal helpers -----------------------------------------------------
 var _confirmCallback = null;
 function showConfirm(title, msg, callback){
   document.getElementById('confirm-title').textContent = title;
@@ -884,7 +884,7 @@ document.getElementById('confirm-modal').onclick = function(e){
   if(e.target===e.currentTarget){ document.getElementById('confirm-modal').classList.remove('on'); _confirmCallback=null; }
 };
 
-// ── Delete bracket (owner only) ────────────────────────────────────────────────
+// -- Delete bracket (owner only) ------------------------------------------------
 function confirmDeleteBracket(code, name){
   showConfirm(
     '🗑 Delete Bracket?',
@@ -907,7 +907,7 @@ async function doDeleteBracket(code){
   }catch(e){ toast('⚠️ Could not delete: '+e.message); }
 }
 
-// ── Leave bracket (member only) ────────────────────────────────────────────────
+// -- Leave bracket (member only) ------------------------------------------------
 function confirmLeaveBracket(code, name){
   showConfirm(
     '🚪 Leave Bracket?',
@@ -941,9 +941,9 @@ async function doLeaveBracket(code){
 }
 
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // BRACKET COMMENTS
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 var _bkcSongId = null;
 
 function fbCmtEp(bkCode, songId){
@@ -979,7 +979,7 @@ async function openBkComments(songId){
   document.getElementById('bkc-title').textContent = song.title;
   document.getElementById('bkc-artist').textContent = song.artist;
   document.getElementById('bkc-input').value = '';
-  document.getElementById('bkc-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px">Loading…</div>';
+  document.getElementById('bkc-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px">Loading...</div>';
   document.getElementById('bk-comments-modal').classList.add('on');
 
   await refreshComments(songId);
@@ -1017,7 +1017,7 @@ function renderCommentsList(comments, songId){
         +'<span class="comment-time">'+timeAgoShort(rep.ts||0)+'</span></div>'
         +'<div class="comment-text">'+esc(rep.text||'')+'</div>'
         +'<div class="comment-actions">'
-        +'<button class="cmt-btn bkc-like-reply '+(rLiked?'liked':'')+'" data-cid="'+cid+'" data-rid="'+rid+'">♥ '+(rLikeCount||'')+'</button>'
+        +'<button class="cmt-btn bkc-like-reply '+(rLiked?'liked':'')+'" data-cid="'+cid+'" data-rid="'+rid+'"><3 '+(rLikeCount||'')+'</button>'
         +'</div></div>';
     }).join('');
     return '<div class="comment" data-cid="'+cid+'">'
@@ -1026,13 +1026,13 @@ function renderCommentsList(comments, songId){
       +'<span class="comment-time">'+timeAgoShort(c.ts||0)+'</span></div>'
       +'<div class="comment-text">'+esc(c.text||'')+'</div>'
       +'<div class="comment-actions">'
-      +'<button class="cmt-btn bkc-like '+(iLiked?'liked':'')+'" data-cid="'+cid+'">♥ '+(likeCount||'')+'</button>'
-      +'<button class="cmt-btn bkc-reply-open" data-cid="'+cid+'">↩ Reply</button>'
+      +'<button class="cmt-btn bkc-like '+(iLiked?'liked':'')+'" data-cid="'+cid+'"><3 '+(likeCount||'')+'</button>'
+      +'<button class="cmt-btn bkc-reply-open" data-cid="'+cid+'"><- Reply</button>'
       +'</div>'
       +(replyEntries.length?'<div class="replies">'+repliesHtml+'</div>':'')
       +'<div class="reply-input-row" id="bkc-reply-row-'+cid+'" style="display:none">'
-      +'<input class="bkc-reply-input" data-cid="'+cid+'" type="text" placeholder="Write a reply…" style="flex:1;font-size:12px;padding:8px 10px" autocomplete="off">'
-      +'<button class="bkc-reply-send" data-cid="'+cid+'" style="flex-shrink:0;padding:0 12px;background:var(--or);border:none;border-radius:10px;color:#fff;font-size:16px;cursor:pointer">↑</button>'
+      +'<input class="bkc-reply-input" data-cid="'+cid+'" type="text" placeholder="Write a reply..." style="flex:1;font-size:12px;padding:8px 10px" autocomplete="off">'
+      +'<button class="bkc-reply-send" data-cid="'+cid+'" style="flex-shrink:0;padding:0 12px;background:var(--or);border:none;border-radius:10px;color:#fff;font-size:16px;cursor:pointer">^</button>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -1122,10 +1122,10 @@ document.getElementById('bk-comments-modal').addEventListener('click', function(
 });
 
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // SINGLE DELEGATED CLICK HANDLER FOR bk-body
 // Replaces {once:true} pattern that caused stacking
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 var _bkBodyHandler = null;
 function setBkBodyHandler(fn){
   var el = document.getElementById('bk-body');
@@ -1135,9 +1135,9 @@ function setBkBodyHandler(fn){
   if(fn) el.addEventListener('click', fn);
 }
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // SESSION HISTORY
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function loadSessions(){
   try{ return JSON.parse(localStorage.getItem(SESH_KEY)||'[]'); }catch(e){ return []; }
 }
@@ -1172,10 +1172,10 @@ function openSessionsModal(){
         <div class="sesh-icon">${s.type==='room'?'🎧':'🏆'}</div>
         <div class="sesh-info">
           <div class="sesh-name">${esc(s.name||s.code)}</div>
-          <div class="sesh-meta">${s.type==='room'?'Live Listen':'Bracket'} · ${s.role==='host'?'Created':'Joined'} · ${timeAgoShort(s.ts)}</div>
+          <div class="sesh-meta">${s.type==='room'?'Live Listen':'Bracket'}  .  ${s.role==='host'?'Created':'Joined'}  .  ${timeAgoShort(s.ts)}</div>
           <div class="sesh-code">${s.code}</div>
         </div>
-        <div style="font-size:18px;color:var(--or)">→</div>
+        <div style="font-size:18px;color:var(--or)">-></div>
       </div>`).join('');
   }
   document.getElementById('sessions-modal').classList.add('on');
@@ -1201,9 +1201,9 @@ document.getElementById('sessions-modal').onclick = e=>{ if(e.target===e.current
 document.getElementById('btn-my-sessions-live').onclick = openSessionsModal;
 document.getElementById('btn-my-sessions-bk').onclick   = openSessionsModal;
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // HOME SCREEN
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function setHomeMode(mode){
   currentMode=mode;
   const isLive=mode==='live';
@@ -1219,14 +1219,14 @@ document.getElementById('mtab-live').onclick=()=>setHomeMode('live');
 document.getElementById('mtab-brackets').onclick=()=>setHomeMode('brackets');
 document.getElementById('btn-home-back').onclick=()=>showScreen('s-setup');
 document.getElementById('btn-home-back-2').onclick=()=>showScreen('s-setup');
-// Firebase URL is hardcoded — no change-fb button needed
+// Firebase URL is hardcoded -- no change-fb button needed
 
 // Join room from URL param
 // urlRoom handled in handleUrlParams() below
 
 // Create room
 document.getElementById('btn-create-room').onclick=async function(){
-  const desc=document.getElementById('create-room-desc'); this.style.opacity='.5'; this.style.pointerEvents='none'; desc.textContent='Creating…';
+  const desc=document.getElementById('create-room-desc'); this.style.opacity='.5'; this.style.pointerEvents='none'; desc.textContent='Creating...';
   try{
     const code=uid();
     await fbPut(code,{songs:[],users:{[myId]:{name:myName,emoji:myEmoji}}});
@@ -1240,12 +1240,12 @@ const roomJoinIn=document.getElementById('room-join-in'),btnRoomJoin=document.ge
 roomJoinIn.oninput=()=>btnRoomJoin.disabled=roomJoinIn.value.trim().length<4;
 roomJoinIn.onkeydown=e=>{if(e.key==='Enter'&&!btnRoomJoin.disabled)btnRoomJoin.click();};
 btnRoomJoin.onclick=async function(){
-  const code=roomJoinIn.value.trim().toUpperCase(); this.textContent='Joining…'; this.disabled=true;
+  const code=roomJoinIn.value.trim().toUpperCase(); this.textContent='Joining...'; this.disabled=true;
   try{
     const d=normalise(await fbGet(code)); roomCode=code; llState=d; llLastStr=JSON.stringify(d);
     await mergeAndSave(s=>{s.users[myId]={name:myName,emoji:myEmoji};});
     launchLL();
-  }catch(e){ toast('⚠️ '+e.message); this.textContent='Join →'; this.disabled=false; }
+  }catch(e){ toast('⚠️ '+e.message); this.textContent='Join ->'; this.disabled=false; }
 };
 
 // New bracket
@@ -1256,19 +1256,19 @@ const bkJoinIn=document.getElementById('bracket-join-in'),btnBkJoin=document.get
 bkJoinIn.oninput=()=>btnBkJoin.disabled=bkJoinIn.value.trim().length<4;
 bkJoinIn.onkeydown=e=>{if(e.key==='Enter'&&!btnBkJoin.disabled)btnBkJoin.click();};
 btnBkJoin.onclick=async function(){
-  const code=bkJoinIn.value.trim().toUpperCase(); this.textContent='Joining…'; this.disabled=true;
+  const code=bkJoinIn.value.trim().toUpperCase(); this.textContent='Joining...'; this.disabled=true;
   try{
     const raw=await fbBkGet(code); const b=normaliseBracket(raw);
-    if(!b)throw new Error('Bracket not found — check the code');
+    if(!b)throw new Error('Bracket not found -- check the code');
     bkCode=code; bkState=b; bkLastStr=JSON.stringify(b);
     await mergeAndSaveBracket(b=>{ b.members[myId]={name:myName,emoji:myEmoji}; });
     launchBracket();
-  }catch(e){ toast('⚠️ '+e.message); this.textContent='Join →'; this.disabled=false; }
+  }catch(e){ toast('⚠️ '+e.message); this.textContent='Join ->'; this.disabled=false; }
 };
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // BOTTOM NAV
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function showBottomNav(){ document.getElementById('bottom-nav').style.display='block'; }
 function hideBottomNav(){ document.getElementById('bottom-nav').style.display='none'; }
 document.getElementById('nav-live').onclick=()=>{
@@ -1282,9 +1282,9 @@ document.getElementById('nav-brackets').onclick=()=>{
 };
 document.getElementById('btn-bk-back').onclick = function(){ showMyBrackets(); };
 
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 // LIVE LISTEN APP
-// ════════════════════════════════════════════════
+// ------------------------------------------------
 function launchLL(){
   saveSession({type:'room', code:roomCode, name:'Room '+roomCode, role: llState&&llState.users&&Object.keys(llState.users)[0]===myId?'host':'member'});
   document.getElementById('me-pill').textContent=myEmoji+' '+myName;
@@ -1437,14 +1437,14 @@ document.getElementById('btn-close-shortcut').onclick=()=>document.getElementByI
 document.getElementById('shortcut-modal').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('shortcut-modal').classList.remove('on');};
 document.getElementById('btn-copy-shortcut').onclick=()=>navigator.clipboard?.writeText(getShortcutUrl()).then(()=>toast('📋 Copied!'));
 
-// ── Already-added modal let _amStars=0;
+// -- Already-added modal let _amStars=0;
 function showAlreadyModal(song){
   amSongId=song.id; _amStars=song.ratings?.[myId]?.stars||0;
   const img=document.getElementById('am-art'),ph=document.getElementById('am-art-ph');
   if(song.artworkUrl){img.src=song.artworkUrl;img.style.display='block';ph.style.display='none';}else{img.style.display='none';ph.style.display='flex';}
   document.getElementById('am-title').textContent=song.title; document.getElementById('am-artist').textContent=song.artist;
   const vs=Object.values(song.ratings||{}).map(r=>r.stars); const avg=vs.length?(vs.reduce((a,b)=>a+b,0)/vs.length).toFixed(1):null;
-  document.getElementById('am-avg').textContent=avg?`${avg} avg · ${vs.length} rating${vs.length!==1?'s':''}`: 'No ratings yet';
+  document.getElementById('am-avg').textContent=avg?`${avg} avg  .  ${vs.length} rating${vs.length!==1?'s':''}`: 'No ratings yet';
   buildAmStars(_amStars); document.getElementById('am-submit').disabled=(_amStars===0); document.getElementById('am-submit').textContent=_amStars?'Update Rating':'Submit Rating';
   document.getElementById('already-modal').classList.add('on');
 }
@@ -1457,11 +1457,11 @@ document.getElementById('am-submit').onclick=async function(){
   await mergeAndSave(s=>{const song=s.songs.find(x=>x.id===sid);if(!song)return;if(!song.ratings)song.ratings={};song.ratings[myId]={stars:st,name:myName,emoji:myEmoji,ratedAt:Date.now()};});
 };
 
-// ── Event delegation for LL rate buttons
+// -- Event delegation for LL rate buttons
 document.getElementById('tab-now').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
 document.getElementById('tab-hist').addEventListener('click',e=>{const b=e.target.closest('.rb');if(b)openLLModal(b.dataset.id);});
 
-// ── LL rate modal let _mStars=0;
+// -- LL rate modal let _mStars=0;
 function openLLModal(songId){ const song=llState?.songs?.find(s=>s.id===songId);if(!song)return; mSongId=songId; _mStars=song.ratings?.[myId]?.stars||0; document.getElementById('m-title').textContent=song.title; document.getElementById('m-artist').textContent=song.artist; document.getElementById('m-submit').textContent=_mStars?'Update Rating':'Submit Rating'; document.getElementById('m-submit').disabled=(_mStars===0); buildLLStars(_mStars); document.getElementById('modal').classList.add('on'); }
 function buildLLStars(lit){ const c=document.getElementById('m-stars');c.innerHTML='';[1,2,3,4,5].forEach(s=>{const b=document.createElement('span');b.className='ms'+(s<=lit?' l':'');b.textContent='★';b.onclick=()=>{_mStars=s;buildLLStars(s);document.getElementById('m-label').textContent=LL_LABELS[s];document.getElementById('m-submit').disabled=false;document.getElementById('m-submit').textContent='Submit Rating';};c.appendChild(b);});document.getElementById('m-label').textContent=lit?LL_LABELS[lit]:'Tap a star to rate';}
 function closeLLModal(){ document.getElementById('modal').classList.remove('on'); mSongId=null; }
@@ -1490,18 +1490,18 @@ function llCardHTML(song,users,isCur){
   const artEl=song.artworkUrl?`<img class="sc-art" src="${esc(song.artworkUrl)}" loading="lazy">`:`<div class="sc-art-ph">🎵</div>`;
   const amlEl=song.appleMusicUrl?`<a class="aml" href="${esc(song.appleMusicUrl)}" target="_blank">♫ Open in Apple Music</a>`:'';
   return`<div class="sc ${isCur?'now':''}">
-    ${isCur?'<div class="ntag">▶ NOW PLAYING</div>':''}
-    <div class="sc-top">${artEl}<div class="sc-info"><div class="stit">${esc(song.title)}</div><div class="sart">${esc(song.artist)}</div><div class="smet">${timeAgo(song.addedAt)} · ${by.emoji||'🎵'} ${esc(by.name||'someone')}</div></div></div>
+    ${isCur?'<div class="ntag">- NOW PLAYING</div>':''}
+    <div class="sc-top">${artEl}<div class="sc-info"><div class="stit">${esc(song.title)}</div><div class="sart">${esc(song.artist)}</div><div class="smet">${timeAgo(song.addedAt)}  .  ${by.emoji||'🎵'} ${esc(by.name||'someone')}</div></div></div>
     ${amlEl}
-    ${avg?`<div class="avgr"><div class="avgn">${avg}</div><div class="avgs">avg · ${vs.length} rating${vs.length!==1?'s':''}</div></div>`:''}
-    <button class="rb" data-id="${song.id}">${myR?'★'.repeat(myR)+' · '+LL_LABELS[myR]:'⭐ Rate this song'}</button>
+    ${avg?`<div class="avgr"><div class="avgn">${avg}</div><div class="avgs">avg  .  ${vs.length} rating${vs.length!==1?'s':''}</div></div>`:''}
+    <button class="rb" data-id="${song.id}">${myR?'★'.repeat(myR)+'  .  '+LL_LABELS[myR]:'⭐ Rate this song'}</button>
     ${chips?`<div class="chips">${chips}</div>`:''}
   </div>`;
 }
 
-// ════════════════════════════════════════════════
-// BRACKET — UTILITIES
-// ════════════════════════════════════════════════
+// ------------------------------------------------
+// BRACKET -- UTILITIES
+// ------------------------------------------------
 function bkSong(b,id){ return b.songs.find(s=>s.id===id)||null; }
 function getMatchupsForRound(b,round){ return Object.entries(b.matchups||{}).filter(([,m])=>m.round===round).sort((a,b)=>a[1].order-b[1].order).map(([id,m])=>({...m,id})); }
 function totalRatingsForMember(b,uid){ return Object.keys(b.ratings?.[uid]||{}).length; }
@@ -1563,9 +1563,9 @@ function avgRatingForSong(b,songId){
   return scores.length?(scores.reduce((a,c)=>a+c,0)/scores.length):null;
 }
 
-// ════════════════════════════════════════════════
-// BRACKET — LAUNCH
-// ════════════════════════════════════════════════
+// ------------------------------------------------
+// BRACKET -- LAUNCH
+// ------------------------------------------------
 function launchBracket(){
   setBkBodyHandler(null); // clear any stale handler
   if(bkState) saveSession({type:'bracket', code:bkCode, name:bkState.name||'Bracket '+bkCode, role:bkState.hostId===myId?'host':'member'});
@@ -1575,9 +1575,9 @@ function launchBracket(){
   renderBracket(); startBkPolling();
 }
 
-// ════════════════════════════════════════════════
-// BRACKET — CREATE FLOW
-// ════════════════════════════════════════════════
+// ------------------------------------------------
+// BRACKET -- CREATE FLOW
+// ------------------------------------------------
 function bkSongRowHTML(s, i){
   var art = s.artworkUrl
     ? '<img class="bk-art" src="' + esc(s.artworkUrl) + '">'
@@ -1610,7 +1610,7 @@ function renderBkCreate(){
       ? '<button id="bk-shuffle-btn" style="padding:5px 10px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:8px;color:var(--mu);font-size:12px;cursor:pointer;font-family:\'Outfit\',sans-serif">🔀 Shuffle</button>'
       : '';
     var restoreBtn = (bkCreateIsShuffled && hasOriginal)
-      ? '<button id="bk-restore-btn" style="padding:5px 10px;background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:\'Outfit\',sans-serif">↩️ Restore</button>'
+      ? '<button id="bk-restore-btn" style="padding:5px 10px;background:var(--or-dim);border:1px solid var(--or-bdr);border-radius:8px;color:var(--or);font-size:12px;cursor:pointer;font-family:\'Outfit\',sans-serif"><-️ Restore</button>'
       : '';
     orderingHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
       + '<div style="font-size:13px;font-weight:600;color:var(--tx)">' + n + ' songs '
@@ -1646,16 +1646,16 @@ function renderBkCreate(){
     + '<div id="bk-import-tab-shortcut" style="background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">'
     +   '<div style="font-size:13px;font-weight:600;margin-bottom:10px">Import an entire playlist in one tap</div>'
     +   '<div style="font-size:12px;color:var(--mu);line-height:1.9;margin-bottom:12px">'
-    +     '<div><strong>1.</strong> Open <strong>Shortcuts</strong> app → tap <strong>+</strong> → <strong>Add Action</strong></div>'
-    +     '<div><strong>2.</strong> Search <strong>"Get Playlist"</strong> → add it → tap the playlist field → pick your playlist</div>'
-    +     '<div><strong>3.</strong> Add <strong>"Repeat with Each"</strong> → confirm it repeats items in your Playlist</div>'
-    +     '<div><strong>4.</strong> Inside the loop, add <strong>"Text"</strong> → tap inside the text box → tap the variable picker → choose <strong>Repeat Item → Name</strong> → type <code>__</code> → tap variable picker again → <strong>Repeat Item → Artist</strong></div>'
-    +     '<div><strong>5.</strong> Outside the loop, add <strong>"Combine Text"</strong> → tap separator → choose <strong>Custom</strong> → type <code>||</code></div>'
+    +     '<div><strong>1.</strong> Open <strong>Shortcuts</strong> app -> tap <strong>+</strong> -> <strong>Add Action</strong></div>'
+    +     '<div><strong>2.</strong> Search <strong>"Get Playlist"</strong> -> add it -> tap the playlist field -> pick your playlist</div>'
+    +     '<div><strong>3.</strong> Add <strong>"Repeat with Each"</strong> -> confirm it repeats items in your Playlist</div>'
+    +     '<div><strong>4.</strong> Inside the loop, add <strong>"Text"</strong> -> tap inside the text box -> tap the variable picker -> choose <strong>Repeat Item -> Name</strong> -> type <code>__</code> -> tap variable picker again -> <strong>Repeat Item -> Artist</strong></div>'
+    +     '<div><strong>5.</strong> Outside the loop, add <strong>"Combine Text"</strong> -> tap separator -> choose <strong>Custom</strong> -> type <code>||</code></div>'
     +     '<div><strong>6.</strong> Add <strong>"URL Encode"</strong> (connects automatically)</div>'
-    +     '<div><strong>7.</strong> Add <strong>"Open URLs"</strong> → paste the URL below → find <code>SONGS</code> in the URL → replace it with the <strong>URL Encoded Text</strong> variable</div>'
-    +     '<div><strong>8.</strong> Before "Open URLs", add a <strong>"Text"</strong> action → paste your Apple Music playlist link → rename it <code>PlaylistURL</code></div>'
+    +     '<div><strong>7.</strong> Add <strong>"Open URLs"</strong> -> paste the URL below -> find <code>SONGS</code> in the URL -> replace it with the <strong>URL Encoded Text</strong> variable</div>'
+    +     '<div><strong>8.</strong> Before "Open URLs", add a <strong>"Text"</strong> action -> paste your Apple Music playlist link -> rename it <code>PlaylistURL</code></div>'
     +     '<div><strong>9.</strong> In the "Open URLs" URL: replace <code>PLAYLIST_URL</code> with the <strong>PlaylistURL</strong> variable</div>'
-    +     '<div><strong>10.</strong> Rename shortcut → tap <strong>Done</strong> → long-press → <strong>Add to Home Screen</strong></div>'
+    +     '<div><strong>10.</strong> Rename shortcut -> tap <strong>Done</strong> -> long-press -> <strong>Add to Home Screen</strong></div>'
     +   '</div>'
     +   '<div style="background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;word-break:break-all;color:#aaa;margin-bottom:10px" id="bk-shortcut-url-display">' + shortcutUrl + '</div>'
     +   '<button class="bp" id="bk-copy-shortcut-url" style="margin-top:0;font-size:13px;padding:11px">Copy Shortcut URL 📋</button>'
@@ -1668,7 +1668,7 @@ function renderBkCreate(){
 
 ```
 +   '<div id="bk-import-status" style="font-size:12px;color:var(--mu);margin-top:6px;min-height:18px"></div>'
-+   '<button class="bp" id="bk-paste-btn" style="margin-top:8px;font-size:13px;padding:11px">Import Songs →</button>'
++   '<button class="bp" id="bk-paste-btn" style="margin-top:8px;font-size:13px;padding:11px">Import Songs -></button>'
 + '</div>'
 // Song count + ordering
 + orderingHTML
@@ -1716,7 +1716,7 @@ renderBkCreate();
 }
 
 async function doImportPlaylist(){
-// This is now handled by iOS Shortcut or paste — kept for backward compatibility
+// This is now handled by iOS Shortcut or paste – kept for backward compatibility
 }
 
 async function importPastedSongs(){
@@ -1736,7 +1736,7 @@ const line = lines[i];
 const dashIdx = line.lastIndexOf(’ - ‘);
 const title = dashIdx > 0 ? line.slice(0, dashIdx).trim() : line.trim();
 const artistHint = dashIdx > 0 ? line.slice(dashIdx+3).trim() : ‘’;
-status.textContent = `Searching ${i+1}/${lines.length}: ${title}…`;
+status.textContent = `Searching ${i+1}/${lines.length}: ${title}...`;
 const q = artistHint ? `${title} ${artistHint}` : title;
 const results = await searchItunes(q);
 const match = results.find(r => r.trackName?.toLowerCase() === title.toLowerCase()) || results[0];
@@ -1774,7 +1774,7 @@ if(!pairs.length) return;
 ```
 var total = Math.min(pairs.length, 64);
 
-// ── Phase 1: Create songs without artwork, show immediately ──
+// -- Phase 1: Create songs without artwork, show immediately --
 bkCreateSongs = pairs.slice(0, total).map(function(p){
   return { id: uid8(), title: p.name, artist: p.artist||'Unknown Artist', artworkUrl: null, appleMusicUrl: null };
 });
@@ -1787,8 +1787,8 @@ document.getElementById('bk-me-pill').textContent = myEmoji+' '+myName;
 document.getElementById('bk-header-title').textContent = 'New Bracket';
 document.getElementById('bk-body').innerHTML =
   '<div style="padding:20px 0 10px;text-align:center">'
-  + '<div style="font-size:15px;font-weight:600;margin-bottom:4px">Loading '+total+' songs…</div>'
-  + '<div id="bk-sc-status" style="font-size:12px;color:var(--mu);margin-bottom:10px">Fetching song info…</div>'
+  + '<div style="font-size:15px;font-weight:600;margin-bottom:4px">Loading '+total+' songs...</div>'
+  + '<div id="bk-sc-status" style="font-size:12px;color:var(--mu);margin-bottom:10px">Fetching song info...</div>'
   + '<div style="height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 20px;overflow:hidden">'
   +   '<div id="bk-sc-fill" style="height:100%;background:var(--or);border-radius:2px;width:0;transition:width .3s"></div>'
   + '</div></div>'
@@ -1810,7 +1810,7 @@ function renderSkeletons(){
 }
 renderSkeletons();
 
-// ── Phase 2: Load artwork + Apple Music links one by one ──
+// -- Phase 2: Load artwork + Apple Music links one by one --
 for(var i=0; i<total; i++){
   var p = pairs[i];
   var statusEl = document.getElementById('bk-sc-status');
@@ -1841,7 +1841,7 @@ for(var i=0; i<total; i++){
   // Update title/artist from iTunes if available (better accuracy)
   if(itMatch){ bkCreateSongs[i].title = itMatch.trackName||p.name; bkCreateSongs[i].artist = itMatch.artistName||p.artist; }
 
-  // Update DOM directly — replace placeholder with real image
+  // Update DOM directly -- replace placeholder with real image
   if(artworkUrl){
     var artEl = document.getElementById('bk-sc-art-'+bkCreateSongs[i].id);
     if(artEl){
@@ -1885,7 +1885,7 @@ launchBracket();
 function openBkSearchModal(){
 document.getElementById(‘bks-input’).value=’’;
 document.getElementById(‘bks-results’).style.display=‘none’;
-document.getElementById(‘bks-added’).innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join(’’);
+document.getElementById(‘bks-added’).innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">v ${esc(s.title)} -- ${esc(s.artist)}</div>`).join(’’);
 document.getElementById(‘bk-search-modal’).classList.add(‘on’);
 }
 document.getElementById(‘bks-done’).onclick=()=>{ document.getElementById(‘bk-search-modal’).classList.remove(‘on’); renderBkCreate(); };
@@ -1907,14 +1907,14 @@ const song={id:uid8(),title:r.trackName,artist:r.artistName,artworkUrl:(r.artwor
 bkCreateSongs.push(song);
 // Keep original in sync if not shuffled
 if(!bkCreateIsShuffled) bkCreateSongsOriginal.push(song);
-document.getElementById(‘bks-added’).innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">✓ ${esc(s.title)} — ${esc(s.artist)}</div>`).join(’’);
+document.getElementById(‘bks-added’).innerHTML=bkCreateSongs.map(s=>`<div style="font-size:12px;color:var(--mu);padding:4px 0">v ${esc(s.title)} -- ${esc(s.artist)}</div>`).join(’’);
 document.getElementById(‘bks-input’).value=’’; document.getElementById(‘bks-results’).style.display=‘none’;
-toast(`✓ "${r.trackName}" added`);
+toast(`v "${r.trackName}" added`);
 }
 
-// ════════════════════════════════════════════════
-// BRACKET — MAIN RENDER
-// ════════════════════════════════════════════════
+// ————————————————
+// BRACKET – MAIN RENDER
+// ————————————————
 
 function playlistLinkHTML(b){
 var parts = [];
@@ -1980,7 +1980,7 @@ const total=b.songs.length, rated=Object.keys(myRatings).length;
 const allRated=allMembersRatedAll(b);
 const iReady=!!b.readyMembers?.[myId];
 const allReady=allMembersReady(b);
-document.getElementById(‘bk-body’).innerHTML=` <div class="codebar" style="margin-bottom:14px"> <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div> <button class="shbtn" id="bk-share-btn">Share 📤</button> </div> ${playlistLinkHTML(b)} <div class="info-box" style="margin-bottom:14px"> <strong>Rating Phase</strong> · Rate all ${total} songs privately. Once everyone's done, you can start the bracket. </div> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"> <div style="font-size:13px;font-weight:600">Your progress: ${rated}/${total}</div> <button onclick="openBkProgressModal()" style="background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--mu);font-size:12px;cursor:pointer">👥 Group</button> </div> <div class="score-bar" style="margin-bottom:16px"><div class="score-fill" style="width:${total?rated/total*100:0}%;background:var(--or)"></div></div> ${b.songs.map(s=>{ const r=myRatings[s.id]; const hasRating=r!==undefined; var artH=s.artworkUrl?('<img class="bk-art" src="'+esc(s.artworkUrl)+'">'):'<div class="bk-art-ph">🎵</div>'; var badgeH=hasRating?('<div class="bk-rating-badge" style="color:'+scoreColor(r)+'">'+r+'<span style="font-size:10px;opacity:.6">/10</span></div>'):'<div class="bk-unrated">Tap to rate</div>'; return '<div class="bk-song bk-rating-row '+(hasRating?'rated':'')+' " data-songid="'+s.id+'" style="flex-direction:column;padding-bottom:6px">' +'<div class="bk-song-main" style="display:flex;align-items:center;gap:12px;width:100%;cursor:pointer">' +artH +'<div class="bk-info"><div class="bk-title">'+esc(s.title)+'</div><div class="bk-artist">'+esc(s.artist)+'</div></div>' +badgeH +'</div>' +'<button class="bk-comment-btn" data-songid="'+s.id+'" style="width:100%;padding:5px 0;background:none;border:none;border-top:1px solid var(--bdr);color:var(--mu);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;margin-top:6px;touch-action:manipulation">💬 Comments'+((b&&b.commentCounts&&b.commentCounts[s.id])?(' ('+b.commentCounts[s.id]+')'):'')+'</button>' +'</div>'; }).join('')} ${allRated?`
+document.getElementById(‘bk-body’).innerHTML=` <div class="codebar" style="margin-bottom:14px"> <div><div class="codelbl">Bracket Code</div><div class="codeval">${bkCode}</div></div> <button class="shbtn" id="bk-share-btn">Share 📤</button> </div> ${playlistLinkHTML(b)} <div class="info-box" style="margin-bottom:14px"> <strong>Rating Phase</strong>  .  Rate all ${total} songs privately. Once everyone's done, you can start the bracket. </div> <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"> <div style="font-size:13px;font-weight:600">Your progress: ${rated}/${total}</div> <button onclick="openBkProgressModal()" style="background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--mu);font-size:12px;cursor:pointer">👥 Group</button> </div> <div class="score-bar" style="margin-bottom:16px"><div class="score-fill" style="width:${total?rated/total*100:0}%;background:var(--or)"></div></div> ${b.songs.map(s=>{ const r=myRatings[s.id]; const hasRating=r!==undefined; var artH=s.artworkUrl?('<img class="bk-art" src="'+esc(s.artworkUrl)+'">'):'<div class="bk-art-ph">🎵</div>'; var badgeH=hasRating?('<div class="bk-rating-badge" style="color:'+scoreColor(r)+'">'+r+'<span style="font-size:10px;opacity:.6">/10</span></div>'):'<div class="bk-unrated">Tap to rate</div>'; return '<div class="bk-song bk-rating-row '+(hasRating?'rated':'')+' " data-songid="'+s.id+'" style="flex-direction:column;padding-bottom:6px">' +'<div class="bk-song-main" style="display:flex;align-items:center;gap:12px;width:100%;cursor:pointer">' +artH +'<div class="bk-info"><div class="bk-title">'+esc(s.title)+'</div><div class="bk-artist">'+esc(s.artist)+'</div></div>' +badgeH +'</div>' +'<button class="bk-comment-btn" data-songid="'+s.id+'" style="width:100%;padding:5px 0;background:none;border:none;border-top:1px solid var(--bdr);color:var(--mu);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;margin-top:6px;touch-action:manipulation">💬 Comments'+((b&&b.commentCounts&&b.commentCounts[s.id])?(' ('+b.commentCounts[s.id]+')'):'')+'</button>' +'</div>'; }).join('')} ${allRated?`
 <div class="info-box green" style="margin-top:8px">✅ Everyone has rated all songs!</div>
 <button class=“btn-gold” id=“bk-ready-btn” ${iReady?‘disabled’:’’} style=“margin-top:8px”>
 ${iReady?‘⏳ Waiting for others…’:‘🏆 Ready to Start Bracket!’}
@@ -2026,11 +2026,11 @@ const winnerSong=isDone?bkSong(b,m.winner):null;
 if(isDone){
 // Reveal ratings
 const avg1=avgRatingForSong(b,s1.id),avg2=avgRatingForSong(b,s2.id);
-html+=`<div class="matchup done"> <div class="matchup-header">✅ ${roundName(b,r)} · All votes in</div> <div class="matchup-songs"> <div class="ms-side ${m.winner===s1.id?'winner':'loser'}"> ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div> ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}<span style="font-size:12px;opacity:.6">/10</span></div>`:''} ${m.winner===s1.id?`<div class="ms-win-label">🏆 WINNER</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${m.winner===s2.id?'winner':'loser'}"> ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div> ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}<span style="font-size:12px;opacity:.6">/10</span></div>`:''} ${m.winner===s2.id?`<div class="ms-win-label">🏆 WINNER</div>`:''} </div> </div> <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`<span style="display:inline-flex;align-items:center;gap:3px">${u.emoji} <b>${esc(u.name||’?’)}</b>: <span style="color:var(--or)">${r1!==undefined?r1+’/10’:’?’}</span> · <span style="color:var(--or)">${r2!==undefined?r2+’/10’:’?’}</span></span>`;}).join(' · ')}</div> </div>`;
+html+=`<div class="matchup done"> <div class="matchup-header">✅ ${roundName(b,r)}  .  All votes in</div> <div class="matchup-songs"> <div class="ms-side ${m.winner===s1.id?'winner':'loser'}"> ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div> ${avg1!==null?`<div class="ms-score">${avg1.toFixed(1)}<span style="font-size:12px;opacity:.6">/10</span></div>`:''} ${m.winner===s1.id?`<div class="ms-win-label">🏆 WINNER</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${m.winner===s2.id?'winner':'loser'}"> ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div> ${avg2!==null?`<div class="ms-score">${avg2.toFixed(1)}<span style="font-size:12px;opacity:.6">/10</span></div>`:''} ${m.winner===s2.id?`<div class="ms-win-label">🏆 WINNER</div>`:''} </div> </div> <div style="font-size:11px;color:var(--mu);margin-top:8px">Individual ratings: ${memberIds.map(uid=>{const u=b.members[uid];const r1=b.ratings?.[uid]?.[s1.id];const r2=b.ratings?.[uid]?.[s2.id];return`<span style="display:inline-flex;align-items:center;gap:3px">${u.emoji} <b>${esc(u.name||’?’)}</b>: <span style="color:var(--or)">${r1!==undefined?r1+’/10’:’?’}</span>  .  <span style="color:var(--or)">${r2!==undefined?r2+’/10’:’?’}</span></span>`;}).join('  .  ')}</div> </div>`;
 } else {
 // Voting open
 const canVote=!myVote;
-html+=`<div class="matchup active" data-mid="${m.id}"> <div class="matchup-header">🗳️ ${roundName(b,r)} · Vote now${myVote?' · Your vote cast':''}</div> <div class="matchup-songs"> <div class="ms-side ${myVote===s1.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote(’${m.id}’,’${s1.id}’)`:''}" > ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div> ${myVote===s1.id?`<div class="ms-vote-label">✓ Your vote</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${myVote===s2.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote(’${m.id}’,’${s2.id}’)`:''}" > ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div> ${myVote===s2.id?`<div class="ms-vote-label">✓ Your vote</div>`:''} </div> </div> <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" style="display:flex;flex-direction:column;align-items:center;gap:2px"><span>${b.members[uid]?.emoji||‘🎵’}</span><span style="font-size:9px;color:var(--mu);max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.members[uid]?.name||’’)} </span></span>`).join('')}</div> <div style="font-size:11px;color:var(--mu);margin-top:6px">${votedCount}/${memberIds.length} voted · waiting for all votes to reveal</div> </div>`;
+html+=`<div class="matchup active" data-mid="${m.id}"> <div class="matchup-header">🗳️ ${roundName(b,r)}  .  Vote now${myVote?'  .  Your vote cast':''}</div> <div class="matchup-songs"> <div class="ms-side ${myVote===s1.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote(’${m.id}’,’${s1.id}’)`:''}" > ${s1.artworkUrl?`<img src="${esc(s1.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s1.title)}</div><div class="ms-artist">${esc(s1.artist)}</div> ${myVote===s1.id?`<div class="ms-vote-label">v Your vote</div>`:''} </div> <div class="matchup-vs">vs</div> <div class="ms-side ${myVote===s2.id?'voted':''}" style="${canVote?'cursor:pointer':''}" onclick="${canVote?`castVote(’${m.id}’,’${s2.id}’)`:''}" > ${s2.artworkUrl?`<img src="${esc(s2.artworkUrl)}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;margin-bottom:8px">`:`<div class="ms-art-ph">🎵</div>`} <div class="ms-title">${esc(s2.title)}</div><div class="ms-artist">${esc(s2.artist)}</div> ${myVote===s2.id?`<div class="ms-vote-label">v Your vote</div>`:''} </div> </div> <div class="voter-pips">${memberIds.map(uid=>`<span class="voter-pip ${m.votes?.[uid]?'done':''}" style="display:flex;flex-direction:column;align-items:center;gap:2px"><span>${b.members[uid]?.emoji||‘🎵’}</span><span style="font-size:9px;color:var(--mu);max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.members[uid]?.name||’’)} </span></span>`).join('')}</div> <div style="font-size:11px;color:var(--mu);margin-top:6px">${votedCount}/${memberIds.length} voted  .  waiting for all votes to reveal</div> </div>`;
 }
 });
 }
@@ -2053,7 +2053,7 @@ const winner=bkSong(b,b.bracketWinner);
 const allMatchups=Object.values(b.matchups);
 const totalRounds=b.totalRounds||Math.log2(b.songs.length);
 // Assign finish position based on which round they lost in
-const positions={}; // songId → position label
+const positions={}; // songId -> position label
 b.songs.forEach(s=>positions[s.id]=‘First Round’);
 const totalRds = b.totalRounds||Math.log2(b.songs.length);
 allMatchups.forEach(m=>{
@@ -2090,9 +2090,9 @@ html+=`<div class="matchup done" style="margin-bottom:10px"> <div class="matchup
 document.getElementById(‘bk-body’).innerHTML=html;
 }
 
-// ════════════════════════════════════════════════
-// BRACKET — MODALS
-// ════════════════════════════════════════════════
+// ————————————————
+// BRACKET – MODALS
+// ————————————————
 
 function openBkRateModal(songId){
 const b=bkState; if(!b)return;
@@ -2112,7 +2112,7 @@ const s=bkRateScore;
 const disp=document.getElementById(‘bkr-score’);
 const bar=document.getElementById(‘bkr-bar’);
 const save=document.getElementById(‘bkr-save’);
-if(s===null){disp.textContent=’—’;disp.style.color=‘var(–mu)’;bar.style.width=‘0’;bar.style.background=‘var(–or)’;save.disabled=true;}
+if(s===null){disp.textContent=’–’;disp.style.color=‘var(–mu)’;bar.style.width=‘0’;bar.style.background=‘var(–or)’;save.disabled=true;}
 else{disp.textContent=s;disp.style.color=scoreColor(s);bar.style.width=`${s/10*100}%`;bar.style.background=scoreColor(s);save.disabled=false;}
 }
 document.getElementById(‘bkr-minus’).onclick=()=>{
@@ -2195,12 +2195,12 @@ if(navigator.share)navigator.share({title:bkState?.name||‘Bracket’,text:msg,
 else navigator.clipboard?.writeText(bkCode).then(()=>toast(’📋 Bracket code copied: ’+bkCode));
 }
 
-// ════════════════════════════════════════════════
+// ————————————————
 // URL PARAM HANDLING (shortcuts, deep links)
-// Runs synchronously after startup showScreen() — no DOMContentLoaded needed
-// ════════════════════════════════════════════════
+// Runs synchronously after startup showScreen() – no DOMContentLoaded needed
+// ————————————————
 function handleUrlParams(){
-// ── Bracket playlist shortcut: ?newbracket=1&songs=ENCODED&who=… ──
+// – Bracket playlist shortcut: ?newbracket=1&songs=ENCODED&who=… –
 if(urlNewBracket && urlSongs && myName){
 if(urlPlaylist) sessionStorage.setItem(‘pending-playlist’, decodeURIComponent(urlPlaylist));
 bkCreateSongs=[]; bkCreateSongsOriginal=[]; bkCreateIsShuffled=false;
@@ -2210,7 +2210,7 @@ document.getElementById(‘nav-live’).classList.remove(‘active’);
 setTimeout(()=>handleShortcutSongs(urlSongs), 50);
 return;
 }
-// ── Live Listen shortcut: ?room=CODE&title=TITLE&… ──
+// – Live Listen shortcut: ?room=CODE&title=TITLE&… –
 // Auto-join the room; launchLL() will handle adding the song via urlTitle
 if(urlRoom && myName){
 setTimeout(async()=>{
@@ -2223,7 +2223,7 @@ launchLL();
 }, 50);
 return;
 }
-// ── Join existing bracket: ?bracket=CODE ──
+// – Join existing bracket: ?bracket=CODE –
 if(urlBracket){
 if(myName){
 // Auto-join immediately
@@ -2245,12 +2245,12 @@ toast(’⚠️ Could not auto-join: ’+e.message);
 }
 }, 50);
 } else {
-// No name yet — save code and restore after setup
+// No name yet – save code and restore after setup
 sessionStorage.setItem(‘pending-bracket’, urlBracket);
 }
 return;
 }
-// ── Pre-fill room code if provided without auto-join ──
+// – Pre-fill room code if provided without auto-join –
 if(urlRoom){
 document.getElementById(‘room-join-in’).value=urlRoom;
 document.getElementById(‘btn-room-join’).disabled=false;
