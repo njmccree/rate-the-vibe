@@ -598,6 +598,9 @@ if(urlWho){
 }
 if(urlDb){ try{ FB=atob(urlDb); localStorage.setItem('rtv-fb',FB); }catch(e){} }
 
+const SESH_KEY = 'rtv-sessions';
+const MAX_SESSIONS = 30;
+
 // ════════════════════════════════════════════════
 // UTILS
 // ════════════════════════════════════════════════
@@ -1127,9 +1130,6 @@ function setBkBodyHandler(fn){
 // ════════════════════════════════════════════════
 // SESSION HISTORY
 // ════════════════════════════════════════════════
-const SESH_KEY = 'rtv-sessions';
-const MAX_SESSIONS = 30;
-
 function loadSessions(){
   try{ return JSON.parse(localStorage.getItem(SESH_KEY)||'[]'); }catch(e){ return []; }
 }
